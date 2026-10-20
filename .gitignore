@@ -4,6 +4,13 @@ __pycache__/
 venv/
 .venv/
 
+# Node / Next.js
+node_modules/
+.next/
+out/
+src/frontend/.env.local
+src/frontend/next-env.d.ts
+
 # Environment
 .env
 

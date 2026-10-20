@@ -2,6 +2,30 @@
 
 > A one-sentence description of what your project does and who it is for.
 
+## Local development: Next.js + FastAPI
+
+The starter frontend is in `src/frontend/`. The FastAPI backend is in `src/main.py`.
+Run each server in a separate terminal from the repository root:
+
+```powershell
+# Terminal 1: backend
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+uvicorn main:app --app-dir src --reload
+```
+
+```powershell
+# Terminal 2: frontend
+cd src/frontend
+npm install
+npm run dev
+```
+
+Open `http://localhost:3000`. The frontend proxies `/api/*` to `http://127.0.0.1:8000`;
+the backend's interactive API docs are at `http://127.0.0.1:8000/docs`.
+Set `BACKEND_URL` in `src/frontend/.env.local` if the API is hosted elsewhere.
+
 ---
 
 ## Team Information

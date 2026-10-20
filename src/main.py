@@ -1,20 +1,27 @@
-"""Application entry point.
-
-Replace this file with your project's main logic.
-"""
+"""FastAPI backend for the hackathon project."""
 
 import os
 
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
+
 from utils import format_greeting, summarize
 
-
-def main() -> None:
-    project_name = os.getenv("PROJECT_NAME", "Project Name")
-    print(format_greeting(project_name))
-
-    sample_data = [12, 7, 3, 21, 9]
-    print(f"Result: {summarize(sample_data)}")
+app = FastAPI(title=os.getenv("PROJECT_NAME", "Hackathon API"))
 
 
-if __name__ == "__main__":
-    main()
+class SummarizeRequest(BaseModel):
+    values: list[float] = Field(min_length=1, max_length=1000)
+
+
+@app.get("/api/health")
+def health() -> dict[str, str]:
+    return {"status": "ok", "message": format_greeting(app.title)}
+
+
+@app.post("/api/summarize")
+def summarize_values(request: SummarizeRequest) -> dict:
+    try:
+        return summarize(request.values)
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
