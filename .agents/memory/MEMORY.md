@@ -1,0 +1,1 @@
+- [Vercel import package install](vercel-import-package-install.md) — a transitive package firewall block cleared after updating its direct dependency to latest.
