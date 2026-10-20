@@ -1,4 +1,4 @@
-# Project Name
+# 3AM SDC Hackathon
 
 > A one-sentence description of what your project does and who it is for.
 
@@ -32,18 +32,18 @@ Set `BACKEND_URL` in `src/frontend/.env.local` if the API is hosted elsewhere.
 
 | Field                  | Details                                     |
 | ---------------------- | ------------------------------------------- |
-| **Team Name**          | Your Team Name                              |
-| **Team Domain**        | Domain 1 / Domain 2 *(choose one)*          |
-| **SDG Track (1–17)**   | e.g. SDG 11 — Sustainable Cities and Communities |
-| **Team Leader**        | Leader Name                                 |
-| **University**         | University Name(s)                          |
-| **Number of Members**  | e.g. 4                                      |
+| **Team Name**          | 3AM                                         |
+| **Team Domain**        | Domain 1                                    |
+| **SDG Track (1–17)**   | SDG 4  — Quality Education                  |
+| **Team Leader**        | Ooi Wei Lun                                 |
+| **University**         | Asia Pacific University                     |
+| **Number of Members**  | 3                                           |
 
 ## Links
 
 | Resource          | Link                                           |
 | ----------------- | ---------------------------------------------- |
-| GitHub Repository | https://github.com/your-username/your-project  |
+| GitHub Repository | https://github.com/weiiilunnnn/3am-sdc-hackathon  |
 | Replit Project    | https://replit.com/@your-username/your-project |
 | Live Demo         | https://your-project.replit.app                |
 | RunPod Endpoint   | https://api.runpod.ai/v2/your-endpoint-id      |
