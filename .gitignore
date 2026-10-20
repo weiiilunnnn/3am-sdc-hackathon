@@ -56,3 +56,7 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Local agent attachments and preserved migration backups
+/attached_assets/
+.migration-backup/ported-vite-express/
