@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "3AM SDC Hackathon"
+description = "A simple hackathon dashboard for entering a list of numbers and viewing a summary from the project API."
+version = "1.0.0"
+id = "artifacts/sdc-hackathon"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21875
+
+[services.development]
+run = "pnpm --filter @workspace/sdc-hackathon run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/sdc-hackathon", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/sdc-hackathon/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21875"
+BASE_PATH = "/"
