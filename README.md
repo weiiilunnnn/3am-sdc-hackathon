@@ -1,4 +1,4 @@
-# Project Name
+# 3AM SDC Hackathon
 
 > A one-sentence description of what your project does and who it is for.
 
