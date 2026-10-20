@@ -5,7 +5,7 @@ import os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from utils import format_greeting, summarize
+from src.utils import format_greeting, summarize
 
 app = FastAPI(title=os.getenv("PROJECT_NAME", "Hackathon API"))
 

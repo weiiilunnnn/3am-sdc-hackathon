@@ -2,29 +2,29 @@
 
 > A one-sentence description of what your project does and who it is for.
 
-## Local development: Next.js + FastAPI
+## Development: Next.js + FastAPI
 
-The starter frontend is in `src/frontend/`. The FastAPI backend is in `src/main.py`.
-Run each server in a separate terminal from the repository root:
+The application source is under `src/`: Next.js is in `src/frontend/`, and the
+FastAPI entry point is `src/main.py`. Replit starts the web and API services
+through their managed workflows. The web service serves `/`; `/api/*` is routed
+to FastAPI.
 
-```powershell
-# Terminal 1: backend
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-uvicorn main:app --app-dir src --reload
+For local development, install the Python requirements and frontend workspace
+dependencies, then run the API and frontend in separate terminals:
+
+```bash
+python -m pip install -r requirements.txt
+python -m uvicorn src.main:app --host 0.0.0.0 --port 8080 --reload
 ```
 
-```powershell
-# Terminal 2: frontend
-cd src/frontend
-npm install
-npm run dev
+```bash
+pnpm install
+pnpm --filter 3am-sdc-frontend run dev
 ```
 
-Open `http://localhost:3000`. The frontend proxies `/api/*` to `http://127.0.0.1:8000`;
-the backend's interactive API docs are at `http://127.0.0.1:8000/docs`.
-Set `BACKEND_URL` in `src/frontend/.env.local` if the API is hosted elsewhere.
+Open the frontend at `http://localhost:3000`. The frontend proxies `/api/*` to
+`http://127.0.0.1:8080`; FastAPI's interactive docs are at
+`http://127.0.0.1:8080/docs`.
 
 ---
 
@@ -85,11 +85,10 @@ Explain how your project uses AI to solve the problem and what makes it valuable
 ```
 .
 ├── docs/                    # Screenshots, diagrams
-├── runpod/
-│   └── handler.py           # RunPod serverless handler (GPU workload)
 ├── src/
-│   ├── main.py              # Application entry point
-│   └── utils.py             # Helper functions
+│   ├── frontend/            # Next.js application
+│   ├── main.py              # FastAPI application entry point
+│   └── utils.py             # Backend helper functions
 ├── submission/              # Required submission documents
 │   ├── REPLIT PROOF OF USE.pdf
 │   ├── RUNPOD PROOF OF USE.pdf
@@ -100,7 +99,7 @@ Explain how your project uses AI to solve the problem and what makes it valuable
 ├── .gitignore
 ├── .replit                  # Replit run configuration
 ├── LICENSE
-├── requirements.txt         # Python dependencies
+├── requirements.txt         # FastAPI and Uvicorn dependencies
 └── README.md
 ```
 
@@ -116,33 +115,17 @@ User ──► Replit (App / API) ──► RunPod Endpoint (GPU model)
 
 ## How to Run
 
-### Option 1 — Run on Replit (Recommended)
+### Run on Replit
 
-1. Open the [Replit Project](https://replit.com/@your-username/your-project), or import this repository via **Create Repl → Import from GitHub**.
-2. Open the **Secrets** tab (🔒) and add the variables listed in `.env.example`:
-   - `RUNPOD_API_KEY`
-   - `RUNPOD_ENDPOINT_ID`
-3. Click **Run**. Replit uses the `.replit` file to start `python src/main.py`.
+Open the Replit project and start the **Project** workflow. The managed web and
+API services start Next.js and FastAPI respectively. No RunPod credentials or
+external services are needed for the starter application.
 
-### Option 2 — Run Locally
+### Run Locally
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/your-username/your-project.git
-cd your-project
-
-# 2. Create and activate a virtual environment
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
-
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. Configure environment variables
-cp .env.example .env            # then fill in your values
-
-# 5. Run the app
-python src/main.py
+# Install dependencies as shown above, then run the API and frontend in
+# separate terminals.
 ```
 
 ### Run Tests
@@ -165,20 +148,8 @@ Describe how your team used Replit. For example:
 
 ## How We Use RunPod *(Required)*
 
-Describe how your team used RunPod. For example:
-
-- **Workload:** Model inference (e.g. text generation, image processing) runs on a RunPod GPU.
-- **Setup:** `runpod/handler.py` is deployed as a **RunPod Serverless Endpoint**.
-- **Integration:** The Replit app sends requests to the endpoint using `RUNPOD_API_KEY` and `RUNPOD_ENDPOINT_ID`.
-
-Example request:
-
-```bash
-curl -X POST https://api.runpod.ai/v2/$RUNPOD_ENDPOINT_ID/runsync \
-  -H "Authorization: Bearer $RUNPOD_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"input": {"prompt": "Hello"}}'
-```
+RunPod has not been configured for the starter baseline. Update this section
+with the team's actual usage only after an endpoint is implemented.
 
 📄 Proof of use: [`submission/RUNPOD PROOF OF USE.pdf`](submission/RUNPOD%20PROOF%20OF%20USE.pdf)
 

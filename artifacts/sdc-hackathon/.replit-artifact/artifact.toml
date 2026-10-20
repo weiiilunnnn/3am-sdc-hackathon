@@ -14,14 +14,18 @@ localPort = 21875
 [services.development]
 run = "pnpm --filter @workspace/sdc-hackathon run dev"
 
-[services.production]
-build = [ "pnpm", "--filter", "@workspace/sdc-hackathon", "run", "build" ]
-serve = "static"
-publicDir = "artifacts/sdc-hackathon/dist/public"
+[services.production.build]
+args = ["pnpm", "--filter", "3am-sdc-frontend", "run", "build"]
 
-[[services.production.rewrites]]
-from = "/*"
-to = "/index.html"
+[services.production.build.env]
+NODE_ENV = "production"
+
+[services.production.run]
+args = ["pnpm", "--filter", "3am-sdc-frontend", "run", "start"]
+
+[services.production.run.env]
+PORT = "21875"
+NODE_ENV = "production"
 
 [services.env]
 PORT = "21875"

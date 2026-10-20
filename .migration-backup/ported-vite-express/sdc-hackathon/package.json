@@ -1,0 +1,9 @@
+{
+  "name": "@workspace/sdc-hackathon",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter 3am-sdc-frontend run dev",
+    "typecheck": "pnpm --filter 3am-sdc-frontend run typecheck"
+  }
+}

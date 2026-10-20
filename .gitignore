@@ -11,6 +11,9 @@ out/
 .expo-shared
 __pycache__/
 *.py[cod]
+venv/
+.venv/
+.pythonlibs/
 
 # dependencies
 node_modules

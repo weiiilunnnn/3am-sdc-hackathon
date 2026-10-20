@@ -1,1 +1,3 @@
 - [Vercel import package install](vercel-import-package-install.md) — a transitive package firewall block cleared after updating its direct dependency to latest.
+- [Aiversecity Domain 1 scope](aiversecity-domain-1.md) — six compulsory workforce-readiness capabilities define the team's product scope.
+- [Python packages on Replit](python-tools-runtime.md) — `python-base` runtimes omit pip; install packages with a Python Tools module.
