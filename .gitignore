@@ -5,8 +5,12 @@ dist
 tmp
 out-tsc
 *.tsbuildinfo
+.next/
+out/
 .expo
 .expo-shared
+__pycache__/
+*.py[cod]
 
 # dependencies
 node_modules
@@ -31,6 +35,8 @@ node_modules
 /.sass-cache
 /connect.lock
 /coverage
+.env
+src/frontend/next-env.d.ts
 /libpeerconnection.log
 npm-debug.log
 yarn-error.log
