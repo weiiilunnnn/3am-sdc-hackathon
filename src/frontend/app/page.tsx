@@ -1,67 +1,87 @@
 "use client";
-
-import { FormEvent, useState } from "react";
-
-type Summary = { count: number; min: number | null; max: number | null; average: number | null };
+import { useEffect, useRef, useState } from "react";
+import type { Bootstrap, DiscoveryResponse, Pathway, Profile, Skill, Source } from "@/lib/contracts";
+import { request } from "@/lib/api";
+import ProfileIntake from "@/components/ProfileIntake";
+import CareerCard from "@/components/CareerCard";
+import PathwayView from "@/components/PathwayView";
+import ScenarioNotice from "@/components/ScenarioNotice";
 
 export default function Home() {
-  const [input, setInput] = useState("12, 7, 3, 21, 9");
-  const [result, setResult] = useState<Summary | null>(null);
+  const [data, setData] = useState<Bootstrap | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [matches, setMatches] = useState<DiscoveryResponse | null>(null);
+  const [pathway, setPathway] = useState<Pathway | null>(null);
+  const [roleQuery, setRoleQuery] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError("");
-    setResult(null);
-    const values = input.split(",").map((value) => Number(value.trim()));
-    if (!values.length || values.some((value) => !Number.isFinite(value))) {
-      setError("Enter numbers separated by commas, for example: 12, 7, 3");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await fetch("/api/summarize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ values }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail ?? "The API request failed.");
-      setResult(data as Summary);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not connect to the backend.");
-    } finally {
-      setLoading(false);
-    }
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [pathBusy, setPathBusy] = useState(false);
+  const [tab, setTab] = useState<"matches" | "pathway">("matches");
+  const inflight = useRef<AbortController | null>(null);
+  const pathInflight = useRef<AbortController | null>(null);
+  async function load() {
+    setLoading(true); setError("");
+    try { const result = await request<Bootstrap>("/api/v2/bootstrap"); setData(result); setProfile(result.profiles[0]); }
+    catch (e) { setError(e instanceof Error ? e.message : "Could not reach the service."); }
+    finally { setLoading(false); }
   }
+  useEffect(() => { void load(); return () => { inflight.current?.abort(); pathInflight.current?.abort(); }; }, []);
+  function changeProfile(next: Profile) { inflight.current?.abort(); pathInflight.current?.abort(); setBusy(false); setPathBusy(false); setMatches(null); setPathway(null); setTab("matches"); setError(""); setProfile(next); setRoleQuery(""); }
+  async function calculate(offset = 0, query = roleQuery) {
+    if (!profile) return;
+    inflight.current?.abort(); pathInflight.current?.abort();
+    const controller = new AbortController(); inflight.current = controller;
+    setBusy(true); setPathBusy(false); setError(""); setPathway(null); setTab("matches");
+    try { const result = await request<DiscoveryResponse>("/api/v2/matches", { schema_version: "2.0", profile, page_size: 5, offset, role_query: query }, controller.signal); if (!controller.signal.aborted) { setMatches(previous => offset && previous ? { ...result, results: [...previous.results, ...result.results] } : result); mergeReference([], result.sources); } }
+    catch (e) { if (!controller.signal.aborted) { setMatches(null); setError(e instanceof Error ? e.message : "Matching failed."); } }
+    finally { if (!controller.signal.aborted) setBusy(false); }
+  }
+  async function selectRole(roleId: string) {
+    if (!profile || !matches) return;
+    pathInflight.current?.abort(); const controller = new AbortController(); pathInflight.current = controller;
+    setPathBusy(true); setError(""); setPathway(null);
+    try { const [result, detail] = await Promise.all([request<Pathway>("/api/pathways", { schema_version: "1.0", profile, role_id: roleId, scenario_config: matches.scenario_context }, controller.signal), request<{skills: Skill[]; sources: Source[]}>(`/api/v2/roles/detail?role_id=${encodeURIComponent(roleId)}`, undefined, controller.signal)]); if (!controller.signal.aborted) { mergeReference(detail.skills, detail.sources); setPathway(result); setTab("pathway"); document.getElementById("workspace")?.scrollIntoView({ behavior: "smooth", block: "start" }); } }
+    catch (e) { if (!controller.signal.aborted) setError(e instanceof Error ? e.message : "Pathway unavailable."); }
+    finally { if (!controller.signal.aborted) setPathBusy(false); }
+  }
+  function mergeReference(skills: Skill[], sources: Source[] = []) {
+    setData(current => current ? { ...current, skills: [...new Map([...current.skills, ...skills].map(s => [s.skill_id, s])).values()], sources: [...new Map([...current.sources, ...sources].map(s => [s.source_id, s])).values()] } : current);
+  }
+  return <div className="app-shell">
+    <header className="app-header"><a className="brand" href="/" aria-label="3AM FutureReady home"><span className="brand-mark" aria-hidden="true">↗</span><span>Future<span className="brand-accent">Ready</span><small>BY TEAM 3AM</small></span></a><div className="header-right"><span className="header-label">YOUR SKILLS. YOUR NEXT CHAPTER.</span><span className="demo-pill"><span />SYNTHETIC PROFILES ONLY</span></div></header>
+    <main className="app-main"><section className="intro-section"><div><p className="eyebrow">AIVERSECITY · FUTURE-READY WORKFORCE</p><h1>Build on what you know.<br /><em>Explore where you could go.</em></h1><p className="intro-copy">Understand your skills, discover relevant technology roles, and find a sourced learning path to your next step.</p></div><div className="intro-art" aria-hidden="true"><span className="orbit orbit-one" /><span className="orbit orbit-two" /><div className="growth-bars"><span /><span /><span /><span /></div><span className="art-arrow">↗</span><span className="art-caption">LEARNING MOVES YOU FORWARD</span></div></section>
+    <div className="journey"><span><b>01</b> Your starting skills</span><i aria-hidden="true">→</i><span><b>02</b> Discover role matches</span><i aria-hidden="true">→</i><span><b>03</b> Plan your learning</span></div>
+    {loading ? <div className="loading-state" role="status"><span className="spinner" />Loading verified reference data…</div> : !data || !profile ? <div className="error-panel" role="alert"><h2>We couldn’t load the reference data</h2><p>{error}</p><button className="primary" onClick={load}>Try again</button></div> : <div className="workspace-grid">
+      <ProfileIntake onSkillsLoaded={mergeReference} data={data} profile={profile} onChange={changeProfile} onSubmit={() => void calculate()} busy={busy} />
+      <section className="results-panel" id="workspace"><div className="results-toolbar"><div className="view-tabs" role="tablist" aria-label="Career exploration view"><button role="tab" aria-selected={tab === "matches"} onClick={() => setTab("matches")}>Role matches{matches ? ` (${matches.total_qualifying_roles})` : ""}</button><button role="tab" aria-selected={tab === "pathway"} disabled={!pathway} onClick={() => setTab("pathway")}>Learning pathway</button></div><span className="reference-label">ESCO {data.dataset_version} · EU REFERENCE</span></div>
+      {error && <div className="error-panel compact" role="alert">{error}<button className="text-button" onClick={() => setError("")}>Dismiss</button></div>}
+      {tab === "matches" && <>
+        <div className="results-heading"><div><p className="eyebrow">EVIDENCE, WITH CONTEXT</p><h2>{matches ? "Your role matches" : "A clearer next step starts here"}</h2><p className="small muted">Skill alignment · not hiring probability. Ranked by profile relevance. Current job-market demand is not included.</p></div><span className="round-icon" aria-hidden="true">↗</span></div>
+        <p className="micro" data-testid="index-status">{data.data_source_status === "local_full" ? "Full official API collection indexed locally" : "Limited subset fallback"} - {data.occupation_count ?? data.roles.length} occupations - ESCO {data.dataset_version}</p>
+        {data.coverage_warning && <p className="notice small">{data.coverage_warning}</p>}
+        {matches?.scenario_context && <ScenarioNotice context={matches.scenario_context} sources={data.sources} />}
+        {busy && <div role="status" className="inline-status"><span className="spinner" />Comparing your skills against verified requirements…</div>}{pathBusy && <div role="status" className="inline-status"><span className="spinner" />Building your personalised starter pathway…</div>}
+        {!matches && !busy && <div className="empty-state"><div className="empty-icon" aria-hidden="true">✳</div><h3>See the possibilities in your skills.</h3><p>Choose a synthetic profile or edit its skills, then find matching roles. Every occupation is grounded in a verified source.</p><div className="empty-facts"><span><strong>{data.occupation_count ?? data.roles.length}</strong> indexed occupations</span><span><strong>{data.skill_count ?? data.skills.length}</strong> indexed concepts</span></div></div>}
+        {matches && <div aria-live="polite" aria-busy={busy} className={busy ? "results-list dimmed" : "results-list"}>
+          {matches.unknown_user_skills.length > 0 && <p className="notice">Unresolved skills, excluded from scoring: {matches.unknown_user_skills.join(", ")}</p>}
+          <p className="small result-count">{matches.total_qualifying_roles} qualifying occupations - {matches.recognised_user_skill_count} recognised listed skills - threshold {matches.qualification_threshold_pct}%</p>
+          {matches.total_qualifying_roles > 0 && <form className="catalogue-toolbar" onSubmit={e => { e.preventDefault(); void calculate(); }}><label>Search qualifying roles<input type="search" value={roleQuery} onChange={e => setRoleQuery(e.target.value)} /></label><button className="secondary" disabled={busy}>Search roles</button></form>}
+          {!matches.results.length && <div className="empty-state"><h3>{matches.insufficient_evidence ? "Add more specific skills" : "No qualifying roles found"}</h3><p>{matches.insufficient_evidence ? "Add at least two distinct recognised skills, including occupationally specific evidence. One skill or generic skills alone cannot qualify a role." : "Confirm your listed skills or clear the title search. The relevance threshold has not been lowered to force recommendations."}</p></div>}
+          {matches.results.map(m => <CareerCard key={m.role_id} match={m} sources={data.sources} onSelect={() => void selectRole(m.role_id)} busy={busy || pathBusy} />)}
+          {matches.next_offset !== null && <button className="secondary see-more" disabled={busy} onClick={() => void calculate(matches.next_offset!, matches.role_query)}>Show more qualifying roles</button>}
+          <details className="method-panel scoring-footer" data-testid="scoring-footer"><summary>How recommendations work / Limitations</summary>
+            <p className="small">Profile relevance measures how your listed, recognised skills relate to an ESCO occupation. It does not include current job-market demand or measure readiness or hiring probability.</p>
+            <p className="small">The backend weights skills by 1 + ln((N+1)/(df+1)), using the full occupation index. Essential links receive strength 1, optional links 0.4. Weighted role overlap is divided by the weight of all recognised listed skills. Roles must meet the application-defined {matches.qualification_threshold_pct}% threshold, two distinct matching concepts, an essential match and a non-transversal informative match occurring in no more than 25% of occupations.</p>
+            <p className="small">Documented essential coverage remains separate under Why this match. Unmentioned requirements are not yet evidenced, not confirmed deficiencies. Areas use sourced broader-skill links with an application-defined single-parent display rule, or actual sourced concept names when grouping is unavailable. They do not change scores.</p>
+            {matches.warnings.map(w => <p className="micro muted" key={w}>{w}</p>)}<p className="micro">Method: {matches.scoring_method} - ESCO {matches.esco_release} - {matches.data_source_status} - {matches.discovered_candidate_count} candidates. Qualification diagnostics: {Object.entries(matches.diagnostic_counts).map(([key, value]) => `${key}: ${value}`).join("; ")}. European reference data do not establish Malaysian demand.</p>
+          </details></div>}
 
-  return (
-    <main className="shell">
-      <section className="card">
-        <p className="eyebrow">3AM SDC HACKATHON · STARTER APP</p>
-        <h1>Your frontend starts here.</h1>
-        <p className="intro">This Next.js page sends your numbers to the Python API and shows its response.</p>
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="numbers">Numbers, separated by commas</label>
-          <input id="numbers" value={input} onChange={(event) => setInput(event.target.value)} />
-          <button disabled={loading}>{loading ? "Working…" : "Summarize numbers"}</button>
-        </form>
-        {error && <p className="error" role="alert">{error}</p>}
-        {result && (
-          <div className="result" aria-live="polite">
-            <h2>API response</h2>
-            <dl>
-              <div><dt>Count</dt><dd>{result.count}</dd></div>
-              <div><dt>Minimum</dt><dd>{result.min}</dd></div>
-              <div><dt>Maximum</dt><dd>{result.max}</dd></div>
-              <div><dt>Average</dt><dd>{result.average}</dd></div>
-            </dl>
-          </div>
-        )}
-        <p className="hint">Backend: FastAPI on <code>127.0.0.1:8000</code></p>
+      </>}
+      {tab === "pathway" && pathway && <>{pathway.status === "resource_not_found" && <p className="notice small">No verified pathway resources available yet for this role. Coverage remains incomplete.</p>}<PathwayView pathway={pathway} data={data} onBack={() => setTab("matches")} /></>}
+      <div className="integration-note"><span aria-hidden="true">◌</span><p><strong>More context, when the evidence is ready.</strong><br />Real trend data, sourced SDG mappings and moderate / fast AI scenarios await team integration. No forecasts or SDG connections are invented.</p></div>
       </section>
-    </main>
-  );
+    </div>}
+    <footer className="app-footer"><p>{data?.attribution ?? "Occupational reference: European Commission ESCO."}<br /><span>English subset; coverage scoring and resource mappings are project additions. No European Commission endorsement implied.</span></p><p>Public reference data. Synthetic people.<br /><span>No LLM or paid API required.</span></p></footer></main>
+  </div>;
 }

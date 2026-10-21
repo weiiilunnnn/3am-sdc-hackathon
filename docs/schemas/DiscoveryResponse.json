@@ -1,0 +1,825 @@
+{
+  "$defs": {
+    "DevelopmentArea": {
+      "properties": {
+        "area_id": {
+          "title": "Area Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        },
+        "not_yet_evidenced_count": {
+          "title": "Not Yet Evidenced Count",
+          "type": "integer"
+        },
+        "supporting_concept_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Supporting Concept Ids",
+          "type": "array"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "mapping_method": {
+          "enum": [
+            "esco_broader_skill_single_parent_v1",
+            "source_concept_fallback"
+          ],
+          "title": "Mapping Method",
+          "type": "string"
+        }
+      },
+      "required": [
+        "area_id",
+        "title",
+        "explanation",
+        "not_yet_evidenced_count",
+        "supporting_concept_ids",
+        "source_ids",
+        "mapping_method"
+      ],
+      "title": "DevelopmentArea",
+      "type": "object"
+    },
+    "DiscoveryRole": {
+      "properties": {
+        "role_id": {
+          "title": "Role Id",
+          "type": "string"
+        },
+        "role_title": {
+          "title": "Role Title",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "rank": {
+          "title": "Rank",
+          "type": "integer"
+        },
+        "score": {
+          "$ref": "#/$defs/RelevanceScore"
+        },
+        "qualification_status": {
+          "const": "qualified",
+          "default": "qualified",
+          "title": "Qualification Status",
+          "type": "string"
+        },
+        "qualification_reason": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Qualification Reason",
+          "type": "array"
+        },
+        "strengths": {
+          "items": {
+            "$ref": "#/$defs/Requirement"
+          },
+          "title": "Strengths",
+          "type": "array"
+        },
+        "additional_strength_count": {
+          "title": "Additional Strength Count",
+          "type": "integer"
+        },
+        "development_areas": {
+          "items": {
+            "$ref": "#/$defs/DevelopmentArea"
+          },
+          "title": "Development Areas",
+          "type": "array"
+        },
+        "not_evidenced_essential_count": {
+          "title": "Not Evidenced Essential Count",
+          "type": "integer"
+        },
+        "unshown_not_evidenced_count": {
+          "title": "Unshown Not Evidenced Count",
+          "type": "integer"
+        },
+        "grouping_warning": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Grouping Warning"
+        },
+        "occupation_source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Occupation Source Ids",
+          "type": "array"
+        },
+        "data_source_status": {
+          "title": "Data Source Status",
+          "type": "string"
+        },
+        "esco_release": {
+          "title": "Esco Release",
+          "type": "string"
+        },
+        "pathway_available": {
+          "title": "Pathway Available",
+          "type": "boolean"
+        },
+        "pathway_coverage_status": {
+          "enum": [
+            "partial_reviewed_resources",
+            "no_verified_resources",
+            "no_unevidenced_essentials"
+          ],
+          "title": "Pathway Coverage Status",
+          "type": "string"
+        },
+        "sdg_mappings": {
+          "items": {
+            "$ref": "#/$defs/SDGMapping"
+          },
+          "title": "Sdg Mappings",
+          "type": "array"
+        },
+        "skill_sdg_mappings": {
+          "additionalProperties": {
+            "items": {
+              "$ref": "#/$defs/SDGMapping"
+            },
+            "type": "array"
+          },
+          "title": "Skill Sdg Mappings",
+          "type": "object"
+        }
+      },
+      "required": [
+        "role_id",
+        "role_title",
+        "description",
+        "rank",
+        "score",
+        "qualification_reason",
+        "strengths",
+        "additional_strength_count",
+        "development_areas",
+        "not_evidenced_essential_count",
+        "unshown_not_evidenced_count",
+        "grouping_warning",
+        "occupation_source_ids",
+        "data_source_status",
+        "esco_release",
+        "pathway_available",
+        "pathway_coverage_status"
+      ],
+      "title": "DiscoveryRole",
+      "type": "object"
+    },
+    "RelevanceScore": {
+      "properties": {
+        "profile_relevance_pct": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Profile Relevance Pct"
+        },
+        "essential_coverage_pct": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Essential Coverage Pct"
+        },
+        "personal_fit_score_pct": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Personal Fit Score Pct"
+        },
+        "display_kind": {
+          "const": "profile_relevance",
+          "default": "profile_relevance",
+          "title": "Display Kind",
+          "type": "string"
+        },
+        "method_version": {
+          "title": "Method Version",
+          "type": "string"
+        },
+        "is_hiring_probability": {
+          "const": false,
+          "default": false,
+          "title": "Is Hiring Probability",
+          "type": "boolean"
+        },
+        "matched_recognised_skill_count": {
+          "title": "Matched Recognised Skill Count",
+          "type": "integer"
+        },
+        "matched_essential_skill_count": {
+          "title": "Matched Essential Skill Count",
+          "type": "integer"
+        },
+        "recognised_user_skill_count": {
+          "title": "Recognised User Skill Count",
+          "type": "integer"
+        },
+        "qualifying_threshold_pct": {
+          "title": "Qualifying Threshold Pct",
+          "type": "number"
+        },
+        "informative_skill_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Informative Skill Ids",
+          "type": "array"
+        },
+        "weighted_matched_sum": {
+          "title": "Weighted Matched Sum",
+          "type": "number"
+        },
+        "weighted_profile_sum": {
+          "title": "Weighted Profile Sum",
+          "type": "number"
+        },
+        "essential_coverage_numerator": {
+          "title": "Essential Coverage Numerator",
+          "type": "integer"
+        },
+        "essential_coverage_denominator": {
+          "title": "Essential Coverage Denominator",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "profile_relevance_pct",
+        "essential_coverage_pct",
+        "personal_fit_score_pct",
+        "method_version",
+        "matched_recognised_skill_count",
+        "matched_essential_skill_count",
+        "recognised_user_skill_count",
+        "qualifying_threshold_pct",
+        "informative_skill_ids",
+        "weighted_matched_sum",
+        "weighted_profile_sum",
+        "essential_coverage_numerator",
+        "essential_coverage_denominator"
+      ],
+      "title": "RelevanceScore",
+      "type": "object"
+    },
+    "Requirement": {
+      "properties": {
+        "skill_id": {
+          "title": "Skill Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "skill_type": {
+          "default": "unknown",
+          "enum": [
+            "skill",
+            "knowledge",
+            "unknown"
+          ],
+          "title": "Skill Type",
+          "type": "string"
+        },
+        "requirement": {
+          "enum": [
+            "essential",
+            "optional",
+            "unspecified"
+          ],
+          "title": "Requirement",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "skill_id",
+        "name",
+        "requirement",
+        "source_ids"
+      ],
+      "title": "Requirement",
+      "type": "object"
+    },
+    "SDGMapping": {
+      "properties": {
+        "sdg_number": {
+          "maximum": 17,
+          "minimum": 1,
+          "title": "Sdg Number",
+          "type": "integer"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "mapping_owner": {
+          "minLength": 1,
+          "title": "Mapping Owner",
+          "type": "string"
+        },
+        "mapping_status": {
+          "enum": [
+            "verified",
+            "proposed",
+            "unknown"
+          ],
+          "title": "Mapping Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sdg_number",
+        "reason",
+        "source_ids",
+        "mapping_owner",
+        "mapping_status"
+      ],
+      "title": "SDGMapping",
+      "type": "object"
+    },
+    "ScenarioConfig": {
+      "properties": {
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "scenario_id": {
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        },
+        "is_synthetic": {
+          "title": "Is Synthetic",
+          "type": "boolean"
+        },
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "model_method": {
+          "title": "Model Method",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "disclaimer": {
+          "title": "Disclaimer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "scenario_id",
+        "version",
+        "is_synthetic",
+        "display_label",
+        "assumptions",
+        "model_method",
+        "source_ids",
+        "disclaimer"
+      ],
+      "title": "ScenarioConfig",
+      "type": "object"
+    },
+    "Source": {
+      "properties": {
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "evidence_status": {
+          "enum": [
+            "verified",
+            "partially_verified",
+            "unverified",
+            "synthetic"
+          ],
+          "title": "Evidence Status",
+          "type": "string"
+        },
+        "source_type": {
+          "title": "Source Type",
+          "type": "string"
+        },
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "publisher": {
+          "minLength": 1,
+          "title": "Publisher",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "license": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "License"
+        },
+        "license_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "License Url"
+        },
+        "dataset_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dataset Version"
+        },
+        "native_record_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Native Record Id"
+        },
+        "published_at": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Published At"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observed At"
+        },
+        "accessed_at": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessed At"
+        },
+        "region": {
+          "title": "Region",
+          "type": "string"
+        },
+        "supported_claims": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Supported Claims",
+          "type": "array"
+        },
+        "redistribution_notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Redistribution Notes"
+        },
+        "transformations": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transformations"
+        }
+      },
+      "required": [
+        "source_id",
+        "evidence_status",
+        "source_type",
+        "title",
+        "publisher",
+        "region",
+        "supported_claims"
+      ],
+      "title": "Source",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "const": "2.0",
+      "default": "2.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "profile_id": {
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "profile_fingerprint": {
+      "title": "Profile Fingerprint",
+      "type": "string"
+    },
+    "dataset_id": {
+      "title": "Dataset Id",
+      "type": "string"
+    },
+    "esco_release": {
+      "title": "Esco Release",
+      "type": "string"
+    },
+    "data_source_status": {
+      "enum": [
+        "local_full",
+        "local_subset_fallback"
+      ],
+      "title": "Data Source Status",
+      "type": "string"
+    },
+    "index_fingerprint": {
+      "title": "Index Fingerprint",
+      "type": "string"
+    },
+    "indexed_occupation_count": {
+      "title": "Indexed Occupation Count",
+      "type": "integer"
+    },
+    "recognised_user_skill_count": {
+      "title": "Recognised User Skill Count",
+      "type": "integer"
+    },
+    "unknown_user_skills": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Unknown User Skills",
+      "type": "array"
+    },
+    "alias_mapping_method": {
+      "default": "canonical URI or unambiguous exact preferred/reviewed/provider alternative label; case/whitespace normalised",
+      "title": "Alias Mapping Method",
+      "type": "string"
+    },
+    "insufficient_evidence": {
+      "title": "Insufficient Evidence",
+      "type": "boolean"
+    },
+    "status": {
+      "enum": [
+        "qualified",
+        "no_qualifying_roles",
+        "insufficient_evidence"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "qualification_threshold_pct": {
+      "title": "Qualification Threshold Pct",
+      "type": "number"
+    },
+    "scoring_method": {
+      "title": "Scoring Method",
+      "type": "string"
+    },
+    "scoring_configuration": {
+      "additionalProperties": true,
+      "title": "Scoring Configuration",
+      "type": "object"
+    },
+    "discovered_candidate_count": {
+      "title": "Discovered Candidate Count",
+      "type": "integer"
+    },
+    "total_qualifying_roles": {
+      "title": "Total Qualifying Roles",
+      "type": "integer"
+    },
+    "filtered_qualifying_roles": {
+      "title": "Filtered Qualifying Roles",
+      "type": "integer"
+    },
+    "offset": {
+      "title": "Offset",
+      "type": "integer"
+    },
+    "role_query": {
+      "title": "Role Query",
+      "type": "string"
+    },
+    "next_offset": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Next Offset"
+    },
+    "page_size": {
+      "title": "Page Size",
+      "type": "integer"
+    },
+    "diagnostic_counts": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "propertyNames": {
+        "enum": [
+          "qualified",
+          "below_threshold",
+          "insufficient_evidence",
+          "unscorable"
+        ]
+      },
+      "title": "Diagnostic Counts",
+      "type": "object"
+    },
+    "results": {
+      "items": {
+        "$ref": "#/$defs/DiscoveryRole"
+      },
+      "title": "Results",
+      "type": "array"
+    },
+    "sources": {
+      "items": {
+        "$ref": "#/$defs/Source"
+      },
+      "title": "Sources",
+      "type": "array"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    },
+    "scenario_context": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ScenarioConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "profile_id",
+    "profile_fingerprint",
+    "dataset_id",
+    "esco_release",
+    "data_source_status",
+    "index_fingerprint",
+    "indexed_occupation_count",
+    "recognised_user_skill_count",
+    "unknown_user_skills",
+    "insufficient_evidence",
+    "status",
+    "qualification_threshold_pct",
+    "scoring_method",
+    "scoring_configuration",
+    "discovered_candidate_count",
+    "total_qualifying_roles",
+    "filtered_qualifying_roles",
+    "offset",
+    "role_query",
+    "next_offset",
+    "page_size",
+    "diagnostic_counts",
+    "results",
+    "sources",
+    "warnings"
+  ],
+  "title": "DiscoveryResponse",
+  "type": "object"
+}

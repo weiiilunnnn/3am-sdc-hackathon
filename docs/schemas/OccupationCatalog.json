@@ -1,0 +1,249 @@
+{
+  "$defs": {
+    "Occupation": {
+      "properties": {
+        "role_id": {
+          "title": "Role Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "esco_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Esco Code"
+        },
+        "required_skills": {
+          "items": {
+            "$ref": "#/$defs/Requirement"
+          },
+          "title": "Required Skills",
+          "type": "array"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "region": {
+          "title": "Region",
+          "type": "string"
+        },
+        "evidence_status": {
+          "enum": [
+            "verified",
+            "partially_verified",
+            "unverified",
+            "synthetic"
+          ],
+          "title": "Evidence Status",
+          "type": "string"
+        },
+        "requirements_complete": {
+          "title": "Requirements Complete",
+          "type": "boolean"
+        },
+        "expected_essential_count": {
+          "minimum": 0,
+          "title": "Expected Essential Count",
+          "type": "integer"
+        },
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Aliases",
+          "type": "array"
+        },
+        "status": {
+          "default": "released",
+          "title": "Status",
+          "type": "string"
+        },
+        "language": {
+          "default": "en",
+          "title": "Language",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role_id",
+        "title",
+        "description",
+        "required_skills",
+        "source_ids",
+        "region",
+        "evidence_status",
+        "requirements_complete",
+        "expected_essential_count"
+      ],
+      "title": "Occupation",
+      "type": "object"
+    },
+    "Requirement": {
+      "properties": {
+        "skill_id": {
+          "title": "Skill Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "skill_type": {
+          "default": "unknown",
+          "enum": [
+            "skill",
+            "knowledge",
+            "unknown"
+          ],
+          "title": "Skill Type",
+          "type": "string"
+        },
+        "requirement": {
+          "enum": [
+            "essential",
+            "optional",
+            "unspecified"
+          ],
+          "title": "Requirement",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "skill_id",
+        "name",
+        "requirement",
+        "source_ids"
+      ],
+      "title": "Requirement",
+      "type": "object"
+    },
+    "SkillDefinition": {
+      "properties": {
+        "skill_id": {
+          "title": "Skill Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "skill_type": {
+          "default": "unknown",
+          "enum": [
+            "skill",
+            "knowledge",
+            "unknown"
+          ],
+          "title": "Skill Type",
+          "type": "string"
+        },
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Aliases",
+          "type": "array"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "broader_skill_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Broader Skill Ids",
+          "type": "array"
+        },
+        "reuse_level": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reuse Level"
+        }
+      },
+      "required": [
+        "skill_id",
+        "name",
+        "source_ids"
+      ],
+      "title": "SkillDefinition",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "dataset_id": {
+      "title": "Dataset Id",
+      "type": "string"
+    },
+    "dataset_version": {
+      "title": "Dataset Version",
+      "type": "string"
+    },
+    "is_synthetic": {
+      "title": "Is Synthetic",
+      "type": "boolean"
+    },
+    "occupations": {
+      "items": {
+        "$ref": "#/$defs/Occupation"
+      },
+      "title": "Occupations",
+      "type": "array"
+    },
+    "skills": {
+      "items": {
+        "$ref": "#/$defs/SkillDefinition"
+      },
+      "title": "Skills",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "dataset_id",
+    "dataset_version",
+    "is_synthetic",
+    "occupations",
+    "skills"
+  ],
+  "title": "OccupationCatalog",
+  "type": "object"
+}

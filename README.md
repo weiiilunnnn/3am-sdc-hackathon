@@ -1,220 +1,102 @@
-# 3AM SDC Hackathon
+# FutureReady - Team 3AM
 
-> A one-sentence description of what your project does and who it is for.
+Sourced technology-role matching and personalised starter reskilling pathways for the SDC Hackathon Domain 1. Built with the team's existing Next.js/React/TypeScript frontend and FastAPI/Python backend.
 
-## Local development: Next.js + FastAPI
+Team: **3AM**, Asia Pacific University, leader **Ooi Wei Lun**. SDG track: **4 - Quality Education**. [Repository](https://github.com/weiiilunnnn/3am-sdc-hackathon).
 
-The starter frontend is in `src/frontend/`. The FastAPI backend is in `src/main.py`.
-Run each server in a separate terminal from the repository root:
+## What works
+
+- Future-Role Matching discovers candidates from a locally indexed complete official ESCO API collection: 3,658 occupations, 14,579 concepts and 126,051 essential/optional relationships, requested release v1.2.1.
+- The React matching view uses the separate v2 API: IDF-weighted profile relevance, a configurable 30% threshold with evidence safeguards, variable result counts and server pagination/search. Legacy v1 strict essential coverage remains available unchanged.
+- Compact sourced development areas, one-element Read more/Show less descriptions and a bottom method disclosure. Market Outlook placeholders were removed only from matching; team trend/SDG/scenario interfaces remain.
+- Existing synthetic intake now searches the indexed concepts on the backend. Thirteen synthetic profiles were evaluated; no real CV or personal data is used.
+- Personalised Reskilling remains unchanged: 22 reviewed resources, existing prerequisite/phase/time logic, explicit incomplete coverage. A minimal API adapter supports newly discovered role IDs.
+- Offline local matching, explicit official API lookup/search with bounded cache/timeouts and a clearly labelled 15-role fallback. Without full frequency evidence, the fallback does not manufacture qualified scores.
+
+Current Feature 3 implementation, source/version caveats, all measured examples, tests, file map and rebuild commands: [FUTURE_ROLE_IMPLEMENTATION.md](docs/FUTURE_ROLE_IMPLEMENTATION.md). Earlier enhancement reports are historical where they conflict with this approved matching change.
+
+**Current scope:** Features 3 and 4 plus temporary synthetic intake. Indexed occupations and concept links are sourced; learning coverage is intentionally partial, as approved. Real updatable trend ingestion, complete sourced SDG mappings and defined future-scenario effects await teammates. The app does not yet satisfy all six final-product requirements. It uses no real CVs or personal profiles and makes no hiring/proficiency or Malaysian demand guarantee.
+
+## Run locally (PowerShell)
+
+Use Python 3.12 and Node.js 24 LTS (tested: Python 3.12.14, Node 24.16.0). Start from the repository root.
 
 ```powershell
-# Terminal 1: backend
 python -m venv .venv
-.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-uvicorn main:app --app-dir src --reload
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
 ```
+
+Terminal 1, repository root:
 
 ```powershell
-# Terminal 2: frontend
+.\.venv\Scripts\python.exe -m uvicorn main:app --app-dir src --reload --host 127.0.0.1 --port 8000
+```
+
+Terminal 2:
+
+```powershell
 cd src/frontend
-npm install
-npm run dev
+npm.cmd ci
+npm.cmd run dev
 ```
 
-Open `http://localhost:3000`. The frontend proxies `/api/*` to `http://127.0.0.1:8000`;
-the backend's interactive API docs are at `http://127.0.0.1:8000/docs`.
-Set `BACKEND_URL` in `src/frontend/.env.local` if the API is hosted elsewhere.
+Open **http://localhost:3000**. Backend API docs: **http://127.0.0.1:8000/docs**.
 
----
+The existing Next.js rewrite forwards `/api/*` to `http://127.0.0.1:8000/api/*`. For another backend, set `BACKEND_URL=http://your-backend:8000` in `src/frontend/.env.local` and restart Next.js. Use the backend origin without `/api` or a trailing slash. No browser API secret is needed.
 
-## Team Information
+On macOS/Linux replace `.venv\Scripts\python.exe` with `.venv/bin/python`. If Python is not on PATH, use your installed interpreter's full path for venv creation. Virtual environment activation is optional when using its executable directly.
 
-| Field                  | Details                                     |
-| ---------------------- | ------------------------------------------- |
-| **Team Name**          | 3AM                                         |
-| **Team Domain**        | Domain 1                                    |
-| **SDG Track (1–17)**   | SDG 4  — Quality Education                  |
-| **Team Leader**        | Ooi Wei Lun                                 |
-| **University**         | Asia Pacific University                     |
-| **Number of Members**  | 3                                           |
+The ESCO index and learning catalogues are local reference files. Starting the app never downloads a dataset or calls a recommendation API. Google Fonts is optional; system fonts provide a fallback. `runpod/handler.py` remains the team's echo skeleton, and the existing RunPod dependency is retained; these features do not require a RunPod endpoint/API key. `.replit` now starts FastAPI; it does not configure a complete two-service cloud deployment. No production deployment is claimed.
 
-## Links
+## Tests and production build
 
-| Resource          | Link                                           |
-| ----------------- | ---------------------------------------------- |
-| GitHub Repository | https://github.com/weiiilunnnn/3am-sdc-hackathon  |
-| Replit Project    | https://replit.com/@your-username/your-project |
-| Live Demo         | https://your-project.replit.app                |
-| RunPod Endpoint   | https://api.runpod.ai/v2/your-endpoint-id      |
-| Slide Deck        | https://example.com/slides                     |
-| Demo Video        | https://example.com/demo-video                 |
+Backend, from root:
 
----
-
-## Overview
-
-### Problem
-
-Describe the real-world problem you are solving in 2–4 sentences. Who is affected, and why does it matter?
-
-### Solution
-
-Explain how your project uses AI to solve the problem and what makes it valuable.
-
-### Key Features
-
-- **Feature 1** — Short description.
-- **Feature 2** — Short description.
-- **Feature 3** — Short description.
-
-### Tech Stack
-
-| Layer         | Technology                   |
-| ------------- | ---------------------------- |
-| Frontend      | e.g. HTML, React             |
-| Backend       | e.g. Python, Flask / FastAPI |
-| Database      | e.g. PostgreSQL, SQLite      |
-| AI / Compute  | RunPod (GPU)                 |
-| Hosting / Dev | Replit                       |
-
----
-
-## Project Structure
-
-```
-.
-├── docs/                    # Screenshots, diagrams
-├── runpod/
-│   └── handler.py           # RunPod serverless handler (GPU workload)
-├── src/
-│   ├── main.py              # Application entry point
-│   └── utils.py             # Helper functions
-├── submission/              # Required submission documents
-│   ├── REPLIT PROOF OF USE.pdf
-│   ├── RUNPOD PROOF OF USE.pdf
-│   └── Submission Template SDC Hackathon.pdf
-├── tests/
-│   └── test_utils.py        # Unit tests
-├── .env.example             # Example environment variables
-├── .gitignore
-├── .replit                  # Replit run configuration
-├── LICENSE
-├── requirements.txt         # Python dependencies
-└── README.md
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\.venv\Scripts\python.exe scripts/export_contract_schemas.py
 ```
 
-### Architecture
+Frontend, from `src/frontend`:
 
-```
-User ──► Replit (App / API) ──► RunPod Endpoint (GPU model)
-                │
-                └──► Response returned to user
-```
-
----
-
-## How to Run
-
-### Option 1 — Run on Replit (Recommended)
-
-1. Open the [Replit Project](https://replit.com/@your-username/your-project), or import this repository via **Create Repl → Import from GitHub**.
-2. Open the **Secrets** tab (🔒) and add the variables listed in `.env.example`:
-   - `RUNPOD_API_KEY`
-   - `RUNPOD_ENDPOINT_ID`
-3. Click **Run**. Replit uses the `.replit` file to start `python src/main.py`.
-
-### Option 2 — Run Locally
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/your-username/your-project.git
-cd your-project
-
-# 2. Create and activate a virtual environment
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
-
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. Configure environment variables
-cp .env.example .env            # then fill in your values
-
-# 5. Run the app
-python src/main.py
+```powershell
+npm.cmd run typecheck
+npm.cmd run build
+npx.cmd playwright install chromium
+npm.cmd run test:e2e
 ```
 
-### Run Tests
+Playwright starts isolated FastAPI/Next.js servers on ports 8100/3100 with a separate `.next-e2e` build directory. It does not reuse or stop your development servers on 8000/3000. Use the `npm.cmd`/`npx.cmd` commands shown in PowerShell to avoid blocked `.ps1` shims. On another Python setup set `PYTHON_EXECUTABLE` to an absolute interpreter path before running it. Real browser tests cover multiple profiles/roles, citations, provider links, relevance safeguards, description toggling, input editing, recovery and mobile overflow. Successful runs write previews under `docs/screenshots/`. If sandboxed browser launch reports a missing executable despite an installed browser, run the tests with the required local filesystem/process access. For production locally, run `npm.cmd run start` after building, with FastAPI running separately.
 
-```bash
-python -m unittest discover tests
+## Code and data map
+
+| Area | Location |
+|---|---|
+| HTTP endpoints and preserved health/summarize routes | `src/main.py` |
+| Pure matching / pathway services | `src/future_role_matching.py`, `src/personalized_reskilling.py` |
+| Contracts, profile normalisation, source loader, trend adapter | `src/models.py`, `skills_intake.py`, `data_repository.py`, `trend_adapter.py` |
+| Existing Next app and reusable React components | `src/frontend/app/`, `components/`, `lib/` |
+| Full discovery index and legacy 15-role fallback | `data/index/`, `data/occupations/` |
+| Reviewed provider catalogue | `data/resources/` |
+| Source registry and verification logs | `data/sources/` |
+| Synthetic profiles and snapshot fixtures | `data/demo/` |
+| Backend / browser tests | `tests/`, `src/frontend/e2e/` |
+
+Enhancement audit, all before/after scores and decision: [SCORING_AUDIT.md](docs/SCORING_AUDIT.md). Exact role/resource inventory and evidence: [CATALOGUE_REVIEW.md](docs/CATALOGUE_REVIEW.md). Change summary: [ENHANCEMENT_REPORT.md](docs/ENHANCEMENT_REPORT.md).
+
+See [API contracts and teammate interfaces](docs/CONTRACTS.md), [scoring and limitations](docs/SCORING_AND_LIMITATIONS.md), [sources and licences](docs/DATA_SOURCES_AND_LICENSES.md), [acceptance walkthrough](docs/DEMO_CHECKLIST.md), and [executed verification results](docs/VERIFICATION.md).
+
+Reference updates are explicit authoring operations, not startup tasks:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/prepare_esco_subset.py --verified-date YYYY-MM-DD
+.\.venv\Scripts\python.exe scripts/check_source_links.py
 ```
 
----
+Review rights/content, inspect diffs, update verification records and run tests before distributing changes. `scripts/curate_learning_catalog.py` reproduces the catalogue reviewed on 21 October 2026; it does not automatically reverify curricula. Restart FastAPI after approved data changes. HTTP clients cannot invent new verified evidence: review/register it in `data/sources/integration_sources.json` first.
 
-## How We Use Replit *(Required)*
+## Attribution and licence
 
-Describe how your team used Replit. For example:
+This service uses the ESCO classification of the European Commission. The English subset, scoring method and editorial course mappings are project additions and imply no endorsement. European classification data are not Malaysian labour-market evidence.
 
-- **Development:** Collaborative coding in a shared Repl using Multiplayer.
-- **Hosting:** The app is deployed with Replit Deployments at the Live Demo link above.
-- **Secrets:** API keys are stored in Replit Secrets, never in the code.
-
-📄 Proof of use: [`submission/REPLIT PROOF OF USE.pdf`](submission/REPLIT%20PROOF%20OF%20USE.pdf)
-
-## How We Use RunPod *(Required)*
-
-Describe how your team used RunPod. For example:
-
-- **Workload:** Model inference (e.g. text generation, image processing) runs on a RunPod GPU.
-- **Setup:** `runpod/handler.py` is deployed as a **RunPod Serverless Endpoint**.
-- **Integration:** The Replit app sends requests to the endpoint using `RUNPOD_API_KEY` and `RUNPOD_ENDPOINT_ID`.
-
-Example request:
-
-```bash
-curl -X POST https://api.runpod.ai/v2/$RUNPOD_ENDPOINT_ID/runsync \
-  -H "Authorization: Bearer $RUNPOD_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"input": {"prompt": "Hello"}}'
-```
-
-📄 Proof of use: [`submission/RUNPOD PROOF OF USE.pdf`](submission/RUNPOD%20PROOF%20OF%20USE.pdf)
-
----
-
-## Challenges & Learnings
-
-- What challenges did you face, and how did you overcome them?
-- What did your team learn?
-
-## Future Improvements
-
-- [ ] Improvement 1
-- [ ] Improvement 2
-
-## Team
-
-| Name        | Role                | GitHub                                   |
-| ----------- | ------------------- | ---------------------------------------- |
-| Member Name | Team Lead / Backend | [@username](https://github.com/username) |
-| Member Name | Frontend            | [@username](https://github.com/username) |
-| Member Name | AI / RunPod         | [@username](https://github.com/username) |
-
----
-
-## Submission Checklist
-
-- [ ] Team name, domain (Domain 1 / Domain 2) and SDG track filled in
-- [ ] Slide deck link added
-- [ ] Demo video link added
-- [ ] Replit used, with proof of use in `submission/`
-- [ ] RunPod used, with proof of use in `submission/`
-- [ ] Submission template completed in `submission/`
-- [ ] "How to Run" steps verified
-- [ ] No API keys or secrets committed to the repository
-
-## License
-
-This project is licensed under the [Apache License 2.0](LICENSE).
+Project code: [Apache 2.0](LICENSE). Third-party data/content retain their own terms; see the source inventory. No course content is mirrored. No deployment, sponsor service usage or measured workforce impact is claimed merely from repository folders or fixtures.

@@ -1,0 +1,892 @@
+{
+  "$defs": {
+    "CareerMatch": {
+      "properties": {
+        "role_id": {
+          "title": "Role Id",
+          "type": "string"
+        },
+        "role_title": {
+          "title": "Role Title",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "dataset_version": {
+          "title": "Dataset Version",
+          "type": "string"
+        },
+        "rank_personal_fit": {
+          "title": "Rank Personal Fit",
+          "type": "integer"
+        },
+        "personal_fit_score_pct": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Personal Fit Score Pct"
+        },
+        "score_label": {
+          "default": "Essential skill/knowledge coverage, not employment probability",
+          "title": "Score Label",
+          "type": "string"
+        },
+        "score_breakdown": {
+          "$ref": "#/$defs/ScoreBreakdown"
+        },
+        "matched_skills": {
+          "items": {
+            "$ref": "#/$defs/Requirement"
+          },
+          "title": "Matched Skills",
+          "type": "array"
+        },
+        "missing_skills": {
+          "items": {
+            "$ref": "#/$defs/Requirement"
+          },
+          "title": "Missing Skills",
+          "type": "array"
+        },
+        "market_outlook": {
+          "$ref": "#/$defs/MarketOutlook"
+        },
+        "occupation_source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Occupation Source Ids",
+          "type": "array"
+        },
+        "evidence_status": {
+          "enum": [
+            "verified",
+            "partially_verified",
+            "unverified",
+            "synthetic"
+          ],
+          "title": "Evidence Status",
+          "type": "string"
+        },
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        },
+        "sdg_mappings": {
+          "items": {
+            "$ref": "#/$defs/SDGMapping"
+          },
+          "title": "Sdg Mappings",
+          "type": "array"
+        },
+        "skill_sdg_mappings": {
+          "additionalProperties": {
+            "items": {
+              "$ref": "#/$defs/SDGMapping"
+            },
+            "type": "array"
+          },
+          "title": "Skill Sdg Mappings",
+          "type": "object"
+        },
+        "sdg_status": {
+          "default": "pending",
+          "enum": [
+            "complete",
+            "partial",
+            "pending"
+          ],
+          "title": "Sdg Status",
+          "type": "string"
+        },
+        "pathway_available": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pathway Available"
+        },
+        "score_method_version": {
+          "default": "essential-skill-coverage-v1",
+          "title": "Score Method Version",
+          "type": "string"
+        },
+        "essential_concept_coverage_pct": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Essential Concept Coverage Pct"
+        },
+        "competency_alignment_pct": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Competency Alignment Pct"
+        },
+        "display_score_kind": {
+          "const": "essential_concept_coverage",
+          "default": "essential_concept_coverage",
+          "title": "Display Score Kind",
+          "type": "string"
+        },
+        "score_is_employment_probability": {
+          "const": false,
+          "default": false,
+          "title": "Score Is Employment Probability",
+          "type": "boolean"
+        },
+        "competency_groups": {
+          "items": {
+            "$ref": "#/$defs/CompetencyGroup"
+          },
+          "title": "Competency Groups",
+          "type": "array"
+        },
+        "requirement_type_coverage": {
+          "items": {
+            "$ref": "#/$defs/RequirementCoverage"
+          },
+          "title": "Requirement Type Coverage",
+          "type": "array"
+        },
+        "priority_gap_skill_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Priority Gap Skill Ids",
+          "type": "array"
+        },
+        "gap_priority_rule": {
+          "default": "Alphabetical by canonical label, then canonical ID; not ESCO importance.",
+          "title": "Gap Priority Rule",
+          "type": "string"
+        },
+        "score_limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Score Limitations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "role_id",
+        "role_title",
+        "description",
+        "dataset_version",
+        "rank_personal_fit",
+        "personal_fit_score_pct",
+        "score_breakdown",
+        "matched_skills",
+        "missing_skills",
+        "market_outlook",
+        "occupation_source_ids",
+        "evidence_status",
+        "explanation",
+        "limitations"
+      ],
+      "title": "CareerMatch",
+      "type": "object"
+    },
+    "CompetencyGroup": {
+      "properties": {
+        "group_id": {
+          "title": "Group Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "matched_count": {
+          "title": "Matched Count",
+          "type": "integer"
+        },
+        "total_count": {
+          "title": "Total Count",
+          "type": "integer"
+        },
+        "essential_skill_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Essential Skill Ids",
+          "type": "array"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "mapping_version": {
+          "title": "Mapping Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "group_id",
+        "label",
+        "matched_count",
+        "total_count",
+        "essential_skill_ids",
+        "source_ids",
+        "mapping_version"
+      ],
+      "title": "CompetencyGroup",
+      "type": "object"
+    },
+    "MarketOutlook": {
+      "properties": {
+        "direction": {
+          "default": "unknown",
+          "enum": [
+            "rising",
+            "stable",
+            "declining",
+            "unknown"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Snapshot Id"
+        },
+        "collected_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Collected At"
+        },
+        "evidence_status": {
+          "default": "unverified",
+          "enum": [
+            "verified",
+            "partially_verified",
+            "unverified",
+            "synthetic"
+          ],
+          "title": "Evidence Status",
+          "type": "string"
+        },
+        "freshness_status": {
+          "default": "unknown",
+          "enum": [
+            "fresh",
+            "stale",
+            "unknown",
+            "synthetic"
+          ],
+          "title": "Freshness Status",
+          "type": "string"
+        },
+        "signals": {
+          "items": {
+            "$ref": "#/$defs/MarketSignalView"
+          },
+          "title": "Signals",
+          "type": "array"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "title": "MarketOutlook",
+      "type": "object"
+    },
+    "MarketSignalView": {
+      "properties": {
+        "signal": {
+          "$ref": "#/$defs/TrendSignal"
+        },
+        "direction": {
+          "enum": [
+            "rising",
+            "stable",
+            "declining",
+            "unknown"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "available",
+            "unknown",
+            "stale",
+            "unmapped"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "evidence_status": {
+          "enum": [
+            "verified",
+            "partially_verified",
+            "unverified",
+            "synthetic"
+          ],
+          "title": "Evidence Status",
+          "type": "string"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "signal",
+        "direction",
+        "status",
+        "evidence_status"
+      ],
+      "title": "MarketSignalView",
+      "type": "object"
+    },
+    "ObservationPeriod": {
+      "properties": {
+        "start": {
+          "format": "date",
+          "title": "Start",
+          "type": "string"
+        },
+        "end": {
+          "format": "date",
+          "title": "End",
+          "type": "string"
+        },
+        "value": {
+          "minimum": 0,
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "start",
+        "end",
+        "value"
+      ],
+      "title": "ObservationPeriod",
+      "type": "object"
+    },
+    "Requirement": {
+      "properties": {
+        "skill_id": {
+          "title": "Skill Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "skill_type": {
+          "default": "unknown",
+          "enum": [
+            "skill",
+            "knowledge",
+            "unknown"
+          ],
+          "title": "Skill Type",
+          "type": "string"
+        },
+        "requirement": {
+          "enum": [
+            "essential",
+            "optional",
+            "unspecified"
+          ],
+          "title": "Requirement",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "skill_id",
+        "name",
+        "requirement",
+        "source_ids"
+      ],
+      "title": "Requirement",
+      "type": "object"
+    },
+    "RequirementCoverage": {
+      "properties": {
+        "skill_type": {
+          "enum": [
+            "skill",
+            "knowledge",
+            "unknown"
+          ],
+          "title": "Skill Type",
+          "type": "string"
+        },
+        "matched_essential_count": {
+          "title": "Matched Essential Count",
+          "type": "integer"
+        },
+        "total_essential_count": {
+          "title": "Total Essential Count",
+          "type": "integer"
+        },
+        "coverage_pct": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Coverage Pct"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "skill_type",
+        "matched_essential_count",
+        "total_essential_count",
+        "coverage_pct",
+        "source_ids"
+      ],
+      "title": "RequirementCoverage",
+      "type": "object"
+    },
+    "SDGMapping": {
+      "properties": {
+        "sdg_number": {
+          "maximum": 17,
+          "minimum": 1,
+          "title": "Sdg Number",
+          "type": "integer"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "mapping_owner": {
+          "minLength": 1,
+          "title": "Mapping Owner",
+          "type": "string"
+        },
+        "mapping_status": {
+          "enum": [
+            "verified",
+            "proposed",
+            "unknown"
+          ],
+          "title": "Mapping Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sdg_number",
+        "reason",
+        "source_ids",
+        "mapping_owner",
+        "mapping_status"
+      ],
+      "title": "SDGMapping",
+      "type": "object"
+    },
+    "ScenarioConfig": {
+      "properties": {
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "scenario_id": {
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        },
+        "is_synthetic": {
+          "title": "Is Synthetic",
+          "type": "boolean"
+        },
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "model_method": {
+          "title": "Model Method",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "disclaimer": {
+          "title": "Disclaimer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "scenario_id",
+        "version",
+        "is_synthetic",
+        "display_label",
+        "assumptions",
+        "model_method",
+        "source_ids",
+        "disclaimer"
+      ],
+      "title": "ScenarioConfig",
+      "type": "object"
+    },
+    "ScoreBreakdown": {
+      "properties": {
+        "matched_essential_count": {
+          "title": "Matched Essential Count",
+          "type": "integer"
+        },
+        "total_essential_count": {
+          "title": "Total Essential Count",
+          "type": "integer"
+        },
+        "matched_optional_count": {
+          "title": "Matched Optional Count",
+          "type": "integer"
+        },
+        "total_optional_count": {
+          "title": "Total Optional Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "matched_essential_count",
+        "total_essential_count",
+        "matched_optional_count",
+        "total_optional_count"
+      ],
+      "title": "ScoreBreakdown",
+      "type": "object"
+    },
+    "TrendSignal": {
+      "properties": {
+        "signal_id": {
+          "title": "Signal Id",
+          "type": "string"
+        },
+        "scope": {
+          "enum": [
+            "role",
+            "skill"
+          ],
+          "title": "Scope",
+          "type": "string"
+        },
+        "role_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role Id"
+        },
+        "skill_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Skill Id"
+        },
+        "region": {
+          "title": "Region",
+          "type": "string"
+        },
+        "metric": {
+          "minLength": 1,
+          "title": "Metric",
+          "type": "string"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "period_previous": {
+          "$ref": "#/$defs/ObservationPeriod"
+        },
+        "period_current": {
+          "$ref": "#/$defs/ObservationPeriod"
+        },
+        "direction": {
+          "enum": [
+            "rising",
+            "stable",
+            "declining",
+            "unknown"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "direction_origin": {
+          "default": "source",
+          "enum": [
+            "source",
+            "calculated"
+          ],
+          "title": "Direction Origin",
+          "type": "string"
+        },
+        "derivation_rule": {
+          "minLength": 1,
+          "title": "Derivation Rule",
+          "type": "string"
+        },
+        "comparison_method": {
+          "default": "owner_defined",
+          "title": "Comparison Method",
+          "type": "string"
+        },
+        "comparability_confirmed": {
+          "default": false,
+          "title": "Comparability Confirmed",
+          "type": "boolean"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "signal_id",
+        "scope",
+        "region",
+        "metric",
+        "unit",
+        "period_previous",
+        "period_current",
+        "direction",
+        "derivation_rule",
+        "source_ids"
+      ],
+      "title": "TrendSignal",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "profile_id": {
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "profile_fingerprint": {
+      "title": "Profile Fingerprint",
+      "type": "string"
+    },
+    "occupation_dataset_id": {
+      "title": "Occupation Dataset Id",
+      "type": "string"
+    },
+    "dataset_version": {
+      "title": "Dataset Version",
+      "type": "string"
+    },
+    "snapshot_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Snapshot Id"
+    },
+    "scenario_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Scenario Id"
+    },
+    "scenario_context": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ScenarioConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "is_synthetic": {
+      "title": "Is Synthetic",
+      "type": "boolean"
+    },
+    "match_method": {
+      "default": "essential-skill-coverage-v1",
+      "title": "Match Method",
+      "type": "string"
+    },
+    "results": {
+      "items": {
+        "$ref": "#/$defs/CareerMatch"
+      },
+      "title": "Results",
+      "type": "array"
+    },
+    "unmatched_user_skills": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Unmatched User Skills",
+      "type": "array"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    },
+    "excluded_roles": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Excluded Roles",
+      "type": "array"
+    },
+    "ranking_basis": {
+      "const": "essential_concept_coverage",
+      "default": "essential_concept_coverage",
+      "title": "Ranking Basis",
+      "type": "string"
+    },
+    "candidate_role_count": {
+      "default": 0,
+      "title": "Candidate Role Count",
+      "type": "integer"
+    },
+    "scored_role_count": {
+      "default": 0,
+      "title": "Scored Role Count",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "profile_id",
+    "profile_fingerprint",
+    "occupation_dataset_id",
+    "dataset_version",
+    "snapshot_id",
+    "scenario_id",
+    "is_synthetic",
+    "results",
+    "unmatched_user_skills",
+    "warnings"
+  ],
+  "title": "MatchResponse",
+  "type": "object"
+}

@@ -1,0 +1,417 @@
+{
+  "schema_version": "1.0",
+  "snapshot_id": "demo-trend-b",
+  "is_synthetic": true,
+  "collected_at": "2026-10-21T09:00:00+08:00",
+  "source_ids": [
+    "demo:fixture:001"
+  ],
+  "signals": [
+    {
+      "signal_id": "demo:signal:b:0",
+      "scope": "role",
+      "role_id": "http://data.europa.eu/esco/occupation/f2b15a0e-e65a-438a-affb-29b9d50b77d1",
+      "skill_id": null,
+      "region": "unspecified",
+      "metric": "synthetic_posting_count",
+      "unit": "count",
+      "period_previous": {
+        "start": "2026-09-01",
+        "end": "2026-09-20",
+        "value": 8
+      },
+      "period_current": {
+        "start": "2026-10-01",
+        "end": "2026-10-20",
+        "value": 5
+      },
+      "direction": "declining",
+      "direction_origin": "calculated",
+      "derivation_rule": "Synthetic count comparison only: current greater/equal/lower than previous.",
+      "comparison_method": "count_comparison_v1",
+      "comparability_confirmed": true,
+      "source_ids": [
+        "demo:fixture:001"
+      ]
+    },
+    {
+      "signal_id": "demo:signal:b:1",
+      "scope": "role",
+      "role_id": "http://data.europa.eu/esco/occupation/258e46f9-0075-4a2e-adae-1ff0477e0f30",
+      "skill_id": null,
+      "region": "unspecified",
+      "metric": "synthetic_posting_count",
+      "unit": "count",
+      "period_previous": {
+        "start": "2026-09-01",
+        "end": "2026-09-20",
+        "value": 8
+      },
+      "period_current": {
+        "start": "2026-10-01",
+        "end": "2026-10-20",
+        "value": 5
+      },
+      "direction": "declining",
+      "direction_origin": "calculated",
+      "derivation_rule": "Synthetic count comparison only: current greater/equal/lower than previous.",
+      "comparison_method": "count_comparison_v1",
+      "comparability_confirmed": true,
+      "source_ids": [
+        "demo:fixture:001"
+      ]
+    },
+    {
+      "signal_id": "demo:signal:b:2",
+      "scope": "role",
+      "role_id": "http://data.europa.eu/esco/occupation/c40a2919-48a9-40ea-b506-1f34f693496d",
+      "skill_id": null,
+      "region": "unspecified",
+      "metric": "synthetic_posting_count",
+      "unit": "count",
+      "period_previous": {
+        "start": "2026-09-01",
+        "end": "2026-09-20",
+        "value": 8
+      },
+      "period_current": {
+        "start": "2026-10-01",
+        "end": "2026-10-20",
+        "value": 5
+      },
+      "direction": "declining",
+      "direction_origin": "calculated",
+      "derivation_rule": "Synthetic count comparison only: current greater/equal/lower than previous.",
+      "comparison_method": "count_comparison_v1",
+      "comparability_confirmed": true,
+      "source_ids": [
+        "demo:fixture:001"
+      ]
+    },
+    {
+      "signal_id": "demo:signal:b:3",
+      "scope": "role",
+      "role_id": "http://data.europa.eu/esco/occupation/35553663-deab-4d9a-bf22-15c1625d28e8",
+      "skill_id": null,
+      "region": "unspecified",
+      "metric": "synthetic_posting_count",
+      "unit": "count",
+      "period_previous": {
+        "start": "2026-09-01",
+        "end": "2026-09-20",
+        "value": 8
+      },
+      "period_current": {
+        "start": "2026-10-01",
+        "end": "2026-10-20",
+        "value": 5
+      },
+      "direction": "declining",
+      "direction_origin": "calculated",
+      "derivation_rule": "Synthetic count comparison only: current greater/equal/lower than previous.",
+      "comparison_method": "count_comparison_v1",
+      "comparability_confirmed": true,
+      "source_ids": [
+        "demo:fixture:001"
+      ]
+    },
+    {
+      "signal_id": "demo:signal:b:4",
+      "scope": "role",
+      "role_id": "http://data.europa.eu/esco/occupation/b11e1742-5e28-4270-b081-b0193d85ee7d",
+      "skill_id": null,
+      "region": "unspecified",
+      "metric": "synthetic_posting_count",
+      "unit": "count",
+      "period_previous": {
+        "start": "2026-09-01",
+        "end": "2026-09-20",
+        "value": 8
+      },
+      "period_current": {
+        "start": "2026-10-01",
+        "end": "2026-10-20",
+        "value": 5
+      },
+      "direction": "declining",
+      "direction_origin": "calculated",
+      "derivation_rule": "Synthetic count comparison only: current greater/equal/lower than previous.",
+      "comparison_method": "count_comparison_v1",
+      "comparability_confirmed": true,
+      "source_ids": [
+        "demo:fixture:001"
+      ]
+    },
+    {
+      "signal_id": "demo:signal:b:5",
+      "scope": "role",
+      "role_id": "http://data.europa.eu/esco/occupation/bd272aee-adc9-4a06-a15c-a73b4b4a46a7",
+      "skill_id": null,
+      "region": "unspecified",
+      "metric": "synthetic_posting_count",
+      "unit": "count",
+      "period_previous": {
+        "start": "2026-09-01",
+        "end": "2026-09-20",
+        "value": 8
+      },
+      "period_current": {
+        "start": "2026-10-01",
+        "end": "2026-10-20",
+        "value": 5
+      },
+      "direction": "declining",
+      "direction_origin": "calculated",
+      "derivation_rule": "Synthetic count comparison only: current greater/equal/lower than previous.",
+      "comparison_method": "count_comparison_v1",
+      "comparability_confirmed": true,
+      "source_ids": [
+        "demo:fixture:001"
+      ]
+    },
+    {
+      "signal_id": "demo:signal:b:6",
+      "scope": "role",
+      "role_id": "http://data.europa.eu/esco/occupation/a7c1d23d-aeca-4bee-9a08-5993ed98b135",
+      "skill_id": null,
+      "region": "unspecified",
+      "metric": "synthetic_posting_count",
+      "unit": "count",
+      "period_previous": {
+        "start": "2026-09-01",
+        "end": "2026-09-20",
+        "value": 8
+      },
+      "period_current": {
+        "start": "2026-10-01",
+        "end": "2026-10-20",
+        "value": 5
+      },
+      "direction": "declining",
+      "direction_origin": "calculated",
+      "derivation_rule": "Synthetic count comparison only: current greater/equal/lower than previous.",
+      "comparison_method": "count_comparison_v1",
+      "comparability_confirmed": true,
+      "source_ids": [
+        "demo:fixture:001"
+      ]
+    },
+    {
+      "signal_id": "demo:signal:b:7",
+      "scope": "role",
+      "role_id": "http://data.europa.eu/esco/occupation/52d5edc9-7902-4cd3-8b06-6bd77c98d440",
+      "skill_id": null,
+      "region": "unspecified",
+      "metric": "synthetic_posting_count",
+      "unit": "count",
+      "period_previous": {
+        "start": "2026-09-01",
+        "end": "2026-09-20",
+        "value": 8
+      },
+      "period_current": {
+        "start": "2026-10-01",
+        "end": "2026-10-20",
+        "value": 5
+      },
+      "direction": "declining",
+      "direction_origin": "calculated",
+      "derivation_rule": "Synthetic count comparison only: current greater/equal/lower than previous.",
+      "comparison_method": "count_comparison_v1",
+      "comparability_confirmed": true,
+      "source_ids": [
+        "demo:fixture:001"
+      ]
+    },
+    {
+      "signal_id": "demo:signal:b:8",
+      "scope": "role",
+      "role_id": "http://data.europa.eu/esco/occupation/0ab5c12c-c1c1-4772-8345-aa287d0e391d",
+      "skill_id": null,
+      "region": "unspecified",
+      "metric": "synthetic_posting_count",
+      "unit": "count",
+      "period_previous": {
+        "start": "2026-09-01",
+        "end": "2026-09-20",
+        "value": 8
+      },
+      "period_current": {
+        "start": "2026-10-01",
+        "end": "2026-10-20",
+        "value": 5
+      },
+      "direction": "declining",
+      "direction_origin": "calculated",
+      "derivation_rule": "Synthetic count comparison only: current greater/equal/lower than previous.",
+      "comparison_method": "count_comparison_v1",
+      "comparability_confirmed": true,
+      "source_ids": [
+        "demo:fixture:001"
+      ]
+    },
+    {
+      "signal_id": "demo:signal:b:9",
+      "scope": "role",
+      "role_id": "http://data.europa.eu/esco/occupation/a6a0b60f-08da-4faa-bf54-942987efb471",
+      "skill_id": null,
+      "region": "unspecified",
+      "metric": "synthetic_posting_count",
+      "unit": "count",
+      "period_previous": {
+        "start": "2026-09-01",
+        "end": "2026-09-20",
+        "value": 8
+      },
+      "period_current": {
+        "start": "2026-10-01",
+        "end": "2026-10-20",
+        "value": 5
+      },
+      "direction": "declining",
+      "direction_origin": "calculated",
+      "derivation_rule": "Synthetic count comparison only: current greater/equal/lower than previous.",
+      "comparison_method": "count_comparison_v1",
+      "comparability_confirmed": true,
+      "source_ids": [
+        "demo:fixture:001"
+      ]
+    },
+    {
+      "signal_id": "demo:signal:b:10",
+      "scope": "role",
+      "role_id": "http://data.europa.eu/esco/occupation/fe0fa514-b48d-4a53-9757-a283c0baacf0",
+      "skill_id": null,
+      "region": "unspecified",
+      "metric": "synthetic_posting_count",
+      "unit": "count",
+      "period_previous": {
+        "start": "2026-09-01",
+        "end": "2026-09-20",
+        "value": 8
+      },
+      "period_current": {
+        "start": "2026-10-01",
+        "end": "2026-10-20",
+        "value": 5
+      },
+      "direction": "declining",
+      "direction_origin": "calculated",
+      "derivation_rule": "Synthetic count comparison only: current greater/equal/lower than previous.",
+      "comparison_method": "count_comparison_v1",
+      "comparability_confirmed": true,
+      "source_ids": [
+        "demo:fixture:001"
+      ]
+    },
+    {
+      "signal_id": "demo:signal:b:11",
+      "scope": "role",
+      "role_id": "http://data.europa.eu/esco/occupation/64c7d461-152c-477f-a8e2-c2c537e9d617",
+      "skill_id": null,
+      "region": "unspecified",
+      "metric": "synthetic_posting_count",
+      "unit": "count",
+      "period_previous": {
+        "start": "2026-09-01",
+        "end": "2026-09-20",
+        "value": 8
+      },
+      "period_current": {
+        "start": "2026-10-01",
+        "end": "2026-10-20",
+        "value": 5
+      },
+      "direction": "declining",
+      "direction_origin": "calculated",
+      "derivation_rule": "Synthetic count comparison only: current greater/equal/lower than previous.",
+      "comparison_method": "count_comparison_v1",
+      "comparability_confirmed": true,
+      "source_ids": [
+        "demo:fixture:001"
+      ]
+    },
+    {
+      "signal_id": "demo:signal:b:12",
+      "scope": "role",
+      "role_id": "http://data.europa.eu/esco/occupation/a44a1dc5-be08-4840-8bd5-770c4ac1ca6d",
+      "skill_id": null,
+      "region": "unspecified",
+      "metric": "synthetic_posting_count",
+      "unit": "count",
+      "period_previous": {
+        "start": "2026-09-01",
+        "end": "2026-09-20",
+        "value": 8
+      },
+      "period_current": {
+        "start": "2026-10-01",
+        "end": "2026-10-20",
+        "value": 5
+      },
+      "direction": "declining",
+      "direction_origin": "calculated",
+      "derivation_rule": "Synthetic count comparison only: current greater/equal/lower than previous.",
+      "comparison_method": "count_comparison_v1",
+      "comparability_confirmed": true,
+      "source_ids": [
+        "demo:fixture:001"
+      ]
+    },
+    {
+      "signal_id": "demo:signal:b:13",
+      "scope": "role",
+      "role_id": "http://data.europa.eu/esco/occupation/aaeec9a7-dc57-4485-890c-86b3eef735f9",
+      "skill_id": null,
+      "region": "unspecified",
+      "metric": "synthetic_posting_count",
+      "unit": "count",
+      "period_previous": {
+        "start": "2026-09-01",
+        "end": "2026-09-20",
+        "value": 8
+      },
+      "period_current": {
+        "start": "2026-10-01",
+        "end": "2026-10-20",
+        "value": 5
+      },
+      "direction": "declining",
+      "direction_origin": "calculated",
+      "derivation_rule": "Synthetic count comparison only: current greater/equal/lower than previous.",
+      "comparison_method": "count_comparison_v1",
+      "comparability_confirmed": true,
+      "source_ids": [
+        "demo:fixture:001"
+      ]
+    },
+    {
+      "signal_id": "demo:signal:b:14",
+      "scope": "role",
+      "role_id": "http://data.europa.eu/esco/occupation/22987b58-dbfa-4ecd-ae3f-82dd209255f6",
+      "skill_id": null,
+      "region": "unspecified",
+      "metric": "synthetic_posting_count",
+      "unit": "count",
+      "period_previous": {
+        "start": "2026-09-01",
+        "end": "2026-09-20",
+        "value": 8
+      },
+      "period_current": {
+        "start": "2026-10-01",
+        "end": "2026-10-20",
+        "value": 5
+      },
+      "direction": "declining",
+      "direction_origin": "calculated",
+      "derivation_rule": "Synthetic count comparison only: current greater/equal/lower than previous.",
+      "comparison_method": "count_comparison_v1",
+      "comparability_confirmed": true,
+      "source_ids": [
+        "demo:fixture:001"
+      ]
+    }
+  ],
+  "refresh_method": "Manually switch synthetic fixture A/B; not a real source refresh."
+}

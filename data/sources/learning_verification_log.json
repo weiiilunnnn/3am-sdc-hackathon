@@ -1,0 +1,353 @@
+{
+  "schema_version": "1.0",
+  "checks": [
+    {
+      "source_id": "learning:google-intro-ml",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": 20,
+      "mapped_skill_ids": [],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "Conceptual prerequisite only; does not teach implementing ML or working with data.",
+      "scope": "bounded_course",
+      "prerequisite_review": "No prior ML concepts assumed.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:google-linear-regression",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": 80,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/68ef0e4d-5542-4e64-84f4-752cce5a3c22",
+        "http://data.europa.eu/esco/skill/0760bfac-9a03-427a-ad84-ccd33a2f2ae8"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "Introduction to linear models, loss, gradient descent and hyperparameter tuning; partial coverage of modelling concepts.",
+      "scope": "bounded_course",
+      "prerequisite_review": "Provider MLCC prework recommends programming, algebra and statistics; complete prerequisite checks before exercises.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:google-logistic-regression",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": 35,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/68ef0e4d-5542-4e64-84f4-752cce5a3c22"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "Introduction to logistic models, sigmoid and regularisation; partial modelling coverage.",
+      "scope": "bounded_course",
+      "prerequisite_review": "Familiarity with introductory ML and linear regression is required.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:google-classification",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": 70,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/68ef0e4d-5542-4e64-84f4-752cce5a3c22"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "Classification thresholds, metrics, ROC and AUC; partial modelling coverage.",
+      "scope": "bounded_course",
+      "prerequisite_review": "Provider lists introductory ML, linear regression and logistic regression as prerequisites.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:microsoft-explore-sql",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": 10,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/598de5b0-5b58-4ea7-8058-a4bc4d18c742",
+        "http://data.europa.eu/esco/skill/9cf681c7-89ec-470c-b651-7fe03786f586"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "Introduces SQL statement types and examples. Introductory query-language knowledge, not complete database development training.",
+      "scope": "short_unit",
+      "prerequisite_review": "Parent module lists no prerequisites.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:python-tutorial",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": null,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "Python language constructs, functions, data structures and modules; assumes general programming knowledge.",
+      "scope": "large_collection",
+      "prerequisite_review": "Provider explicitly targets programmers new to Python, not people new to programming.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:python-debugger",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": null,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/2522a6ce-3202-4ac8-9f5b-b9cb5a3a83a1",
+        "http://data.europa.eu/esco/skill/6014921e-1d25-4039-adc2-04852d61880e"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "Python-specific breakpoints, stepping, stack inspection and post-mortem debugging; partial software-debugging coverage.",
+      "scope": "large_collection",
+      "prerequisite_review": "Reading Python examples requires Python familiarity.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:mdn-js-debugging",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": null,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/2522a6ce-3202-4ac8-9f5b-b9cb5a3a83a1",
+        "http://data.europa.eu/esco/skill/6014921e-1d25-4039-adc2-04852d61880e"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "JavaScript error types, console logging and browser DevTools; partial software-debugging coverage.",
+      "scope": "short_unit",
+      "prerequisite_review": "Provider also requires HTML knowledge. Confirm this before attempting the article; HTML is outside this catalogue's linked concepts.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:google-numerical-data",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": 85,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/07889c08-7220-47c8-96f7-6068fbea00dc",
+        "http://data.europa.eu/esco/skill/50b100ea-74fd-4706-99db-3e4ca55e51b8"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "Feature scaling, outliers and binning support introductory normalisation and cleansing of numerical ML inputs.",
+      "scope": "bounded_course",
+      "prerequisite_review": "Complete introductory ML and review MLCC mathematics/programming prework before exercises.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:google-categorical-data",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": 50,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/93aaf65c-5aad-4e6f-a7ba-ce9bf7c0e6e6",
+        "http://data.europa.eu/esco/skill/1b70a55d-b8a4-49fc-96c6-15ab4cff2522"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "Categorical representations, one-hot encoding and feature crosses support partial categorisation and data processing.",
+      "scope": "bounded_course",
+      "prerequisite_review": "Provider requires introductory ML and numerical data.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:google-overfitting",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": 105,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/906323f4-00c4-4c3b-ab5a-8af77be3456e",
+        "http://data.europa.eu/esco/skill/713fb616-118e-40bc-9366-4a69879a49d5"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "Dataset reliability, missing values and train/validation/test splits support partial dataset creation and quality processes.",
+      "scope": "bounded_course",
+      "prerequisite_review": "Provider requires introductory ML, linear regression, numerical and categorical data.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:google-neural-networks",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": 75,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/5608d5a0-6d5e-43b7-be37-616501729bb4"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "Nodes, layers, activation, inference and backpropagation introduce neural-network knowledge, not implementation mastery.",
+      "scope": "bounded_course",
+      "prerequisite_review": "Provider lists all seven preceding MLCC modules as prerequisites.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:mdn-html-syntax",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": null,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/0af062de-eb43-41e9-9b96-249e2cd22d26"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "Element syntax, attributes, document structure and interactive challenges introduce HTML markup use.",
+      "scope": "short_unit",
+      "prerequisite_review": "Requires basic software installation and working with files.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:mdn-css-intro",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": null,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/e5d1f825-60ed-4bdd-872a-e748c387f777",
+        "http://data.europa.eu/esco/skill/c2999f0c-eb37-4cdf-b9b0-82107b628794"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "CSS syntax and applying styles to HTML introduce style-sheet languages.",
+      "scope": "short_unit",
+      "prerequisite_review": "Provider expects HTML familiarity; included introductory HTML is a starting prerequisite, not full HTML mastery.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:mdn-js-intro",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": null,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/3cd569a2-4f88-4c1e-9995-8dce8c5e51a7",
+        "http://data.europa.eu/esco/skill/69bbd53f-fbb0-4476-b4b2-ef7844464e28"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "Adding scripts to pages introduces JavaScript and browser-side web programming.",
+      "scope": "short_unit",
+      "prerequisite_review": "Provider requires HTML/CSS fundamentals; confirm familiarity beyond the introductory units.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:mdn-responsive",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": null,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/c4b1f326-224a-420a-b8b3-814a8f13b6cb"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "Flexible layout, media queries and viewport settings support partial responsive front-end implementation.",
+      "scope": "short_unit",
+      "prerequisite_review": "Provider expects HTML, CSS styling, text/font styling and CSS layout. Confirm layout knowledge beyond the introductory CSS unit.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:postgres-sql",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": null,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/598de5b0-5b58-4ea7-8058-a4bc4d18c742",
+        "http://data.europa.eu/esco/skill/9cf681c7-89ec-470c-b651-7fe03786f586",
+        "http://data.europa.eu/esco/skill/4463a721-69f3-413d-8321-43e3af13a4f1"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "Tutorial chapter covers tables, queries, joins, aggregates, updates and deletions; partial PostgreSQL database use.",
+      "scope": "large_collection",
+      "prerequisite_review": "Requires PostgreSQL setup/access described in tutorial chapter 1; arrange a suitable local environment.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:postgres-backup",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": null,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/cf3e976d-2c3e-495c-a874-f9e8a66d3b48",
+        "http://data.europa.eu/esco/skill/82de2df7-0d6c-42b1-94ac-b3e9a029e917"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "pg_dump and restore instructions support introductory logical database backup and recovery practice.",
+      "scope": "short_unit",
+      "prerequisite_review": "Requires PostgreSQL and appropriate permissions. Practise on disposable sample data.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:git-version-control",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": null,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/9d2e926f-53d9-41f5-98f3-19dfaa687f3f"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "Local, centralised and distributed version-control concepts introduce configuration-management tools.",
+      "scope": "short_unit",
+      "prerequisite_review": "Basic file-management familiarity; no prior Git assumed for this conceptual reading.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:git-recording",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": null,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/9d2e926f-53d9-41f5-98f3-19dfaa687f3f"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "Tracking, staging, diffing and committing provide introductory configuration-management practice with Git.",
+      "scope": "short_unit",
+      "prerequisite_review": "Requires installed/configured Git and a repository, as explained in earlier sections; confirm setup before commands.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:cs50-sql",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": null,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/598de5b0-5b58-4ea7-8058-a4bc4d18c742",
+        "http://data.europa.eu/esco/skill/9cf681c7-89ec-470c-b651-7fe03786f586",
+        "http://data.europa.eu/esco/skill/4463a721-69f3-413d-8321-43e3af13a4f1",
+        "http://data.europa.eu/esco/skill/fbafa41f-cd05-4109-a649-8b44d306d779",
+        "http://data.europa.eu/esco/skill/6c08403c-a5bb-4868-b8c2-b7d039c0e511"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "Relational querying, entities, tables, keys, constraints and normalisation support partial database design and use.",
+      "scope": "large_collection",
+      "prerequisite_review": "Study before/during/after CS50x. OpenCourseWare is free; submission/feedback requires an edX account. Seven curriculum weeks plus final project; no total study hours asserted.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    },
+    {
+      "source_id": "learning:cs50-python",
+      "checked_at": "2026-10-21",
+      "method": "Provider page text reviewed: title, objectives, prerequisites and published duration where shown; exact ESCO concepts mapped editorially.",
+      "duration_minutes": null,
+      "mapped_skill_ids": [
+        "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d",
+        "http://data.europa.eu/esco/skill/21d2f96d-35f7-4e3f-9745-c533d2dd6e97",
+        "http://data.europa.eu/esco/skill/2522a6ce-3202-4ac8-9f5b-b9cb5a3a83a1",
+        "http://data.europa.eu/esco/skill/913e7e83-b8f8-4574-b1ca-1b38f3fd974a",
+        "http://data.europa.eu/esco/skill/8b94aa1e-89c9-459d-b3b4-1dfab8dec2df"
+      ],
+      "coverage": "introductory/partial",
+      "mapping_review_note": "Functions, loops, exceptions, libraries, debugging and unit tests support partial programming and testing development.",
+      "scope": "large_collection",
+      "prerequisite_review": "Designed with or without programming experience. Public OpenCourseWare is free; submissions/certificates have separate conditions. Ten curriculum units plus final project; no total hours asserted.",
+      "access_review": "Linked content is publicly readable; see access policy and prerequisite/account caveats. CS50 course pages each explicitly offer free OpenCourseWare; paid credentials are separate.",
+      "limits": "No claim that this resource alone establishes the occupational skill. Account-based exercises not executed."
+    }
+  ]
+}

@@ -1,0 +1,213 @@
+{
+  "$defs": {
+    "ObservationPeriod": {
+      "properties": {
+        "start": {
+          "format": "date",
+          "title": "Start",
+          "type": "string"
+        },
+        "end": {
+          "format": "date",
+          "title": "End",
+          "type": "string"
+        },
+        "value": {
+          "minimum": 0,
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "start",
+        "end",
+        "value"
+      ],
+      "title": "ObservationPeriod",
+      "type": "object"
+    },
+    "TrendSignal": {
+      "properties": {
+        "signal_id": {
+          "title": "Signal Id",
+          "type": "string"
+        },
+        "scope": {
+          "enum": [
+            "role",
+            "skill"
+          ],
+          "title": "Scope",
+          "type": "string"
+        },
+        "role_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role Id"
+        },
+        "skill_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Skill Id"
+        },
+        "region": {
+          "title": "Region",
+          "type": "string"
+        },
+        "metric": {
+          "minLength": 1,
+          "title": "Metric",
+          "type": "string"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "period_previous": {
+          "$ref": "#/$defs/ObservationPeriod"
+        },
+        "period_current": {
+          "$ref": "#/$defs/ObservationPeriod"
+        },
+        "direction": {
+          "enum": [
+            "rising",
+            "stable",
+            "declining",
+            "unknown"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "direction_origin": {
+          "default": "source",
+          "enum": [
+            "source",
+            "calculated"
+          ],
+          "title": "Direction Origin",
+          "type": "string"
+        },
+        "derivation_rule": {
+          "minLength": 1,
+          "title": "Derivation Rule",
+          "type": "string"
+        },
+        "comparison_method": {
+          "default": "owner_defined",
+          "title": "Comparison Method",
+          "type": "string"
+        },
+        "comparability_confirmed": {
+          "default": false,
+          "title": "Comparability Confirmed",
+          "type": "boolean"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "signal_id",
+        "scope",
+        "region",
+        "metric",
+        "unit",
+        "period_previous",
+        "period_current",
+        "direction",
+        "derivation_rule",
+        "source_ids"
+      ],
+      "title": "TrendSignal",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "snapshot_id": {
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "is_synthetic": {
+      "title": "Is Synthetic",
+      "type": "boolean"
+    },
+    "collected_at": {
+      "format": "date-time",
+      "title": "Collected At",
+      "type": "string"
+    },
+    "source_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Source Ids",
+      "type": "array"
+    },
+    "signals": {
+      "items": {
+        "$ref": "#/$defs/TrendSignal"
+      },
+      "title": "Signals",
+      "type": "array"
+    },
+    "refresh_method": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Refresh Method"
+    },
+    "valid_until": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Valid Until"
+    }
+  },
+  "required": [
+    "schema_version",
+    "snapshot_id",
+    "is_synthetic",
+    "collected_at",
+    "source_ids",
+    "signals"
+  ],
+  "title": "TrendSnapshot",
+  "type": "object"
+}

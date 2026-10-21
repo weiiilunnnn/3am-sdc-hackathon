@@ -1,0 +1,186 @@
+{
+  "$defs": {
+    "LearningPreferences": {
+      "properties": {
+        "hours_per_week": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Hours Per Week"
+        },
+        "study_days_per_week": {
+          "default": 5,
+          "maximum": 7,
+          "minimum": 1,
+          "title": "Study Days Per Week",
+          "type": "integer"
+        },
+        "budget": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Money"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "preferred_resource_types": {
+          "items": {
+            "enum": [
+              "course",
+              "article",
+              "tutorial",
+              "documentation"
+            ],
+            "type": "string"
+          },
+          "title": "Preferred Resource Types",
+          "type": "array"
+        }
+      },
+      "title": "LearningPreferences",
+      "type": "object"
+    },
+    "Money": {
+      "properties": {
+        "amount": {
+          "minimum": 0,
+          "title": "Amount",
+          "type": "number"
+        },
+        "currency": {
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "title": "Money",
+      "type": "object"
+    },
+    "ProfileSkill": {
+      "properties": {
+        "skill_id": {
+          "minLength": 1,
+          "title": "Skill Id",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "proficiency": {
+          "default": "unknown",
+          "enum": [
+            "beginner",
+            "intermediate",
+            "advanced",
+            "unknown"
+          ],
+          "title": "Proficiency",
+          "type": "string"
+        },
+        "self_reported": {
+          "const": true,
+          "default": true,
+          "title": "Self Reported",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "skill_id",
+        "name"
+      ],
+      "title": "ProfileSkill",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "profile_id": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "is_synthetic": {
+      "const": true,
+      "title": "Is Synthetic",
+      "type": "boolean"
+    },
+    "education": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Education"
+    },
+    "experience_years": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Experience Years"
+    },
+    "skills": {
+      "items": {
+        "$ref": "#/$defs/ProfileSkill"
+      },
+      "maxItems": 500,
+      "title": "Skills",
+      "type": "array"
+    },
+    "interests": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Interests",
+      "type": "array"
+    },
+    "learning_preferences": {
+      "$ref": "#/$defs/LearningPreferences"
+    },
+    "unresolved_skills": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Unresolved Skills",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "profile_id",
+    "is_synthetic",
+    "skills"
+  ],
+  "title": "UserProfile",
+  "type": "object"
+}

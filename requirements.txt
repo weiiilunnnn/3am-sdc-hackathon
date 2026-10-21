@@ -1,3 +1,4 @@
-fastapi
-uvicorn[standard]
-runpod
+fastapi==0.156.4
+uvicorn[standard]==0.54.0
+pydantic==2.14.1
+runpod==1.12.0

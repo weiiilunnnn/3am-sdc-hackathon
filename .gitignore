@@ -7,6 +7,9 @@ venv/
 # Node / Next.js
 node_modules/
 .next/
+*.tsbuildinfo
+src/frontend/test-results/
+src/frontend/playwright-report/
 out/
 src/frontend/.env.local
 src/frontend/next-env.d.ts
@@ -18,3 +21,8 @@ src/frontend/next-env.d.ts
 .DS_Store
 .vscode/
 .idea/
+# Isolated browser-test build and optional local browser downloads
+src/frontend/.next-e2e/
+src/frontend/.playwright/
+# Raw official ESCO responses are rebuild caches, not distributed artifacts.
+.cache/

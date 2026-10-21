@@ -1,0 +1,407 @@
+{
+  "esco_release": "v1.2.1",
+  "data_source_status": "local_full",
+  "occupation_count": 3658,
+  "skill_count": 14579,
+  "index_cold_load_ms": 5236.757,
+  "upstream_requests_during_matching": 0,
+  "unmapped_requested_terms": [
+    "Excel",
+    "HTML",
+    "Pyhton typo",
+    "React",
+    "financial reporting",
+    "not a reviewed skill"
+  ],
+  "preserved_reskilling_hashes": {
+    "src/personalized_reskilling.py": true,
+    "src/learning_time.py": true,
+    "src/frontend/components/PathwayView.tsx": true,
+    "data/resources/catalog_v1.json": true,
+    "data/sources/learning_sources.json": true
+  },
+  "profiles": [
+    {
+      "profile_id": "demo-graduate-a",
+      "recognised_count": 5,
+      "unknown_terms": [],
+      "qualification_count": 11,
+      "candidate_count": 182,
+      "status": "qualified",
+      "diagnostics": {
+        "qualified": 11,
+        "below_threshold": 5,
+        "insufficient_evidence": 166,
+        "unscorable": 0
+      },
+      "median_matching_ms": 21.42,
+      "top_results": [
+        {
+          "role_id": "http://data.europa.eu/esco/occupation/258e46f9-0075-4a2e-adae-1ff0477e0f30",
+          "title": "data scientist",
+          "profile_relevance_pct": 56.13,
+          "strict_coverage_pct": 4.76,
+          "qualification_reason": [
+            "3 distinct listed concepts match, including 3 essential.",
+            "At least one non-transversal match appears in no more than 25% of the full indexed occupations.",
+            "Relevance meets the application-defined 30% threshold."
+          ]
+        },
+        {
+          "role_id": "http://data.europa.eu/esco/occupation/d3edb8f8-3a06-47a0-8fb9-9b212c006aa2",
+          "title": "data analyst",
+          "profile_relevance_pct": 56.13,
+          "strict_coverage_pct": 8.33,
+          "qualification_reason": [
+            "3 distinct listed concepts match, including 3 essential.",
+            "At least one non-transversal match appears in no more than 25% of the full indexed occupations.",
+            "Relevance meets the application-defined 30% threshold."
+          ]
+        },
+        {
+          "role_id": "http://data.europa.eu/esco/occupation/2079755f-d809-49e6-8037-4de6180e54c0",
+          "title": "data engineer",
+          "profile_relevance_pct": 47.02,
+          "strict_coverage_pct": 8.7,
+          "qualification_reason": [
+            "3 distinct listed concepts match, including 2 essential.",
+            "At least one non-transversal match appears in no more than 25% of the full indexed occupations.",
+            "Relevance meets the application-defined 30% threshold."
+          ]
+        }
+      ]
+    },
+    {
+      "profile_id": "demo-graduate-b",
+      "recognised_count": 5,
+      "unknown_terms": [],
+      "qualification_count": 27,
+      "candidate_count": 75,
+      "status": "qualified",
+      "diagnostics": {
+        "qualified": 27,
+        "below_threshold": 6,
+        "insufficient_evidence": 42,
+        "unscorable": 0
+      },
+      "median_matching_ms": 12.188,
+      "top_results": [
+        {
+          "role_id": "http://data.europa.eu/esco/occupation/c40a2919-48a9-40ea-b506-1f34f693496d",
+          "title": "web developer",
+          "profile_relevance_pct": 75.22,
+          "strict_coverage_pct": 11.54,
+          "qualification_reason": [
+            "5 distinct listed concepts match, including 3 essential.",
+            "At least one non-transversal match appears in no more than 25% of the full indexed occupations.",
+            "Relevance meets the application-defined 30% threshold."
+          ]
+        },
+        {
+          "role_id": "http://data.europa.eu/esco/occupation/866c7813-2c03-47d7-9bdc-192cfbace57c",
+          "title": "user interface developer",
+          "profile_relevance_pct": 63.19,
+          "strict_coverage_pct": 11.76,
+          "qualification_reason": [
+            "5 distinct listed concepts match, including 2 essential.",
+            "At least one non-transversal match appears in no more than 25% of the full indexed occupations.",
+            "Relevance meets the application-defined 30% threshold."
+          ]
+        },
+        {
+          "role_id": "http://data.europa.eu/esco/occupation/30ed83ba-cc89-4d9f-a59d-5c783c1da56e",
+          "title": "web designer",
+          "profile_relevance_pct": 48.2,
+          "strict_coverage_pct": 20.0,
+          "qualification_reason": [
+            "3 distinct listed concepts match, including 2 essential.",
+            "At least one non-transversal match appears in no more than 25% of the full indexed occupations.",
+            "Relevance meets the application-defined 30% threshold."
+          ]
+        }
+      ]
+    },
+    {
+      "profile_id": "demo-graduate-c",
+      "recognised_count": 1,
+      "unknown_terms": [],
+      "qualification_count": 0,
+      "candidate_count": 56,
+      "status": "insufficient_evidence",
+      "diagnostics": {
+        "qualified": 0,
+        "below_threshold": 0,
+        "insufficient_evidence": 56,
+        "unscorable": 0
+      },
+      "median_matching_ms": 8.367,
+      "top_results": []
+    },
+    {
+      "profile_id": "demo-discovery-data",
+      "recognised_count": 3,
+      "unknown_terms": [],
+      "qualification_count": 1,
+      "candidate_count": 57,
+      "status": "qualified",
+      "diagnostics": {
+        "qualified": 1,
+        "below_threshold": 0,
+        "insufficient_evidence": 56,
+        "unscorable": 0
+      },
+      "median_matching_ms": 9.384,
+      "top_results": [
+        {
+          "role_id": "http://data.europa.eu/esco/occupation/1c5a45b9-440e-4726-b565-16a952abd341",
+          "title": "computer vision engineer",
+          "profile_relevance_pct": 61.82,
+          "strict_coverage_pct": 6.25,
+          "qualification_reason": [
+            "2 distinct listed concepts match, including 2 essential.",
+            "At least one non-transversal match appears in no more than 25% of the full indexed occupations.",
+            "Relevance meets the application-defined 30% threshold."
+          ]
+        }
+      ]
+    },
+    {
+      "profile_id": "demo-discovery-web",
+      "recognised_count": 4,
+      "unknown_terms": [
+        "HTML",
+        "React"
+      ],
+      "qualification_count": 13,
+      "candidate_count": 60,
+      "status": "qualified",
+      "diagnostics": {
+        "qualified": 13,
+        "below_threshold": 0,
+        "insufficient_evidence": 47,
+        "unscorable": 0
+      },
+      "median_matching_ms": 11.454,
+      "top_results": [
+        {
+          "role_id": "http://data.europa.eu/esco/occupation/30ed83ba-cc89-4d9f-a59d-5c783c1da56e",
+          "title": "web designer",
+          "profile_relevance_pct": 82.95,
+          "strict_coverage_pct": 30.0,
+          "qualification_reason": [
+            "4 distinct listed concepts match, including 3 essential.",
+            "At least one non-transversal match appears in no more than 25% of the full indexed occupations.",
+            "Relevance meets the application-defined 30% threshold."
+          ]
+        },
+        {
+          "role_id": "http://data.europa.eu/esco/occupation/a74f6c51-37e5-423e-aa5b-044e98663027",
+          "title": "web content manager",
+          "profile_relevance_pct": 70.11,
+          "strict_coverage_pct": 6.25,
+          "qualification_reason": [
+            "4 distinct listed concepts match, including 2 essential.",
+            "At least one non-transversal match appears in no more than 25% of the full indexed occupations.",
+            "Relevance meets the application-defined 30% threshold."
+          ]
+        },
+        {
+          "role_id": "http://data.europa.eu/esco/occupation/c40a2919-48a9-40ea-b506-1f34f693496d",
+          "title": "web developer",
+          "profile_relevance_pct": 70.11,
+          "strict_coverage_pct": 7.69,
+          "qualification_reason": [
+            "4 distinct listed concepts match, including 2 essential.",
+            "At least one non-transversal match appears in no more than 25% of the full indexed occupations.",
+            "Relevance meets the application-defined 30% threshold."
+          ]
+        }
+      ]
+    },
+    {
+      "profile_id": "demo-discovery-business",
+      "recognised_count": 3,
+      "unknown_terms": [
+        "Excel",
+        "financial reporting"
+      ],
+      "qualification_count": 16,
+      "candidate_count": 91,
+      "status": "qualified",
+      "diagnostics": {
+        "qualified": 16,
+        "below_threshold": 0,
+        "insufficient_evidence": 75,
+        "unscorable": 0
+      },
+      "median_matching_ms": 10.668,
+      "top_results": [
+        {
+          "role_id": "http://data.europa.eu/esco/occupation/30f3ea93-882a-4525-841c-1d5b4b64076f",
+          "title": "financial manager",
+          "profile_relevance_pct": 100.0,
+          "strict_coverage_pct": 7.89,
+          "qualification_reason": [
+            "3 distinct listed concepts match, including 3 essential.",
+            "At least one non-transversal match appears in no more than 25% of the full indexed occupations.",
+            "Relevance meets the application-defined 30% threshold."
+          ]
+        },
+        {
+          "role_id": "http://data.europa.eu/esco/occupation/5e5b1b61-1351-4d3b-a293-deb3661715dd",
+          "title": "financial controller",
+          "profile_relevance_pct": 67.32,
+          "strict_coverage_pct": 11.76,
+          "qualification_reason": [
+            "2 distinct listed concepts match, including 2 essential.",
+            "At least one non-transversal match appears in no more than 25% of the full indexed occupations.",
+            "Relevance meets the application-defined 30% threshold."
+          ]
+        },
+        {
+          "role_id": "http://data.europa.eu/esco/occupation/c3aae59e-1441-4b3e-bdd1-6da50dc7cf42",
+          "title": "bookkeeper",
+          "profile_relevance_pct": 67.32,
+          "strict_coverage_pct": 11.11,
+          "qualification_reason": [
+            "2 distinct listed concepts match, including 2 essential.",
+            "At least one non-transversal match appears in no more than 25% of the full indexed occupations.",
+            "Relevance meets the application-defined 30% threshold."
+          ]
+        }
+      ]
+    },
+    {
+      "profile_id": "demo-discovery-generic-one",
+      "recognised_count": 1,
+      "unknown_terms": [],
+      "qualification_count": 0,
+      "candidate_count": 26,
+      "status": "insufficient_evidence",
+      "diagnostics": {
+        "qualified": 0,
+        "below_threshold": 0,
+        "insufficient_evidence": 26,
+        "unscorable": 0
+      },
+      "median_matching_ms": 4.917,
+      "top_results": []
+    },
+    {
+      "profile_id": "demo-discovery-generic-two",
+      "recognised_count": 2,
+      "unknown_terms": [],
+      "qualification_count": 0,
+      "candidate_count": 0,
+      "status": "insufficient_evidence",
+      "diagnostics": {
+        "qualified": 0,
+        "below_threshold": 0,
+        "insufficient_evidence": 0,
+        "unscorable": 0
+      },
+      "median_matching_ms": 0.118,
+      "top_results": []
+    },
+    {
+      "profile_id": "demo-discovery-specific-one",
+      "recognised_count": 1,
+      "unknown_terms": [],
+      "qualification_count": 0,
+      "candidate_count": 49,
+      "status": "insufficient_evidence",
+      "diagnostics": {
+        "qualified": 0,
+        "below_threshold": 0,
+        "insufficient_evidence": 49,
+        "unscorable": 0
+      },
+      "median_matching_ms": 8.382,
+      "top_results": []
+    },
+    {
+      "profile_id": "demo-discovery-unknown",
+      "recognised_count": 0,
+      "unknown_terms": [
+        "Pyhton typo",
+        "not a reviewed skill"
+      ],
+      "qualification_count": 0,
+      "candidate_count": 0,
+      "status": "insufficient_evidence",
+      "diagnostics": {
+        "qualified": 0,
+        "below_threshold": 0,
+        "insufficient_evidence": 0,
+        "unscorable": 0
+      },
+      "median_matching_ms": 0.097,
+      "top_results": []
+    },
+    {
+      "profile_id": "demo-discovery-empty",
+      "recognised_count": 0,
+      "unknown_terms": [],
+      "qualification_count": 0,
+      "candidate_count": 0,
+      "status": "insufficient_evidence",
+      "diagnostics": {
+        "qualified": 0,
+        "below_threshold": 0,
+        "insufficient_evidence": 0,
+        "unscorable": 0
+      },
+      "median_matching_ms": 0.149,
+      "top_results": []
+    },
+    {
+      "profile_id": "demo-discovery-mixed",
+      "recognised_count": 8,
+      "unknown_terms": [],
+      "qualification_count": 0,
+      "candidate_count": 151,
+      "status": "no_qualifying_roles",
+      "diagnostics": {
+        "qualified": 0,
+        "below_threshold": 12,
+        "insufficient_evidence": 139,
+        "unscorable": 0
+      },
+      "median_matching_ms": 21.123,
+      "top_results": []
+    },
+    {
+      "profile_id": "demo-discovery-aliases",
+      "recognised_count": 1,
+      "unknown_terms": [],
+      "qualification_count": 0,
+      "candidate_count": 49,
+      "status": "insufficient_evidence",
+      "diagnostics": {
+        "qualified": 0,
+        "below_threshold": 0,
+        "insufficient_evidence": 49,
+        "unscorable": 0
+      },
+      "median_matching_ms": 7.888,
+      "top_results": []
+    }
+  ],
+  "api_measurements": [
+    {
+      "profile_id": "demo-graduate-a",
+      "median_local_asgi_request_ms": 39.469,
+      "response_bytes": 64712
+    },
+    {
+      "profile_id": "demo-graduate-b",
+      "median_local_asgi_request_ms": 23.164,
+      "response_bytes": 56806
+    },
+    {
+      "profile_id": "demo-graduate-c",
+      "median_local_asgi_request_ms": 19.095,
+      "response_bytes": 1568
+    }
+  ]
+}

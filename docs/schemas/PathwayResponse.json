@@ -1,0 +1,640 @@
+{
+  "$defs": {
+    "Money": {
+      "properties": {
+        "amount": {
+          "minimum": 0,
+          "title": "Amount",
+          "type": "number"
+        },
+        "currency": {
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "title": "Money",
+      "type": "object"
+    },
+    "PathwayPhase": {
+      "properties": {
+        "phase_id": {
+          "title": "Phase Id",
+          "type": "string"
+        },
+        "order": {
+          "title": "Order",
+          "type": "integer"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "target_skill_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Target Skill Ids",
+          "type": "array"
+        },
+        "prerequisite_skill_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Prerequisite Skill Ids",
+          "type": "array"
+        },
+        "learning_objectives": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Learning Objectives",
+          "type": "array"
+        },
+        "resources": {
+          "items": {
+            "$ref": "#/$defs/Resource"
+          },
+          "title": "Resources",
+          "type": "array"
+        },
+        "estimated_hours": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Estimated Hours"
+        },
+        "duration_basis": {
+          "enum": [
+            "provider_stated",
+            "estimated_with_method",
+            "unknown"
+          ],
+          "title": "Duration Basis",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "available",
+            "resource_not_found",
+            "blocked"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "phase_kind": {
+          "default": "guided_practice",
+          "enum": [
+            "foundations",
+            "guided_practice",
+            "online_courses",
+            "remaining_gaps"
+          ],
+          "title": "Phase Kind",
+          "type": "string"
+        },
+        "planning_estimate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PlanningEstimate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "phase_id",
+        "order",
+        "title",
+        "target_skill_ids",
+        "prerequisite_skill_ids",
+        "learning_objectives",
+        "resources",
+        "estimated_hours",
+        "duration_basis",
+        "source_ids",
+        "status"
+      ],
+      "title": "PathwayPhase",
+      "type": "object"
+    },
+    "PlanningEstimate": {
+      "properties": {
+        "provider_known_hours": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Provider Known Hours",
+          "type": "number"
+        },
+        "reviewed_app_hours": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Reviewed App Hours",
+          "type": "number"
+        },
+        "fallback_study_days": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Fallback Study Days",
+          "type": "number"
+        },
+        "study_days_per_week": {
+          "default": 5,
+          "maximum": 7,
+          "minimum": 1,
+          "title": "Study Days Per Week",
+          "type": "integer"
+        },
+        "scheduled_study_days": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scheduled Study Days"
+        },
+        "scheduled_weeks": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scheduled Weeks"
+        },
+        "complete_for_selected_resources": {
+          "default": false,
+          "title": "Complete For Selected Resources",
+          "type": "boolean"
+        },
+        "estimate_basis": {
+          "default": "unknown",
+          "enum": [
+            "provider_hours",
+            "reviewed_app_estimate",
+            "app_rule_of_thumb",
+            "mixed",
+            "unknown"
+          ],
+          "title": "Estimate Basis",
+          "type": "string"
+        },
+        "notes": {
+          "default": "Schedule covers selected materials only, not occupational readiness.",
+          "title": "Notes",
+          "type": "string"
+        }
+      },
+      "title": "PlanningEstimate",
+      "type": "object"
+    },
+    "Resource": {
+      "properties": {
+        "resource_id": {
+          "title": "Resource Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "resource_type": {
+          "enum": [
+            "course",
+            "article",
+            "tutorial",
+            "documentation"
+          ],
+          "title": "Resource Type",
+          "type": "string"
+        },
+        "covers_skill_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Covers Skill Ids",
+          "type": "array"
+        },
+        "prerequisite_skill_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Prerequisite Skill Ids",
+          "type": "array"
+        },
+        "prerequisite_resource_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Prerequisite Resource Ids",
+          "type": "array"
+        },
+        "prerequisite_notes": {
+          "default": "",
+          "title": "Prerequisite Notes",
+          "type": "string"
+        },
+        "duration_hours": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Hours"
+        },
+        "duration_basis": {
+          "enum": [
+            "provider_stated",
+            "estimated_with_method",
+            "unknown"
+          ],
+          "title": "Duration Basis",
+          "type": "string"
+        },
+        "estimated_hours_method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimated Hours Method"
+        },
+        "cost_status": {
+          "enum": [
+            "free",
+            "low_cost",
+            "paid",
+            "unknown"
+          ],
+          "title": "Cost Status",
+          "type": "string"
+        },
+        "cost": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Money"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "access_verified_at": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Access Verified At"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "evidence_status": {
+          "enum": [
+            "verified",
+            "partially_verified",
+            "unverified",
+            "synthetic"
+          ],
+          "title": "Evidence Status",
+          "type": "string"
+        },
+        "coverage_note": {
+          "minLength": 1,
+          "title": "Coverage Note",
+          "type": "string"
+        },
+        "access_notes": {
+          "title": "Access Notes",
+          "type": "string"
+        },
+        "planning_scope": {
+          "default": "unreviewed",
+          "enum": [
+            "short_unit",
+            "bounded_course",
+            "large_collection",
+            "unreviewed"
+          ],
+          "title": "Planning Scope",
+          "type": "string"
+        },
+        "scope_review_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scope Review Note"
+        },
+        "time_estimate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TimeEstimate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "resource_id",
+        "title",
+        "provider",
+        "url",
+        "resource_type",
+        "covers_skill_ids",
+        "duration_basis",
+        "cost_status",
+        "access_verified_at",
+        "source_ids",
+        "evidence_status",
+        "coverage_note",
+        "access_notes"
+      ],
+      "title": "Resource",
+      "type": "object"
+    },
+    "TimeEstimate": {
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "unit": {
+          "default": "hour",
+          "enum": [
+            "hour",
+            "study_day",
+            "study_week"
+          ],
+          "title": "Unit",
+          "type": "string"
+        },
+        "basis": {
+          "default": "unknown",
+          "enum": [
+            "provider_published",
+            "reviewed_app_estimate",
+            "app_rule_of_thumb",
+            "unknown"
+          ],
+          "title": "Basis",
+          "type": "string"
+        },
+        "published_by_provider": {
+          "default": false,
+          "title": "Published By Provider",
+          "type": "boolean"
+        },
+        "rule_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rule Id"
+        },
+        "notes": {
+          "title": "Notes",
+          "type": "string"
+        }
+      },
+      "required": [
+        "notes"
+      ],
+      "title": "TimeEstimate",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "profile_id": {
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "profile_fingerprint": {
+      "title": "Profile Fingerprint",
+      "type": "string"
+    },
+    "role_id": {
+      "title": "Role Id",
+      "type": "string"
+    },
+    "role_title": {
+      "title": "Role Title",
+      "type": "string"
+    },
+    "dataset_version": {
+      "title": "Dataset Version",
+      "type": "string"
+    },
+    "is_synthetic": {
+      "title": "Is Synthetic",
+      "type": "boolean"
+    },
+    "target_skill_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Target Skill Ids",
+      "type": "array"
+    },
+    "hours_per_week": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Hours Per Week"
+    },
+    "phases": {
+      "items": {
+        "$ref": "#/$defs/PathwayPhase"
+      },
+      "title": "Phases",
+      "type": "array"
+    },
+    "total_known_hours": {
+      "title": "Total Known Hours",
+      "type": "number"
+    },
+    "all_phase_durations_known": {
+      "title": "All Phase Durations Known",
+      "type": "boolean"
+    },
+    "estimated_weeks": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Estimated Weeks"
+    },
+    "uncovered_skill_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Uncovered Skill Ids",
+      "type": "array"
+    },
+    "blocked_resource_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Blocked Resource Ids",
+      "type": "array"
+    },
+    "source_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Source Ids",
+      "type": "array"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "starter",
+        "covered",
+        "no_documented_gaps",
+        "resource_not_found"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "coverage_complete": {
+      "default": false,
+      "title": "Coverage Complete",
+      "type": "boolean"
+    },
+    "timeline_is_estimated": {
+      "const": true,
+      "default": true,
+      "title": "Timeline Is Estimated",
+      "type": "boolean"
+    },
+    "planning_estimate": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PlanningEstimate"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "schema_version",
+    "profile_id",
+    "profile_fingerprint",
+    "role_id",
+    "role_title",
+    "dataset_version",
+    "is_synthetic",
+    "target_skill_ids",
+    "hours_per_week",
+    "phases",
+    "total_known_hours",
+    "all_phase_durations_known",
+    "estimated_weeks",
+    "uncovered_skill_ids",
+    "blocked_resource_ids",
+    "source_ids",
+    "warnings",
+    "status"
+  ],
+  "title": "PathwayResponse",
+  "type": "object"
+}

@@ -1,0 +1,312 @@
+{
+  "$defs": {
+    "Money": {
+      "properties": {
+        "amount": {
+          "minimum": 0,
+          "title": "Amount",
+          "type": "number"
+        },
+        "currency": {
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "title": "Money",
+      "type": "object"
+    },
+    "Resource": {
+      "properties": {
+        "resource_id": {
+          "title": "Resource Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "resource_type": {
+          "enum": [
+            "course",
+            "article",
+            "tutorial",
+            "documentation"
+          ],
+          "title": "Resource Type",
+          "type": "string"
+        },
+        "covers_skill_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Covers Skill Ids",
+          "type": "array"
+        },
+        "prerequisite_skill_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Prerequisite Skill Ids",
+          "type": "array"
+        },
+        "prerequisite_resource_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Prerequisite Resource Ids",
+          "type": "array"
+        },
+        "prerequisite_notes": {
+          "default": "",
+          "title": "Prerequisite Notes",
+          "type": "string"
+        },
+        "duration_hours": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Hours"
+        },
+        "duration_basis": {
+          "enum": [
+            "provider_stated",
+            "estimated_with_method",
+            "unknown"
+          ],
+          "title": "Duration Basis",
+          "type": "string"
+        },
+        "estimated_hours_method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimated Hours Method"
+        },
+        "cost_status": {
+          "enum": [
+            "free",
+            "low_cost",
+            "paid",
+            "unknown"
+          ],
+          "title": "Cost Status",
+          "type": "string"
+        },
+        "cost": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Money"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "access_verified_at": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Access Verified At"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "evidence_status": {
+          "enum": [
+            "verified",
+            "partially_verified",
+            "unverified",
+            "synthetic"
+          ],
+          "title": "Evidence Status",
+          "type": "string"
+        },
+        "coverage_note": {
+          "minLength": 1,
+          "title": "Coverage Note",
+          "type": "string"
+        },
+        "access_notes": {
+          "title": "Access Notes",
+          "type": "string"
+        },
+        "planning_scope": {
+          "default": "unreviewed",
+          "enum": [
+            "short_unit",
+            "bounded_course",
+            "large_collection",
+            "unreviewed"
+          ],
+          "title": "Planning Scope",
+          "type": "string"
+        },
+        "scope_review_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scope Review Note"
+        },
+        "time_estimate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TimeEstimate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "resource_id",
+        "title",
+        "provider",
+        "url",
+        "resource_type",
+        "covers_skill_ids",
+        "duration_basis",
+        "cost_status",
+        "access_verified_at",
+        "source_ids",
+        "evidence_status",
+        "coverage_note",
+        "access_notes"
+      ],
+      "title": "Resource",
+      "type": "object"
+    },
+    "TimeEstimate": {
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "unit": {
+          "default": "hour",
+          "enum": [
+            "hour",
+            "study_day",
+            "study_week"
+          ],
+          "title": "Unit",
+          "type": "string"
+        },
+        "basis": {
+          "default": "unknown",
+          "enum": [
+            "provider_published",
+            "reviewed_app_estimate",
+            "app_rule_of_thumb",
+            "unknown"
+          ],
+          "title": "Basis",
+          "type": "string"
+        },
+        "published_by_provider": {
+          "default": false,
+          "title": "Published By Provider",
+          "type": "boolean"
+        },
+        "rule_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rule Id"
+        },
+        "notes": {
+          "title": "Notes",
+          "type": "string"
+        }
+      },
+      "required": [
+        "notes"
+      ],
+      "title": "TimeEstimate",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "catalog_version": {
+      "title": "Catalog Version",
+      "type": "string"
+    },
+    "resources": {
+      "items": {
+        "$ref": "#/$defs/Resource"
+      },
+      "title": "Resources",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "catalog_version",
+    "resources"
+  ],
+  "title": "ResourceCatalog",
+  "type": "object"
+}

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "3AM SDC Hackathon",
-  description: "Hackathon project dashboard",
+  title: "FutureReady | Sourced career pathways by 3AM",
+  description: "Explore verified technology roles and personalised starter learning pathways using synthetic profiles.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

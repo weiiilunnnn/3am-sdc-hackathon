@@ -1,0 +1,730 @@
+{
+  "schema_version": "1.1",
+  "catalog_version": "1.1",
+  "resources": [
+    {
+      "resource_id": "google-intro-ml",
+      "title": "Introduction to Machine Learning",
+      "provider": "Google",
+      "url": "https://developers.google.com/machine-learning/intro-to-ml",
+      "resource_type": "course",
+      "covers_skill_ids": [],
+      "prerequisite_skill_ids": [],
+      "prerequisite_resource_ids": [],
+      "prerequisite_notes": "No prior ML concepts assumed.",
+      "duration_hours": 0.3333333333333333,
+      "duration_basis": "provider_stated",
+      "planning_scope": "bounded_course",
+      "scope_review_note": "Reviewed discrete module or single reading/tutorial page; fallback eligible if no provider duration.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:google-intro-ml",
+        "access:Google"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "Conceptual prerequisite only; does not teach implementing ML or working with data.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "google-linear-regression",
+      "title": "Linear regression",
+      "provider": "Google",
+      "url": "https://developers.google.com/machine-learning/crash-course/linear-regression",
+      "resource_type": "course",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/68ef0e4d-5542-4e64-84f4-752cce5a3c22",
+        "http://data.europa.eu/esco/skill/0760bfac-9a03-427a-ad84-ccd33a2f2ae8"
+      ],
+      "prerequisite_skill_ids": [],
+      "prerequisite_resource_ids": [
+        "google-intro-ml"
+      ],
+      "prerequisite_notes": "Provider MLCC prework recommends programming, algebra and statistics; complete prerequisite checks before exercises.",
+      "duration_hours": 1.3333333333333333,
+      "duration_basis": "provider_stated",
+      "planning_scope": "bounded_course",
+      "scope_review_note": "Reviewed discrete module or single reading/tutorial page; fallback eligible if no provider duration.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:google-linear-regression",
+        "access:Google"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "Introduction to linear models, loss, gradient descent and hyperparameter tuning; partial coverage of modelling concepts.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "google-logistic-regression",
+      "title": "Logistic regression",
+      "provider": "Google",
+      "url": "https://developers.google.com/machine-learning/crash-course/logistic-regression",
+      "resource_type": "course",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/68ef0e4d-5542-4e64-84f4-752cce5a3c22"
+      ],
+      "prerequisite_skill_ids": [],
+      "prerequisite_resource_ids": [
+        "google-intro-ml",
+        "google-linear-regression"
+      ],
+      "prerequisite_notes": "Familiarity with introductory ML and linear regression is required.",
+      "duration_hours": 0.5833333333333334,
+      "duration_basis": "provider_stated",
+      "planning_scope": "bounded_course",
+      "scope_review_note": "Reviewed discrete module or single reading/tutorial page; fallback eligible if no provider duration.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:google-logistic-regression",
+        "access:Google"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "Introduction to logistic models, sigmoid and regularisation; partial modelling coverage.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "google-classification",
+      "title": "Classification",
+      "provider": "Google",
+      "url": "https://developers.google.com/machine-learning/crash-course/classification",
+      "resource_type": "course",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/68ef0e4d-5542-4e64-84f4-752cce5a3c22"
+      ],
+      "prerequisite_skill_ids": [],
+      "prerequisite_resource_ids": [
+        "google-intro-ml",
+        "google-linear-regression",
+        "google-logistic-regression"
+      ],
+      "prerequisite_notes": "Provider lists introductory ML, linear regression and logistic regression as prerequisites.",
+      "duration_hours": 1.1666666666666667,
+      "duration_basis": "provider_stated",
+      "planning_scope": "bounded_course",
+      "scope_review_note": "Reviewed discrete module or single reading/tutorial page; fallback eligible if no provider duration.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:google-classification",
+        "access:Google"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "Classification thresholds, metrics, ROC and AUC; partial modelling coverage.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "microsoft-explore-sql",
+      "title": "Explore SQL",
+      "provider": "Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/training/modules/explore-relational-data-offerings/4-query-with-sql",
+      "resource_type": "article",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/598de5b0-5b58-4ea7-8058-a4bc4d18c742",
+        "http://data.europa.eu/esco/skill/9cf681c7-89ec-470c-b651-7fe03786f586"
+      ],
+      "prerequisite_skill_ids": [],
+      "prerequisite_resource_ids": [],
+      "prerequisite_notes": "Parent module lists no prerequisites.",
+      "duration_hours": 0.16666666666666666,
+      "duration_basis": "provider_stated",
+      "planning_scope": "short_unit",
+      "scope_review_note": "Reviewed discrete module or single reading/tutorial page; fallback eligible if no provider duration.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:microsoft-explore-sql",
+        "access:Microsoft Learn"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "Introduces SQL statement types and examples. Introductory query-language knowledge, not complete database development training.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "python-tutorial",
+      "title": "The Python Tutorial",
+      "provider": "Python Software Foundation",
+      "url": "https://docs.python.org/3.13/tutorial/",
+      "resource_type": "tutorial",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d"
+      ],
+      "prerequisite_skill_ids": [
+        "http://data.europa.eu/esco/skill/21d2f96d-35f7-4e3f-9745-c533d2dd6e97"
+      ],
+      "prerequisite_resource_ids": [],
+      "prerequisite_notes": "Provider explicitly targets programmers new to Python, not people new to programming.",
+      "duration_hours": null,
+      "duration_basis": "unknown",
+      "planning_scope": "large_collection",
+      "scope_review_note": "Reviewed multipart scope; simple fallback would understate material.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:python-tutorial",
+        "access:Python Software Foundation"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "Python language constructs, functions, data structures and modules; assumes general programming knowledge.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "python-debugger",
+      "title": "pdb - The Python Debugger",
+      "provider": "Python Software Foundation",
+      "url": "https://docs.python.org/3.13/library/pdb.html",
+      "resource_type": "documentation",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/2522a6ce-3202-4ac8-9f5b-b9cb5a3a83a1",
+        "http://data.europa.eu/esco/skill/6014921e-1d25-4039-adc2-04852d61880e"
+      ],
+      "prerequisite_skill_ids": [
+        "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d"
+      ],
+      "prerequisite_resource_ids": [],
+      "prerequisite_notes": "Reading Python examples requires Python familiarity.",
+      "duration_hours": null,
+      "duration_basis": "unknown",
+      "planning_scope": "large_collection",
+      "scope_review_note": "Reviewed multipart scope; simple fallback would understate material.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:python-debugger",
+        "access:Python Software Foundation"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "Python-specific breakpoints, stepping, stack inspection and post-mortem debugging; partial software-debugging coverage.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "mdn-js-debugging",
+      "title": "What went wrong? Troubleshooting JavaScript",
+      "provider": "MDN Web Docs",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/What_went_wrong",
+      "resource_type": "article",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/2522a6ce-3202-4ac8-9f5b-b9cb5a3a83a1",
+        "http://data.europa.eu/esco/skill/6014921e-1d25-4039-adc2-04852d61880e"
+      ],
+      "prerequisite_skill_ids": [
+        "http://data.europa.eu/esco/skill/e5d1f825-60ed-4bdd-872a-e748c387f777",
+        "http://data.europa.eu/esco/skill/3cd569a2-4f88-4c1e-9995-8dce8c5e51a7"
+      ],
+      "prerequisite_resource_ids": [],
+      "prerequisite_notes": "Provider also requires HTML knowledge. Confirm this before attempting the article; HTML is outside this catalogue's linked concepts.",
+      "duration_hours": null,
+      "duration_basis": "unknown",
+      "planning_scope": "short_unit",
+      "scope_review_note": "Reviewed discrete module or single reading/tutorial page; fallback eligible if no provider duration.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:mdn-js-debugging",
+        "access:MDN Web Docs"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "JavaScript error types, console logging and browser DevTools; partial software-debugging coverage.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "google-numerical-data",
+      "title": "Working with numerical data",
+      "provider": "Google",
+      "url": "https://developers.google.com/machine-learning/crash-course/numerical-data",
+      "resource_type": "course",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/07889c08-7220-47c8-96f7-6068fbea00dc",
+        "http://data.europa.eu/esco/skill/50b100ea-74fd-4706-99db-3e4ca55e51b8"
+      ],
+      "prerequisite_skill_ids": [],
+      "prerequisite_resource_ids": [
+        "google-intro-ml"
+      ],
+      "prerequisite_notes": "Complete introductory ML and review MLCC mathematics/programming prework before exercises.",
+      "duration_hours": 1.4166666666666667,
+      "duration_basis": "provider_stated",
+      "planning_scope": "bounded_course",
+      "scope_review_note": "Reviewed discrete module or single reading/tutorial page; fallback eligible if no provider duration.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:google-numerical-data",
+        "access:Google"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "Feature scaling, outliers and binning support introductory normalisation and cleansing of numerical ML inputs.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "google-categorical-data",
+      "title": "Working with categorical data",
+      "provider": "Google",
+      "url": "https://developers.google.com/machine-learning/crash-course/categorical-data",
+      "resource_type": "course",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/93aaf65c-5aad-4e6f-a7ba-ce9bf7c0e6e6",
+        "http://data.europa.eu/esco/skill/1b70a55d-b8a4-49fc-96c6-15ab4cff2522"
+      ],
+      "prerequisite_skill_ids": [],
+      "prerequisite_resource_ids": [
+        "google-intro-ml",
+        "google-numerical-data"
+      ],
+      "prerequisite_notes": "Provider requires introductory ML and numerical data.",
+      "duration_hours": 0.8333333333333334,
+      "duration_basis": "provider_stated",
+      "planning_scope": "bounded_course",
+      "scope_review_note": "Reviewed discrete module or single reading/tutorial page; fallback eligible if no provider duration.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:google-categorical-data",
+        "access:Google"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "Categorical representations, one-hot encoding and feature crosses support partial categorisation and data processing.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "google-overfitting",
+      "title": "Datasets, generalization, and overfitting",
+      "provider": "Google",
+      "url": "https://developers.google.com/machine-learning/crash-course/overfitting",
+      "resource_type": "course",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/906323f4-00c4-4c3b-ab5a-8af77be3456e",
+        "http://data.europa.eu/esco/skill/713fb616-118e-40bc-9366-4a69879a49d5"
+      ],
+      "prerequisite_skill_ids": [],
+      "prerequisite_resource_ids": [
+        "google-intro-ml",
+        "google-linear-regression",
+        "google-numerical-data",
+        "google-categorical-data"
+      ],
+      "prerequisite_notes": "Provider requires introductory ML, linear regression, numerical and categorical data.",
+      "duration_hours": 1.75,
+      "duration_basis": "provider_stated",
+      "planning_scope": "bounded_course",
+      "scope_review_note": "Reviewed discrete module or single reading/tutorial page; fallback eligible if no provider duration.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:google-overfitting",
+        "access:Google"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "Dataset reliability, missing values and train/validation/test splits support partial dataset creation and quality processes.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "google-neural-networks",
+      "title": "Neural networks",
+      "provider": "Google",
+      "url": "https://developers.google.com/machine-learning/crash-course/neural-networks",
+      "resource_type": "course",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/5608d5a0-6d5e-43b7-be37-616501729bb4"
+      ],
+      "prerequisite_skill_ids": [],
+      "prerequisite_resource_ids": [
+        "google-intro-ml",
+        "google-linear-regression",
+        "google-logistic-regression",
+        "google-classification",
+        "google-numerical-data",
+        "google-categorical-data",
+        "google-overfitting"
+      ],
+      "prerequisite_notes": "Provider lists all seven preceding MLCC modules as prerequisites.",
+      "duration_hours": 1.25,
+      "duration_basis": "provider_stated",
+      "planning_scope": "bounded_course",
+      "scope_review_note": "Reviewed discrete module or single reading/tutorial page; fallback eligible if no provider duration.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:google-neural-networks",
+        "access:Google"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "Nodes, layers, activation, inference and backpropagation introduce neural-network knowledge, not implementation mastery.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "mdn-html-syntax",
+      "title": "Basic HTML syntax",
+      "provider": "MDN Web Docs",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax",
+      "resource_type": "tutorial",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/0af062de-eb43-41e9-9b96-249e2cd22d26"
+      ],
+      "prerequisite_skill_ids": [],
+      "prerequisite_resource_ids": [],
+      "prerequisite_notes": "Requires basic software installation and working with files.",
+      "duration_hours": null,
+      "duration_basis": "unknown",
+      "planning_scope": "short_unit",
+      "scope_review_note": "Reviewed discrete module or single reading/tutorial page; fallback eligible if no provider duration.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:mdn-html-syntax",
+        "access:MDN Web Docs"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "Element syntax, attributes, document structure and interactive challenges introduce HTML markup use.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "mdn-css-intro",
+      "title": "What is CSS?",
+      "provider": "MDN Web Docs",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/What_is_CSS",
+      "resource_type": "article",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/e5d1f825-60ed-4bdd-872a-e748c387f777",
+        "http://data.europa.eu/esco/skill/c2999f0c-eb37-4cdf-b9b0-82107b628794"
+      ],
+      "prerequisite_skill_ids": [],
+      "prerequisite_resource_ids": [
+        "mdn-html-syntax"
+      ],
+      "prerequisite_notes": "Provider expects HTML familiarity; included introductory HTML is a starting prerequisite, not full HTML mastery.",
+      "duration_hours": null,
+      "duration_basis": "unknown",
+      "planning_scope": "short_unit",
+      "scope_review_note": "Reviewed discrete module or single reading/tutorial page; fallback eligible if no provider duration.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:mdn-css-intro",
+        "access:MDN Web Docs"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "CSS syntax and applying styles to HTML introduce style-sheet languages.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "mdn-js-intro",
+      "title": "What is JavaScript?",
+      "provider": "MDN Web Docs",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/What_is_JavaScript",
+      "resource_type": "article",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/3cd569a2-4f88-4c1e-9995-8dce8c5e51a7",
+        "http://data.europa.eu/esco/skill/69bbd53f-fbb0-4476-b4b2-ef7844464e28"
+      ],
+      "prerequisite_skill_ids": [],
+      "prerequisite_resource_ids": [
+        "mdn-html-syntax",
+        "mdn-css-intro"
+      ],
+      "prerequisite_notes": "Provider requires HTML/CSS fundamentals; confirm familiarity beyond the introductory units.",
+      "duration_hours": null,
+      "duration_basis": "unknown",
+      "planning_scope": "short_unit",
+      "scope_review_note": "Reviewed discrete module or single reading/tutorial page; fallback eligible if no provider duration.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:mdn-js-intro",
+        "access:MDN Web Docs"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "Adding scripts to pages introduces JavaScript and browser-side web programming.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "mdn-responsive",
+      "title": "Responsive web design",
+      "provider": "MDN Web Docs",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Responsive_Design",
+      "resource_type": "tutorial",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/c4b1f326-224a-420a-b8b3-814a8f13b6cb"
+      ],
+      "prerequisite_skill_ids": [],
+      "prerequisite_resource_ids": [
+        "mdn-html-syntax",
+        "mdn-css-intro"
+      ],
+      "prerequisite_notes": "Provider expects HTML, CSS styling, text/font styling and CSS layout. Confirm layout knowledge beyond the introductory CSS unit.",
+      "duration_hours": null,
+      "duration_basis": "unknown",
+      "planning_scope": "short_unit",
+      "scope_review_note": "Reviewed discrete module or single reading/tutorial page; fallback eligible if no provider duration.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:mdn-responsive",
+        "access:MDN Web Docs"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "Flexible layout, media queries and viewport settings support partial responsive front-end implementation.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "postgres-sql",
+      "title": "The SQL Language",
+      "provider": "PostgreSQL Global Development Group",
+      "url": "https://www.postgresql.org/docs/17/tutorial-sql.html",
+      "resource_type": "tutorial",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/598de5b0-5b58-4ea7-8058-a4bc4d18c742",
+        "http://data.europa.eu/esco/skill/9cf681c7-89ec-470c-b651-7fe03786f586",
+        "http://data.europa.eu/esco/skill/4463a721-69f3-413d-8321-43e3af13a4f1"
+      ],
+      "prerequisite_skill_ids": [],
+      "prerequisite_resource_ids": [],
+      "prerequisite_notes": "Requires PostgreSQL setup/access described in tutorial chapter 1; arrange a suitable local environment.",
+      "duration_hours": null,
+      "duration_basis": "unknown",
+      "planning_scope": "large_collection",
+      "scope_review_note": "Reviewed multipart scope; simple fallback would understate material.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:postgres-sql",
+        "access:PostgreSQL Global Development Group"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "Tutorial chapter covers tables, queries, joins, aggregates, updates and deletions; partial PostgreSQL database use.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "postgres-backup",
+      "title": "SQL Dump",
+      "provider": "PostgreSQL Global Development Group",
+      "url": "https://www.postgresql.org/docs/17/backup-dump.html",
+      "resource_type": "documentation",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/cf3e976d-2c3e-495c-a874-f9e8a66d3b48",
+        "http://data.europa.eu/esco/skill/82de2df7-0d6c-42b1-94ac-b3e9a029e917"
+      ],
+      "prerequisite_skill_ids": [],
+      "prerequisite_resource_ids": [
+        "postgres-sql"
+      ],
+      "prerequisite_notes": "Requires PostgreSQL and appropriate permissions. Practise on disposable sample data.",
+      "duration_hours": null,
+      "duration_basis": "unknown",
+      "planning_scope": "short_unit",
+      "scope_review_note": "Reviewed discrete module or single reading/tutorial page; fallback eligible if no provider duration.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:postgres-backup",
+        "access:PostgreSQL Global Development Group"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "pg_dump and restore instructions support introductory logical database backup and recovery practice.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "git-version-control",
+      "title": "About Version Control",
+      "provider": "Pro Git",
+      "url": "https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control",
+      "resource_type": "article",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/9d2e926f-53d9-41f5-98f3-19dfaa687f3f"
+      ],
+      "prerequisite_skill_ids": [],
+      "prerequisite_resource_ids": [],
+      "prerequisite_notes": "Basic file-management familiarity; no prior Git assumed for this conceptual reading.",
+      "duration_hours": null,
+      "duration_basis": "unknown",
+      "planning_scope": "short_unit",
+      "scope_review_note": "Reviewed discrete module or single reading/tutorial page; fallback eligible if no provider duration.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:git-version-control",
+        "access:Pro Git"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "Local, centralised and distributed version-control concepts introduce configuration-management tools.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "git-recording",
+      "title": "Recording Changes to the Repository",
+      "provider": "Pro Git",
+      "url": "https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository",
+      "resource_type": "tutorial",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/9d2e926f-53d9-41f5-98f3-19dfaa687f3f"
+      ],
+      "prerequisite_skill_ids": [],
+      "prerequisite_resource_ids": [
+        "git-version-control"
+      ],
+      "prerequisite_notes": "Requires installed/configured Git and a repository, as explained in earlier sections; confirm setup before commands.",
+      "duration_hours": null,
+      "duration_basis": "unknown",
+      "planning_scope": "short_unit",
+      "scope_review_note": "Reviewed discrete module or single reading/tutorial page; fallback eligible if no provider duration.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:git-recording",
+        "access:Pro Git"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "Tracking, staging, diffing and committing provide introductory configuration-management practice with Git.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "cs50-sql",
+      "title": "CS50's Introduction to Databases with SQL",
+      "provider": "Harvard CS50",
+      "url": "https://cs50.harvard.edu/sql/",
+      "resource_type": "course",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/598de5b0-5b58-4ea7-8058-a4bc4d18c742",
+        "http://data.europa.eu/esco/skill/9cf681c7-89ec-470c-b651-7fe03786f586",
+        "http://data.europa.eu/esco/skill/4463a721-69f3-413d-8321-43e3af13a4f1",
+        "http://data.europa.eu/esco/skill/fbafa41f-cd05-4109-a649-8b44d306d779",
+        "http://data.europa.eu/esco/skill/6c08403c-a5bb-4868-b8c2-b7d039c0e511"
+      ],
+      "prerequisite_skill_ids": [],
+      "prerequisite_resource_ids": [],
+      "prerequisite_notes": "Study before/during/after CS50x. OpenCourseWare is free; submission/feedback requires an edX account. Seven curriculum weeks plus final project; no total study hours asserted.",
+      "duration_hours": null,
+      "duration_basis": "unknown",
+      "planning_scope": "large_collection",
+      "scope_review_note": "Reviewed multipart scope; simple fallback would understate material.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:cs50-sql",
+        "access:Harvard CS50"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "Relational querying, entities, tables, keys, constraints and normalisation support partial database design and use.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    },
+    {
+      "resource_id": "cs50-python",
+      "title": "CS50's Introduction to Programming with Python",
+      "provider": "Harvard CS50",
+      "url": "https://cs50.harvard.edu/python/",
+      "resource_type": "course",
+      "covers_skill_ids": [
+        "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d",
+        "http://data.europa.eu/esco/skill/21d2f96d-35f7-4e3f-9745-c533d2dd6e97",
+        "http://data.europa.eu/esco/skill/2522a6ce-3202-4ac8-9f5b-b9cb5a3a83a1",
+        "http://data.europa.eu/esco/skill/913e7e83-b8f8-4574-b1ca-1b38f3fd974a",
+        "http://data.europa.eu/esco/skill/8b94aa1e-89c9-459d-b3b4-1dfab8dec2df"
+      ],
+      "prerequisite_skill_ids": [],
+      "prerequisite_resource_ids": [],
+      "prerequisite_notes": "Designed with or without programming experience. Public OpenCourseWare is free; submissions/certificates have separate conditions. Ten curriculum units plus final project; no total hours asserted.",
+      "duration_hours": null,
+      "duration_basis": "unknown",
+      "planning_scope": "large_collection",
+      "scope_review_note": "Reviewed multipart scope; simple fallback would understate material.",
+      "cost_status": "free",
+      "cost": {
+        "amount": 0,
+        "currency": "MYR"
+      },
+      "access_verified_at": "2026-10-21",
+      "source_ids": [
+        "learning:cs50-python",
+        "access:Harvard CS50"
+      ],
+      "evidence_status": "verified",
+      "coverage_note": "Functions, loops, exceptions, libraries, debugging and unit tests support partial programming and testing development.",
+      "access_notes": "Public reading material; no paid credential or cloud provisioning required. Exercises/sign-in and Malaysian regional access not fully tested."
+    }
+  ]
+}
