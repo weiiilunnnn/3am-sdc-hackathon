@@ -1,6 +1,6 @@
 # SH alignment with main
 
-Compared SH `35dc13588dba7ab2df571eea984917abf7bf8f2a` with main/WL `e6cbf66dab1221a1acd5bed729d232367b84adfa` and KW `a31ffe457800de6d5c0530261f2ac752ccdc2614` on 2026-10-21. Main and WL were identical; KW had the same compact package structure. This change integrates the main snapshot into SH’s working tree; it does not rewrite or merge Git history.
+Compared SH `35dc13588dba7ab2df571eea984917abf7bf8f2a` with main/WL `e6cbf66dab1221a1acd5bed729d232367b84adfa` and KW `a31ffe457800de6d5c0530261f2ac752ccdc2614` on 2026-10-21. Main and WL were identical; KW had the same compact package structure. The initial alignment integrated the main snapshot into SH’s working tree. A subsequent merge of main into SH records that integration in Git history and resolves the old-path conflicts for PR #2; no history was rewritten.
 
 ## Preserved
 
@@ -44,3 +44,7 @@ Historical verification reports retain their original commands and results; READ
 - All 31 backend/source-data/requirements files checked against SH were byte-for-byte unchanged. The RunPod handler matches main.
 
 Not verified: live provider refreshes, actual Replit hosting/deployment, authentication, every CV upload/print flow, and exhaustive browser coverage of the restored onboarding/scenario demo. The saved integration-demo profile is local ignored SQLite data and is excluded from deliverables.
+
+## PR merge conflict resolution
+
+Merged main `e6cbf66` into SH after the structural integration. Kept the integrated route-group pages and removed the duplicate top-level routes reintroduced by the merge. Retained the separate root layouts and stylesheets and adopted main’s shared Pathwaay icon. No backend or profile-storage changes were needed.
