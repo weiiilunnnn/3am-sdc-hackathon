@@ -1,4 +1,4 @@
-from src.models import *
+from src.models.future_roles import *
 
 
 def fixture():

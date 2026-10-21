@@ -2,9 +2,9 @@
 import math
 import unittest
 from unittest.mock import patch
-from src.models import OccupationCatalog, UserProfile, ProfileSkill, Source
-from src.occupation_index import OccupationIndex
-from src.profile_relevance import discover, RelevanceConfig
+from src.models.future_roles import OccupationCatalog, UserProfile, ProfileSkill, Source
+from src.services.future_roles.occupation_index import OccupationIndex
+from src.services.future_roles.profile_relevance import discover, RelevanceConfig
 
 
 def fixture():
@@ -79,7 +79,7 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(discover(p,i,page_size=1,offset=1).results[0].role_id,'demo:R01')
         second.required_skills[0].requirement='optional';second.required_skills[1].requirement='essential'
         i=OccupationIndex(i.catalog,i.sources,'local_full')
-        with patch('src.profile_relevance.log',side_effect=[0,.000001]):
+        with patch('src.services.future_roles.profile_relevance.log',side_effect=[0,.000001]):
             r=discover(p,i)
         self.assertEqual(r.results[0].role_id,'demo:R01')
         self.assertEqual(r.results[0].score.profile_relevance_pct,r.results[1].score.profile_relevance_pct)
@@ -96,7 +96,7 @@ class DiscoveryTests(unittest.TestCase):
     def test_unknowns_spacing_and_no_upstream_call(self):
         p,i=fixture();p.skills[0]=ProfileSkill(skill_id='  Alias    A ',name='alias')
         p.skills.append(ProfileSkill(skill_id='typo',name='typo'))
-        with patch('src.esco_api.client.fetch',side_effect=AssertionError('No network in matching')):
+        with patch('src.services.sources.esco.client.fetch',side_effect=AssertionError('No network in matching')):
             r=discover(p,i)
         self.assertEqual(r.unknown_user_skills,['typo'])
         self.assertEqual(r.recognised_user_skill_count,2)

@@ -6,9 +6,9 @@ import unittest
 from unittest.mock import patch
 from fastapi.testclient import TestClient
 from src.main import app
-from src.occupation_index import get_occupation_index, load_occupation_index
-from src.data_repository import get_catalogues
-from src.esco_api import EscoError
+from src.services.future_roles.occupation_index import get_occupation_index, load_occupation_index
+from src.services.future_roles.data_repository import get_catalogues
+from src.services.sources.esco import EscoError
 
 
 class FullDiscoveryTests(unittest.TestCase):
@@ -83,17 +83,25 @@ class FullDiscoveryTests(unittest.TestCase):
 
     def test_official_lookup_failure_cache_and_version_separation(self):
         role=next(iter(self.index.roles))
-        with patch('src.main.esco_client.fetch',side_effect=EscoError('timeout')):
+        with patch('src.api.future_roles.esco_client.fetch',side_effect=EscoError('timeout')):
             x=self.client.get('/api/esco/lookup',params={'kind':'occupation','uri':role}).json()
             self.assertEqual(x['data_source_status'],'api_unavailable');self.assertTrue(x['local_fallback'])
             y=self.client.get('/api/esco/lookup',params={'kind':'occupation','uri':role,'version':'v1.2.0'}).json()
             self.assertFalse(y['local_fallback']);self.assertIsNone(y['record'])
-        with patch('src.main.esco_client.fetch',return_value={'requested_version':'v1.2.0','returned_version':None,'record':{'uri':role}}):
+        with patch('src.api.future_roles.esco_client.fetch',return_value={'requested_version':'v1.2.0','returned_version':None,'record':{'uri':role}}):
             x=self.client.get('/api/esco/lookup',params={'kind':'occupation','uri':role,'version':'v1.2.0'}).json()
             self.assertEqual(x['data_source_status'],'version_mismatch');self.assertFalse(x['updates_matching_index'])
 
-    def test_reskilling_files_remain_byte_identical(self):
-        root=Path(__file__).parents[1]
-        baseline=json.loads((root/'docs/future-role-baseline.json').read_text())
-        for name,expected in baseline['files'].items():
-            self.assertEqual(hashlib.sha256((root/name).read_bytes()).hexdigest(),expected,name)
+    def test_reskilling_preserves_bytes_except_approved_import_relocation(self):
+        root = Path(__file__).parents[1]
+        baseline = json.loads((root/'docs/future-role-baseline.json').read_text())
+        moved = {
+            'src/personalized_reskilling.py': 'src/services/future_roles/personalized_reskilling.py',
+            'src/learning_time.py': 'src/services/future_roles/learning_time.py',
+        }
+        for name, expected in baseline['files'].items():
+            payload = (root/moved.get(name, name)).read_bytes()
+            if name == 'src/frontend/components/PathwayView.tsx':
+                self.assertEqual(payload.count(b'from "@/lib/future-role-api"'), 1)
+                payload = payload.replace(b'@/lib/future-role-api', b'@/lib/api')
+            self.assertEqual(hashlib.sha256(payload).hexdigest(), expected, name)

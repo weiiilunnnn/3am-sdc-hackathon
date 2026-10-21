@@ -14,7 +14,7 @@ async function match(page: import("@playwright/test").Page) {
 
 test("real proxy, qualified relevance cards and citations", async ({ page, request }) => {
   expect((await request.get("/api/health")).ok()).toBeTruthy();
-  await page.setViewportSize({ width: 1440, height: 1000 }); await page.goto("/");
+  await page.setViewportSize({ width: 1440, height: 1000 }); await page.goto("/role-matching");
   const result = await match(page); const cards = page.getByTestId("career-card");
   expect(result.indexed_occupation_count).toBeGreaterThan(15);
   expect(result.total_qualifying_roles).toBeGreaterThan(0);
@@ -29,7 +29,7 @@ test("real proxy, qualified relevance cards and citations", async ({ page, reque
 });
 
 test("description toggle uses one element and independent state", async ({ page }) => {
-  await page.goto("/"); await match(page); const cards = page.getByTestId("career-card");
+  await page.goto("/role-matching"); await match(page); const cards = page.getByTestId("career-card");
   const description = cards.first().getByTestId("role-description"); const original = await description.textContent();
   await expect(description).toHaveCount(1); await expect(description).toHaveClass(/description-clamped/);
   const toggle = cards.first().getByRole("button", { name: /Read more/ });
@@ -44,7 +44,7 @@ test("description toggle uses one element and independent state", async ({ page 
 test("variable counts, pagination and server-side role search", async ({ page }) => {
   const keyErrors: string[] = [];
   page.on("console", m => { if (m.type() === "error" && m.text().includes("same key")) keyErrors.push(m.text()); });
-  await page.goto("/"); const result = await match(page); const cards = page.getByTestId("career-card");
+  await page.goto("/role-matching"); const result = await match(page); const cards = page.getByTestId("career-card");
   if (result.next_offset !== null) {
     const response = page.waitForResponse(r => r.url().endsWith("/api/v2/matches"));
     await page.getByRole("button", { name: "Show more qualifying roles" }).click();
@@ -60,7 +60,7 @@ test("variable counts, pagination and server-side role search", async ({ page })
 });
 
 test("compact sourced areas and no matching market or full-requirements UI", async ({ page }) => {
-  await page.goto("/"); await match(page);
+  await page.goto("/role-matching"); await match(page);
   await expect(page.getByText(/Market outlook/i)).toHaveCount(0);
   await expect(page.getByLabel("Market context")).toHaveCount(0);
   await expect(page.getByText(/View all documented requirements/i)).toHaveCount(0);
@@ -79,7 +79,7 @@ test("compact sourced areas and no matching market or full-requirements UI", asy
 });
 
 test("unknown terms and empty intake remain honest", async ({ page }) => {
-  await page.goto("/"); await page.getByText("Add unresolved skills or interests").click();
+  await page.goto("/role-matching"); await page.getByText("Add unresolved skills or interests").click();
   await page.getByLabel("Unresolved skills (comma separated)").fill("unreviewed typo"); await match(page);
   await expect(page.getByText("Unresolved skills, excluded from scoring: unreviewed typo")).toBeVisible();
   const remove = page.getByRole("button", { name: /^Remove / }); const count = await remove.count();
@@ -90,7 +90,7 @@ test("unknown terms and empty intake remain honest", async ({ page }) => {
 
 test("bootstrap failure is recoverable", async ({ page }) => {
   await page.route("**/api/v2/bootstrap", r => r.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ detail: "Reference data unavailable" }) }));
-  await page.goto("/"); await expect(page.getByRole("alert").filter({ hasText: "Reference data unavailable" })).toBeVisible();
+  await page.goto("/role-matching"); await expect(page.getByRole("alert").filter({ hasText: "Reference data unavailable" })).toBeVisible();
   await page.unroute("**/api/v2/bootstrap"); await page.getByRole("button", { name: "Try again" }).click();
   await expect(page.getByLabel("Synthetic profile")).toBeVisible();
 });
@@ -99,7 +99,7 @@ test("new discovered occupation hands off to unchanged pathways", async ({ page,
   const original = new Set((await (await request.get("/api/bootstrap")).json()).roles.map((r: {role_id:string}) => r.role_id));
   const result: DiscoveryResponse = await (await request.post("/api/v2/matches", { data: { schema_version: "2.0", profile: boot.profiles[0], page_size:25 } })).json();
   const selected = result.results.find(r => !original.has(r.role_id)); expect(selected).toBeTruthy();
-  await page.goto("/"); await match(page);
+  await page.goto("/role-matching"); await match(page);
   await page.getByLabel("Search occupations").fill(selected!.role_title); await page.getByRole("button", { name: "Search roles", exact:true }).click();
   const pathResponse = page.waitForResponse(r => r.url().endsWith("/api/pathways"));
   await page.getByTestId("career-card").first().getByRole("button", { name:"Explore pathway" }).click();
@@ -111,7 +111,7 @@ test("new discovered occupation hands off to unchanged pathways", async ({ page,
 });
 
 test("mobile matching, pathway and skill search", async ({ page }) => {
-  await page.setViewportSize({ width:390,height:844 }); await page.goto("/"); await match(page);
+  await page.setViewportSize({ width:390,height:844 }); await page.goto("/role-matching"); await match(page);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({path:"../../docs/screenshots/discovery-mobile.png",fullPage:true});
   await page.getByTestId("career-card").first().getByRole("button",{name:"Explore pathway"}).click();
@@ -124,7 +124,7 @@ test("mobile matching, pathway and skill search", async ({ page }) => {
 test("profile edits cancel late matching responses", async ({ page }) => {
   let release!:()=>void, arrived!:()=>void; const gate=new Promise<void>(r=>{release=r;});const sent=new Promise<void>(r=>{arrived=r;});
   await page.route("**/api/v2/matches",async route=>{const response=await route.fetch();arrived();await gate;await route.fulfill({response}).catch(()=>{});});
-  await page.goto("/"); await page.getByRole("button",{name:"Find matching roles"}).click();await sent;
+  await page.goto("/role-matching"); await page.getByRole("button",{name:"Find matching roles"}).click();await sent;
   await page.getByLabel("Synthetic profile").selectOption("demo-graduate-c");release();
   await expect(page.getByTestId("career-card")).toHaveCount(0);
   await page.unroute("**/api/v2/matches");await match(page);await expect(page.getByRole("heading",{name:"Add more specific skills"})).toBeVisible();
@@ -133,6 +133,6 @@ test("profile edits cancel late matching responses", async ({ page }) => {
 test("scenario context is retained without changing relevance", async ({ page, request }) => {
   const baseline:DiscoveryResponse=await(await request.post("/api/v2/matches",{data:{schema_version:"2.0",profile:boot.profiles[0]}})).json();
   await page.route("**/api/v2/matches",async route=>{const payload=route.request().postDataJSON();const response=await route.fetch({postData:JSON.stringify({...payload,scenario_config:{schema_version:"1.0",scenario_id:"moderate",version:"test",is_synthetic:true,display_label:"Illustrative scenario",assumptions:[],model_method:"not-yet-defined",source_ids:["demo:fixture:001"],disclaimer:"Not a validated forecast"}})});await route.fulfill({response});});
-  await page.goto("/");await match(page);await expect(page.getByRole("heading",{name:"Illustrative scenario"})).toBeVisible();
+  await page.goto("/role-matching");await match(page);await expect(page.getByRole("heading",{name:"Illustrative scenario"})).toBeVisible();
   await expect(page.getByTestId("career-card").first().locator(".score strong")).toHaveText(`${baseline.results[0].score.profile_relevance_pct!.toFixed(2)}%`);
 });

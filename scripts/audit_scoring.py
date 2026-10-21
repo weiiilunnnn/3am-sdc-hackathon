@@ -13,8 +13,8 @@ from time import perf_counter
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from src.data_repository import load_catalogues
-from src.future_role_matching import MatchingConfig, match_roles
+from src.services.future_roles.data_repository import load_catalogues
+from src.services.future_roles.future_role_matching import MatchingConfig, match_roles
 
 
 def audit():

@@ -1,9 +1,9 @@
 import unittest
-from src.learning_time import resource_time, plan_time
-from src.data_repository import load_catalogues
-from src.future_role_matching import match_roles, MatchingConfig
-from src.personalized_reskilling import build_pathway
-from src.models import LearningPreferences
+from src.services.future_roles.learning_time import resource_time, plan_time
+from src.services.future_roles.data_repository import load_catalogues
+from src.services.future_roles.future_role_matching import match_roles, MatchingConfig
+from src.services.future_roles.personalized_reskilling import build_pathway
+from src.models.future_roles import LearningPreferences
 from helpers import learning_fixture
 
 

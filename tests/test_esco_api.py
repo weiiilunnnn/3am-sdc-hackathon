@@ -3,7 +3,7 @@ import json
 import unittest
 from unittest.mock import Mock, patch
 from urllib.error import URLError
-from src.esco_api import EscoClient, EscoError
+from src.services.sources.esco import EscoClient, EscoError
 
 URI='http://data.europa.eu/esco/occupation/00000000-0000-0000-0000-000000000000'
 
@@ -25,7 +25,7 @@ class EscoClientTests(unittest.TestCase):
 
     def test_timeout_bounded_retry_and_malformed_payload(self):
         opener=Mock(side_effect=TimeoutError())
-        with patch('src.esco_api.sleep'):
+        with patch('src.services.sources.esco.sleep'):
             with self.assertRaises(EscoError):EscoClient(opener=opener,retries=1).fetch('occupation','v1.2.1',uri=URI)
         self.assertEqual(opener.call_count,2)
         with self.assertRaises(EscoError):EscoClient(opener=Mock(return_value=response([]))).fetch('occupation','v1.2.1',uri=URI)

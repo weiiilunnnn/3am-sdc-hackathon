@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import type { RoleSearchResponse } from "../lib/contracts";
 
 test("search focus stays below its label with an adjacent icon on desktop and mobile", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/role-matching");
   const field = page.getByLabel("Search occupations");
   const button = page.getByRole("button", { name: "Search roles", exact: true });
   for (const width of [1440, 390]) {
@@ -24,7 +24,7 @@ test("search focus stays below its label with an adjacent icon on desktop and mo
 });
 
 test("title search overrides qualification, clears automatically and keeps pathway navigation", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/role-matching");
   const matched = page.waitForResponse(r => r.url().endsWith("/api/v2/matches"));
   await page.getByRole("button", { name: "Find matching roles" }).click();
   const original = await (await matched).json();
@@ -63,7 +63,7 @@ test("title search overrides qualification, clears automatically and keeps pathw
 });
 
 test("title pagination and unknown title empty state", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/role-matching");
   const first = page.waitForResponse(r => r.url().endsWith("/api/v2.1/roles/search"));
   await page.getByLabel("Search occupations").fill("data");
   const result = await (await first).json() as RoleSearchResponse;
@@ -94,7 +94,7 @@ test("clearing cancels a delayed search and prevents stale search overwrites", a
     const response = await route.fetch(); arrived(); await gate;
     await route.fulfill({ response }).catch(() => {});
   });
-  await page.goto("/");
+  await page.goto("/role-matching");
   let response = page.waitForResponse(r => r.url().endsWith("/api/v2/matches"));
   await page.getByRole("button", { name: "Find matching roles" }).click();
   const original = await (await response).json();

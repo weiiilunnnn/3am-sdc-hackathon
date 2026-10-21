@@ -1,7 +1,7 @@
 import unittest
 from pydantic import ValidationError
-from src.models import *
-from src.data_repository import load_catalogues
+from src.models.future_roles import *
+from src.services.future_roles.data_repository import load_catalogues
 from helpers import fixture
 
 
@@ -34,8 +34,8 @@ class ContractTests(unittest.TestCase):
                 MatchRequest(schema_version="1.0", profile=b.profiles[0], top_k=value)
 
     def test_output_contracts_and_mixed_evidence(self):
-        from src.future_role_matching import match_roles
-        from src.personalized_reskilling import build_pathway
+        from src.services.future_roles.future_role_matching import match_roles
+        from src.services.future_roles.personalized_reskilling import build_pathway
         b = load_catalogues()
         m = match_roles(b.profiles[1], b.occupations, b.snapshots['demo-trend-a'], sources=b.sources)
         w = build_pathway(b.profiles[1], m.results[0], b.resources, b.sources)

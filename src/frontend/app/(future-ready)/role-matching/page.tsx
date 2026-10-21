@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import type { Bootstrap, DiscoveryResponse, RoleSearchResponse, Pathway, Profile, Skill, Source } from "@/lib/contracts";
-import { request } from "@/lib/api";
+import { request } from "@/lib/future-role-api";
 import ProfileIntake from "@/components/ProfileIntake";
 import CareerCard from "@/components/CareerCard";
 import PathwayView from "@/components/PathwayView";
@@ -64,7 +64,7 @@ export default function Home() {
     setData(current => current ? { ...current, skills: [...new Map([...current.skills, ...skills].map(s => [s.skill_id, s])).values()], sources: [...new Map([...current.sources, ...sources].map(s => [s.source_id, s])).values()] } : current);
   }
   return <div className="app-shell">
-    <header className="app-header"><a className="brand" href="/" aria-label="3AM FutureReady home"><span className="brand-mark" aria-hidden="true">↗</span><span>Future<span className="brand-accent">Ready</span><small>BY TEAM 3AM</small></span></a><div className="header-right"><span className="header-label">YOUR SKILLS. YOUR NEXT CHAPTER.</span><span className="demo-pill"><span />SYNTHETIC PROFILES ONLY</span></div></header>
+    <header className="app-header"><a className="brand" href="/role-matching" aria-label="3AM FutureReady home"><span className="brand-mark" aria-hidden="true">↗</span><span>Future<span className="brand-accent">Ready</span><small>BY TEAM 3AM</small></span></a><div className="header-right"><span className="header-label">YOUR SKILLS. YOUR NEXT CHAPTER.</span><span className="demo-pill"><span />SYNTHETIC PROFILES ONLY</span></div></header>
     <main className="app-main"><section className="intro-section"><div><p className="eyebrow">AIVERSECITY · FUTURE-READY WORKFORCE</p><h1>Build on what you know.<br /><em>Explore where you could go.</em></h1><p className="intro-copy">Understand your skills, discover relevant technology roles, and find a sourced learning path to your next step.</p></div><div className="intro-art" aria-hidden="true"><span className="orbit orbit-one" /><span className="orbit orbit-two" /><div className="growth-bars"><span /><span /><span /><span /></div><span className="art-arrow">↗</span><span className="art-caption">LEARNING MOVES YOU FORWARD</span></div></section>
     <div className="journey"><span><b>01</b> Your starting skills</span><i aria-hidden="true">→</i><span><b>02</b> Discover role matches</span><i aria-hidden="true">→</i><span><b>03</b> Plan your learning</span></div>
     {loading ? <div className="loading-state" role="status"><span className="spinner" />Loading verified reference data…</div> : !data || !profile ? <div className="error-panel" role="alert"><h2>We couldn’t load the reference data</h2><p>{error}</p><button className="primary" onClick={load}>Try again</button></div> : <div className="workspace-grid">

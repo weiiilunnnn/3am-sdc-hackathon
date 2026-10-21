@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
 import unittest
-from src.data_repository import load_catalogues
-from src.future_role_matching import match_roles
-from src.trend_adapter import adapt_trend_snapshot
+from src.services.future_roles.data_repository import load_catalogues
+from src.services.future_roles.future_role_matching import match_roles
+from src.services.future_roles.trend_adapter import adapt_trend_snapshot
 
 
 class TrendTests(unittest.TestCase):

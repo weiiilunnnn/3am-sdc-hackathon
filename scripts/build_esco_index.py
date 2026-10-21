@@ -15,9 +15,9 @@ from concurrent.futures import ThreadPoolExecutor
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from src.esco_api import EscoClient
-from src.models import OccupationCatalog, SourceRegistry
-from src.data_repository import validate_catalogue
+from src.services.sources.esco import EscoClient
+from src.models.future_roles import OccupationCatalog, SourceRegistry
+from src.services.future_roles.data_repository import validate_catalogue
 
 VERSION = "v1.2.1"
 SCRIPT_VERSION = "full-esco-api-import-v1"

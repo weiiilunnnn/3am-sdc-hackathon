@@ -5,8 +5,8 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from src import models
-from src.discovery_models import DiscoveryRequest, DiscoveryResponse, RoleSearchRequest, RoleSearchResponse
+from src.models import future_roles as models
+from src.models.future_role_discovery import DiscoveryRequest, DiscoveryResponse, RoleSearchRequest, RoleSearchResponse
 
 NAMES = ["UserProfile", "SourceRegistry", "OccupationCatalog", "ResourceCatalog", "TrendSnapshot",
          "ScenarioConfig", "SDGMappingSnapshot", "MatchRequest", "MatchResponse", "PathwayRequest", "PathwayResponse"]

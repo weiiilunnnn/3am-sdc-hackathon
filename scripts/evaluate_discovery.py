@@ -8,10 +8,10 @@ from time import perf_counter
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
-from src.occupation_index import get_occupation_index
-from src.data_repository import get_catalogues
-from src.models import UserProfile, ProfileSkill
-from src.profile_relevance import discover
+from src.services.future_roles.occupation_index import get_occupation_index
+from src.services.future_roles.data_repository import get_catalogues
+from src.models.future_roles import UserProfile, ProfileSkill
+from src.services.future_roles.profile_relevance import discover
 
 
 def evaluate():
@@ -58,7 +58,11 @@ def evaluate():
             'top_results':[{'role_id':r.role_id,'title':r.role_title,'profile_relevance_pct':r.score.profile_relevance_pct,
                 'strict_coverage_pct':r.score.essential_coverage_pct,'qualification_reason':r.qualification_reason} for r in response.results[:3]]})
     baseline=json.loads((ROOT/'docs/future-role-baseline.json').read_text())
-    preserved={p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest()==h for p,h in baseline['files'].items()}
+    def baseline_bytes(name):
+        path = name.replace('src/personalized_reskilling.py', 'src/services/future_roles/personalized_reskilling.py').replace('src/learning_time.py', 'src/services/future_roles/learning_time.py')
+        payload = (ROOT/path).read_bytes()
+        return payload.replace(b'@/lib/future-role-api', b'@/lib/api') if name == 'src/frontend/components/PathwayView.tsx' else payload
+    preserved={p:hashlib.sha256(baseline_bytes(p)).hexdigest()==h for p,h in baseline['files'].items()}
     report={'esco_release':index.catalog.dataset_version,'data_source_status':index.coverage,'occupation_count':index.n,
         'skill_count':len(index.skills),'index_cold_load_ms':round(cold,3),'upstream_requests_during_matching':0,
         'unmapped_requested_terms':sorted(set(missing_terms)),'preserved_reskilling_hashes':preserved,'profiles':rows}

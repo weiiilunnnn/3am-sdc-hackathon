@@ -1,9 +1,9 @@
 import unittest
 
-from src.future_role_matching import MatchingConfig, match_roles
-from src.models import ProfileSkill
-from src.data_repository import load_catalogues
-from src.skills_intake import normalize_profile
+from src.services.future_roles.future_role_matching import MatchingConfig, match_roles
+from src.models.future_roles import ProfileSkill
+from src.services.future_roles.data_repository import load_catalogues
+from src.services.future_roles.skills_intake import normalize_profile
 from helpers import fixture
 
 

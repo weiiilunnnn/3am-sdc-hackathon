@@ -3,10 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --hostname 0.0.0.0",
     "build": "next build",
     "start": "next start",
+    "generate:data": "node ../../scripts/generate_synthetic_data.mjs",
     "typecheck": "tsc --noEmit",
+    "test:logic": "node --experimental-strip-types --test ../../tests/frontend_logic.test.mjs",
+    "test:components": "tsx --tsconfig tsconfig.json --test ../../tests/frontend_components.test.ts",
     "test:e2e": "playwright test"
   },
   "dependencies": {
@@ -15,10 +18,11 @@
     "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@playwright/test": "1.64.1",
     "@types/node": "26.6.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "typescript": "7.0.2"
+    "tsx": "4.23.13",
+    "typescript": "5.9.3",
+    "@playwright/test": "1.64.1"
   }
 }

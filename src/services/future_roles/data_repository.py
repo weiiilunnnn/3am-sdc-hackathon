@@ -8,7 +8,7 @@ from pathlib import Path
 
 from .models import OccupationCatalog, ResourceCatalog, Source, SourceRegistry, TrendSnapshot, UserProfile
 
-DATA_ROOT = Path(__file__).resolve().parents[1] / "data"
+DATA_ROOT = Path(__file__).resolve().parents[3] / "data"
 
 
 def read_json(path: Path):

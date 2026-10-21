@@ -4,9 +4,9 @@ import unittest
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
-from src.data_repository import get_catalogues, supported
+from src.services.future_roles.data_repository import get_catalogues, supported
 from src.main import app
-from src.occupation_index import get_occupation_index
+from src.services.future_roles.occupation_index import get_occupation_index
 
 
 class RoleSearchTests(unittest.TestCase):
@@ -18,7 +18,7 @@ class RoleSearchTests(unittest.TestCase):
         cls.role = next(r for r in cls.index.roles.values() if r.title.casefold() == 'data scientist')
 
     def search(self, query, profile=None, **kwargs):
-        with patch('src.main.esco_client.fetch', side_effect=AssertionError('Search must stay local')):
+        with patch('src.api.future_roles.esco_client.fetch', side_effect=AssertionError('Search must stay local')):
             response = self.client.post('/api/v2.1/roles/search', json={
                 'schema_version': '2.1', 'profile': profile or self.profile,
                 'role_query': query, **kwargs})

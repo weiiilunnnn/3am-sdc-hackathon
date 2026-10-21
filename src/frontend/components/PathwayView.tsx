@@ -1,5 +1,5 @@
 import type { Bootstrap, Pathway } from "@/lib/contracts";
-import { duration, planningTime, resourceTime } from "@/lib/api";
+import { duration, planningTime, resourceTime } from "@/lib/future-role-api";
 import SourceLinks from "./SourceLinks";
 
 export default function PathwayView({ pathway: p, data, onBack }: { pathway: Pathway; data: Bootstrap; onBack: () => void }) {

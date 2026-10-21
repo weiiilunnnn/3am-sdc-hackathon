@@ -1,7 +1,7 @@
 "use client";
 import { FormEvent, useEffect, useState } from "react";
 import type { Bootstrap, Profile, Proficiency, Skill } from "@/lib/contracts";
-import { request } from "@/lib/api";
+import { request } from "@/lib/future-role-api";
 export default function ProfileIntake({ data, profile, onChange, onSubmit, busy, onSkillsLoaded }: { data: Bootstrap; profile: Profile; onChange: (p: Profile) => void; onSubmit: () => void; busy: boolean; onSkillsLoaded?: (skills: Skill[]) => void }) {
   const [search, setSearch] = useState("");
   const [extra, setExtra] = useState((profile.unresolved_skills ?? []).join(", "));

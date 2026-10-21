@@ -1,7 +1,7 @@
 """Version 2 compact discovery contracts; legacy coverage/pathway models stay v1."""
 from typing import Annotated, Literal
 from pydantic import BaseModel, Field, FiniteFloat, StrictInt, model_validator
-from .models import UserProfile, Requirement, Source, ScenarioConfig, TrendSnapshot, SDGMappingSnapshot, SDGMapping
+from .future_roles import UserProfile, Requirement, Source, ScenarioConfig, TrendSnapshot, SDGMappingSnapshot, SDGMapping
 
 
 class DiscoveryRequest(BaseModel):

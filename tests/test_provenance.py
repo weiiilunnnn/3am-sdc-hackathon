@@ -1,5 +1,5 @@
 import unittest
-from src.data_repository import load_catalogues, validate_catalogue, validate_resources, merge_integration_sources
+from src.services.future_roles.data_repository import load_catalogues, validate_catalogue, validate_resources, merge_integration_sources
 from helpers import fixture
 
 

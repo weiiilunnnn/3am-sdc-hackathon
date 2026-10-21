@@ -1,8 +1,8 @@
 import unittest
-from src.future_role_matching import match_roles, MatchingConfig
-from src.personalized_reskilling import build_pathway
-from src.models import ProfileSkill, Money
-from src.data_repository import load_catalogues
+from src.services.future_roles.future_role_matching import match_roles, MatchingConfig
+from src.services.future_roles.personalized_reskilling import build_pathway
+from src.models.future_roles import ProfileSkill, Money
+from src.services.future_roles.data_repository import load_catalogues
 from helpers import fixture, learning_fixture
 
 

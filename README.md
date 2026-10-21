@@ -1,102 +1,145 @@
-# FutureReady - Team 3AM
+# 3AM SDC Hackathon
 
-Sourced technology-role matching and personalised starter reskilling pathways for the SDC Hackathon Domain 1. Built with the team's existing Next.js/React/TypeScript frontend and FastAPI/Python backend.
+A career-development prototype combining Pathwaay’s onboarding and career/SDG scenario demo with Aiversecity’s saved fictional profiles, CV tools, research evidence and employment snapshots.
 
-Team: **3AM**, Asia Pacific University, leader **Ooi Wei Lun**. SDG track: **4 - Quality Education**. [Repository](https://github.com/weiiilunnnn/3am-sdc-hackathon).
+## Local development
 
-## What works
+Requires Python 3.10+ and Node.js 22.18+ (Node 24 recommended). Use npm inside `src/frontend`; this repository is not a pnpm workspace.
 
-- Future-Role Matching discovers candidates from a locally indexed complete official ESCO API collection: 3,658 occupations, 14,579 concepts and 126,051 essential/optional relationships, requested release v1.2.1.
-- The React matching view uses the separate v2 API: IDF-weighted profile relevance, a configurable 30% threshold with evidence safeguards, variable result counts and server pagination/search. Legacy v1 strict essential coverage remains available unchanged.
-- Compact sourced development areas, one-element Read more/Show less descriptions and a bottom method disclosure. Market Outlook placeholders were removed only from matching; team trend/SDG/scenario interfaces remain.
-- Existing synthetic intake now searches the indexed concepts on the backend. Thirteen synthetic profiles were evaluated; no real CV or personal data is used.
-- Personalised Reskilling remains unchanged: 22 reviewed resources, existing prerequisite/phase/time logic, explicit incomplete coverage. A minimal API adapter supports newly discovered role IDs.
-- Offline local matching, explicit official API lookup/search with bounded cache/timeouts and a clearly labelled 15-role fallback. Without full frequency evidence, the fallback does not manufacture qualified scores.
-
-Current Feature 3 implementation, source/version caveats, all measured examples, tests, file map and rebuild commands: [FUTURE_ROLE_IMPLEMENTATION.md](docs/FUTURE_ROLE_IMPLEMENTATION.md). Earlier enhancement reports are historical where they conflict with this approved matching change.
-
-**Current scope:** Features 3 and 4 plus temporary synthetic intake. Indexed occupations and concept links are sourced; learning coverage is intentionally partial, as approved. Real updatable trend ingestion, complete sourced SDG mappings and defined future-scenario effects await teammates. The app does not yet satisfy all six final-product requirements. It uses no real CVs or personal profiles and makes no hiring/proficiency or Malaysian demand guarantee.
-
-## Run locally (PowerShell)
-
-Use Python 3.12 and Node.js 24 LTS (tested: Python 3.12.14, Node 24.16.0). Start from the repository root.
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+npm --prefix src/frontend ci
+python scripts/dev.py
 ```
 
-Terminal 1, repository root:
+Open http://localhost:3000. The launcher starts FastAPI on 127.0.0.1:8080 and Next.js on port 3000, and stops both when interrupted or either service exits. `PORT` and `API_PORT` can override these development ports. The launcher requires a POSIX environment (macOS/Linux/Replit).
 
-```powershell
-.\.venv\Scripts\python.exe -m uvicorn main:app --app-dir src --reload --host 127.0.0.1 --port 8000
+Alternatively, run each service in its own terminal:
+
+```sh
+python -m uvicorn src.main:app --host 127.0.0.1 --port 8080 --reload
+npm --prefix src/frontend run dev
 ```
 
-Terminal 2:
+Next.js proxies `/api/*` to `BACKEND_URL` (default `http://127.0.0.1:8080`). FastAPI docs are at http://127.0.0.1:8080/docs. SQLite defaults to `src/data/future_ready.sqlite3`; set `APP_DB_PATH` to change it. Keep local data and credentials out of Git.
 
-```powershell
-cd src/frontend
-npm.cmd ci
-npm.cmd run dev
+## Pages and integration
+
+| URL | Behavior |
+| --- | --- |
+| `/` | Redirects to `/register`, matching main |
+| `/register`, `/login` | Main’s onboarding/sign-in previews; no account creation or authentication |
+| `/explorer` | Main’s career matching, SDG mapping and scenario demo |
+| `/profile` | SH’s existing profile editor, sample profiles and CV upload/review (previously `/`) |
+| `/home` | Saved-profile workspace overview |
+| `/cv-studio` | Saved-profile CV previews and printing |
+| `/outlook` | Profile-content checks and cached skill evidence |
+| `/explore` | Skills catalogue with profile, research and posting filters |
+| `/radar` | OpenAlex research and Remote OK job-source evidence |
+
+The career demo links to the workspace, and the workspace links back. Onboarding answers remain in memory and are not silently copied into saved profiles. Use fictional details only. Pathwaay's role matches, scenario estimates, and SDG rankings demonstrate the workflow using generated synthetic data; they are not real labour-market forecasts or measured SDG impact. No page implements account security.
+
+## Pathwaay model and data
+
+The synthetic data is stored in `data/` at the repository root. Recreate it with `node scripts/generate_synthetic_data.mjs`, then train the local CPU models with `python scripts/train_career_models.py`. Model artifacts are saved under `models/` and excluded from Git; the backend trains them from the committed CSVs when needed. The SDG ranker uses curated synthetic skill-to-target weights across all 17 goals. SDG explanations can be generated by the optional RunPod GLM endpoint; configure `RUNPOD_API_KEY` and `RUNPOD_LLM_ENDPOINT_ID` in the backend environment. Career inference uses the local scikit-learn model by default, or an optional RunPod career endpoint when `RUNPOD_ENDPOINT_ID` is configured.
+
+## Structure
+
+```text
+src/
+  main.py                  FastAPI entry point
+  api/                     API routes
+  models/                  Validation and response contracts
+  services/                Business logic, SQLite storage and source adapters
+  data/                    Local vocabulary and fictional samples
+  frontend/
+    package.json           Frontend dependencies and commands
+    package-lock.json      npm lockfile
+    app/
+      (pathwaay)/           Main’s pages and root layout
+      (workspace)/          SH’s pages and root layout
+    lib/                   Frontend API client and helpers
+runpod/handler.py          Optional career inference Serverless handler
+scripts/dev.py            Optional two-service development launcher
+tests/                    Python, frontend logic and component tests
+docs/                     Architecture, data sources and verification
+submission/               Competition documents
 ```
 
-Open **http://localhost:3000**. Backend API docs: **http://127.0.0.1:8000/docs**.
+Route-group names in parentheses do not appear in URLs. Separate root layouts prevent the two existing global stylesheets from affecting each other. Crossing between groups performs a full page load; saved fictional profiles remain available through the existing browser profile ID and SQLite storage.
 
-The existing Next.js rewrite forwards `/api/*` to `http://127.0.0.1:8000/api/*`. For another backend, set `BACKEND_URL=http://your-backend:8000` in `src/frontend/.env.local` and restart Next.js. Use the backend origin without `/api` or a trailing slash. No browser API secret is needed.
+## Verification
 
-On macOS/Linux replace `.venv\Scripts\python.exe` with `.venv/bin/python`. If Python is not on PATH, use your installed interpreter's full path for venv creation. Virtual environment activation is optional when using its executable directly.
-
-The ESCO index and learning catalogues are local reference files. Starting the app never downloads a dataset or calls a recommendation API. Google Fonts is optional; system fonts provide a fallback. `runpod/handler.py` remains the team's echo skeleton, and the existing RunPod dependency is retained; these features do not require a RunPod endpoint/API key. `.replit` now starts FastAPI; it does not configure a complete two-service cloud deployment. No production deployment is claimed.
-
-## Tests and production build
-
-Backend, from root:
-
-```powershell
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
-.\.venv\Scripts\python.exe scripts/export_contract_schemas.py
+```sh
+python -m unittest discover tests
+npm --prefix src/frontend run test:logic
+npm --prefix src/frontend run test:components
+npm --prefix src/frontend run typecheck
+npm --prefix src/frontend run build
 ```
 
-Frontend, from `src/frontend`:
+Tests use synthetic fixtures and temporary databases. Live external-source availability and production hosting are separate checks. See [testing](docs/testing.md) and [branch integration](docs/branch-integration.md).
+
+## Replit and production
+
+After installing Python and frontend dependencies, the Replit Run button uses `scripts/dev.py`. Only the frontend needs a public port; it proxies API calls to the local backend. The previous artifact/workspace configuration and unrelated database post-merge hook have been removed.
+
+For a production server, build with `npm --prefix src/frontend run build`, run FastAPI without `--reload`, and run `npm --prefix src/frontend run start`. Configure `BACKEND_URL` when building if the API is not at the default address. Replit deployment and durable SQLite storage must be configured and verified separately; the development launcher is not a production deployment configuration.
+
+RunPod is optional. FastAPI can use the local career model without RunPod. Generated SDG explanations require a configured RunPod language-model endpoint; the fixed SDG reference text and dataset-ranked goals do not. `runpod/handler.py` is a Serverless handler for career inference and requires the included synthetic dataset at deployment.
+
+## Team and submission
+
+Team **3AM**, Domain 1, SDG 4 — Quality Education. Team leader: Ooi Wei Lun. University: Asia Pacific University. Team size: 3.
+
+The team still needs to supply final live-demo, slide-deck and video links and complete its submission documentation and proofs of use. Existing documents are retained under `submission/`.
+
+Licensed under [Apache License 2.0](LICENSE).
+
+
+## KW ESCO matching and reskilling integration
+
+Main's pages, saved-profile contracts, source adapters, synthetic models and setup
+remain the foundation. The workspace navigation additionally links to
+**`/role-matching`**, which hosts KW's independent ESCO matching and reskilling
+workflow. `/` still redirects to `/register`. The saved-profile/local-vocabulary
+and ESCO profile formats remain separate; no automatic conversion is performed.
+
+The ESCO workflow retains verified citations, full-index skills/title search,
+backend profile-relevance scoring, recommendation qualification rules and
+reviewed learning resources with honest incomplete coverage. Its API paths
+(`/api/matches`, `/api/pathways`, `/api/v2/*`, `/api/v2.1/roles/search`, and explicit
+`/api/esco/*` lookup) retain their existing contracts. Synthetic career/scenario
+scores and ESCO profile relevance have different meanings and are not combined.
+
+Implementation: `src/api/future_roles.py`, `src/models/future_roles.py`,
+`src/models/future_role_discovery.py`, `src/services/future_roles/`,
+`src/services/sources/esco.py`, and the frontend `(future-ready)` route group.
+Main's `lib/api.ts` is unchanged; KW uses `lib/future-role-api.ts`.
+
+Existing ESCO datasets, CSV exports, source registries, resource catalogues and
+export/build scripts remain under `data/` and `scripts/`. Application startup
+does not download ESCO. See `docs/FUTURE_ROLE_IMPLEMENTATION.md` and
+`docs/ROLE_SEARCH_UPDATE.md` for the original feature records, and
+`docs/MAIN_KW_MERGE_REPORT.md` for the integration and current verification.
+
+Install the backend test dependency with `python -m pip install -r requirements-dev.txt`.
+Run all backend tests with `python -m unittest discover -s tests`, and KW browser
+checks with `npm --prefix src/frontend run test:e2e`, in addition to main's
+existing frontend checks. The browser tests use isolated ports 8100/3100,
+`.next-e2e`, and temporary SQLite/model storage. Install the Playwright Chromium
+browser if the test environment does not already have it.
+
+On Windows, the existing POSIX development launcher is not the supported startup
+path. Use two PowerShell terminals from the repository root:
 
 ```powershell
-npm.cmd run typecheck
-npm.cmd run build
-npx.cmd playwright install chromium
-npm.cmd run test:e2e
+.\.venv\Scripts\python.exe -m uvicorn src.main:app --host 127.0.0.1 --port 8080 --reload
+$env:BACKEND_URL = "http://127.0.0.1:8080"
+npm.cmd --prefix src/frontend run dev
 ```
 
-Playwright starts isolated FastAPI/Next.js servers on ports 8100/3100 with a separate `.next-e2e` build directory. It does not reuse or stop your development servers on 8000/3000. Use the `npm.cmd`/`npx.cmd` commands shown in PowerShell to avoid blocked `.ps1` shims. On another Python setup set `PYTHON_EXECUTABLE` to an absolute interpreter path before running it. Real browser tests cover multiple profiles/roles, citations, provider links, relevance safeguards, description toggling, input editing, recovery and mobile overflow. Successful runs write previews under `docs/screenshots/`. If sandboxed browser launch reports a missing executable despite an installed browser, run the tests with the required local filesystem/process access. For production locally, run `npm.cmd run start` after building, with FastAPI running separately.
-
-## Code and data map
-
-| Area | Location |
-|---|---|
-| HTTP endpoints and preserved health/summarize routes | `src/main.py` |
-| Pure matching / pathway services | `src/future_role_matching.py`, `src/personalized_reskilling.py` |
-| Contracts, profile normalisation, source loader, trend adapter | `src/models.py`, `skills_intake.py`, `data_repository.py`, `trend_adapter.py` |
-| Existing Next app and reusable React components | `src/frontend/app/`, `components/`, `lib/` |
-| Full discovery index and legacy 15-role fallback | `data/index/`, `data/occupations/` |
-| Reviewed provider catalogue | `data/resources/` |
-| Source registry and verification logs | `data/sources/` |
-| Synthetic profiles and snapshot fixtures | `data/demo/` |
-| Backend / browser tests | `tests/`, `src/frontend/e2e/` |
-
-Enhancement audit, all before/after scores and decision: [SCORING_AUDIT.md](docs/SCORING_AUDIT.md). Exact role/resource inventory and evidence: [CATALOGUE_REVIEW.md](docs/CATALOGUE_REVIEW.md). Change summary: [ENHANCEMENT_REPORT.md](docs/ENHANCEMENT_REPORT.md).
-
-See [API contracts and teammate interfaces](docs/CONTRACTS.md), [scoring and limitations](docs/SCORING_AND_LIMITATIONS.md), [sources and licences](docs/DATA_SOURCES_AND_LICENSES.md), [acceptance walkthrough](docs/DEMO_CHECKLIST.md), and [executed verification results](docs/VERIFICATION.md).
-
-Reference updates are explicit authoring operations, not startup tasks:
-
-```powershell
-.\.venv\Scripts\python.exe scripts/prepare_esco_subset.py --verified-date YYYY-MM-DD
-.\.venv\Scripts\python.exe scripts/check_source_links.py
-```
-
-Review rights/content, inspect diffs, update verification records and run tests before distributing changes. `scripts/curate_learning_catalog.py` reproduces the catalogue reviewed on 21 October 2026; it does not automatically reverify curricula. Restart FastAPI after approved data changes. HTTP clients cannot invent new verified evidence: review/register it in `data/sources/integration_sources.json` first.
-
-## Attribution and licence
-
-This service uses the ESCO classification of the European Commission. The English subset, scoring method and editorial course mappings are project additions and imply no endorsement. European classification data are not Malaysian labour-market evidence.
-
-Project code: [Apache 2.0](LICENSE). Third-party data/content retain their own terms; see the source inventory. No course content is mirrored. No deployment, sponsor service usage or measured workforce impact is claimed merely from repository folders or fixtures.
+Main's `.replit`, Linux launcher and Docker/RunPod configuration are preserved;
+this integration does not deploy anything or configure paid services.

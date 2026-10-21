@@ -5,7 +5,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from src.data_repository import load_catalogues
+from src.services.future_roles.data_repository import load_catalogues
 
 
 def write_reports():
