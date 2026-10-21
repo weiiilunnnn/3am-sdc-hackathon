@@ -145,7 +145,7 @@ export default function RegisterPage() {
       <div className="ambient-layer" aria-hidden="true" />
       <header className={`login-topbar ${hasScrolled ? "is-scrolled" : ""}`}>
         <Link className="brand" href="/" aria-label="Pathwaay home"><span className="brand-mark">P</span> Pathwaay <span className="brand-note">CAREER EXPLORER</span></Link>
-        <Link className="login-back-link" href="/login">Log in <span aria-hidden="true">↗</span></Link>
+        <nav className="entry-links" aria-label="Demo navigation"><Link className="login-back-link" href="/home">Skills workspace <span aria-hidden="true">↗</span></Link><Link className="login-back-link" href="/login">Log in</Link></nav>
       </header>
       <div className={`journey-transition ${journeyTransition ? "is-active" : ""}`} aria-hidden="true"><span /><span /><span /></div>
       {showRegisterIntro && <div className="register-intro" aria-hidden="true"><span className="register-intro-mark">P</span><span className="register-intro-word">Pathwaay.</span></div>}
@@ -173,6 +173,7 @@ export default function RegisterPage() {
         <div className="onboarding-scene">
           <div className="onboarding-topline"><button type="button" className="onboarding-back" onClick={() => setActiveStep(activeStep === 0 ? null : activeStep - 1)}>← <span>{activeStep === 0 ? "Welcome" : "Back"}</span></button><span className="onboarding-count">0{activeStep + 1} <i>/</i> 04</span></div>
           <div className="onboarding-progress" role="progressbar" aria-label="Profile setup progress" aria-valuemin={1} aria-valuemax={4} aria-valuenow={activeStep + 1}><span style={{ width: `${((activeStep + 1) / 4) * 100}%` }} /></div>
+          <p className="completion-note">Fictional demo details only. Your answers stay in this preview and are not saved.</p>
           <form key={activeStep} className="onboarding-form onboarding-content" onSubmit={handleNext}>
             {activeStep === 0 && <div className="onboarding-question">
               <span className="onboarding-step-tag">FIRST, THE HUMAN BEHIND THE PATH</span>
@@ -222,7 +223,8 @@ export default function RegisterPage() {
           <p>You’re exploring <strong>{interest.toLowerCase()}</strong> from a starting point in <strong>{major}</strong>. Your next step is yours to choose.</p>
           <div className="completion-summary"><span>{experience}</span><span>{interest}</span><span>{major}</span></div>
           <Link className="welcome-cta" href="/explorer"><span>Explore career pathways</span><span className="welcome-cta-icon" aria-hidden="true">↗</span></Link>
-          <p className="completion-note">This prototype doesn’t save profile details yet.</p>
+          <Link className="login-explore-link" href="/profile">Build a saved fictional profile ↗</Link>
+          <p className="completion-note">This onboarding preview does not save your answers. Use fictional details only.</p>
         </div>
       </section>}
 

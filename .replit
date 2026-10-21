@@ -1,5 +1,10 @@
-run = "python src/main.py"
+modules = ["nodejs-24", "python-3.12"]
+run = "python scripts/dev.py"
 entrypoint = "src/main.py"
 
 [nix]
-channel = "stable-24_05"
+channel = "stable-25_05"
+
+[[ports]]
+localPort = 3000
+externalPort = 80

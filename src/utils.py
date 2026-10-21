@@ -16,5 +16,3 @@ def summarize(values: list[float]) -> dict:
         "max": max(values),
         "average": round(sum(values) / len(values), 2),
     }
-
-

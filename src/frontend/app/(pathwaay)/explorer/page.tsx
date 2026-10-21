@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 
 type Goal = { number: string; title: string; target: string; reason: string };
@@ -296,7 +297,7 @@ export default function Home() {
       <div className="ambient-layer" aria-hidden="true" />
       <header className={`topbar ${hasScrolled ? "is-scrolled" : ""}`}>
         <a className="brand" href="#top" aria-label="Pathwaay home"><span className="brand-mark">P</span> Pathwaay <span className="brand-note">CAREER EXPLORER</span></a>
-        <span className="demo-pill"><span /> DEMO EXPERIENCE</span>
+        <Link className="demo-pill" href="/home">Open skills workspace ↗</Link>
       </header>
 
       <section className="hero" id="top">

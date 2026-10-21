@@ -727,3 +727,6 @@ button:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid
   .register-intro, .register-intro-mark, .register-intro-word { animation: none; }
   .onboarding-progress span, .onboarding-back, .onboarding-suggestions button, .onboarding-option { transition: none; }
 }
+
+/* Navigation between the preserved demo and saved-profile workspace. */
+.entry-links { display: flex; align-items: center; gap: 20px; }
