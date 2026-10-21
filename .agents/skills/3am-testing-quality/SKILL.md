@@ -16,7 +16,7 @@ Use this skill when adding behavior, fixing a defect, or reporting project readi
 - Browser journeys: verify profile sample → edit → save/reload and radar data/provenance states when browser automation is available. If it is not available, state the limitation and provide a manual checklist.
 - Run the Next.js production build after relevant frontend changes; it generates `.next` output.
 
-The root `pnpm run typecheck` does not include `src/frontend`; run `pnpm --filter 3am-sdc-frontend run typecheck` explicitly.
+Run `npm --prefix src/frontend run typecheck` explicitly; there is no root JavaScript workspace.
 
 ## Report accurately
 

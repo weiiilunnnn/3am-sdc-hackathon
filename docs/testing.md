@@ -11,23 +11,23 @@ From the repository root:
 PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests -p 'test_*.py' -v
 
 # Frontend helper logic tests (Node built-in test runner)
-pnpm --dir src/frontend run test:logic
+npm --prefix src/frontend run test:logic
 
 # React component rendering tests (Node test runner via the dev-only tsx tool)
-pnpm --dir src/frontend run test:components
+npm --prefix src/frontend run test:components
 
 # Frontend TypeScript check
-pnpm --dir src/frontend run typecheck
+npm --prefix src/frontend run typecheck
 
 # Next.js production build; writes generated .next output
-pnpm --dir src/frontend run build
+npm --prefix src/frontend run build
 ```
 
 Python tests cover profiles, trends, utilities, employment snapshots, mocked HTTP adapters and FastAPI routes. `tests/test_api.py` drives the real ASGI application in process without an extra HTTP-client dependency. Every storage test uses temporary SQLite databases. External responses are mocked; ordinary tests do not fetch a provider.
 
 `tests/frontend_logic.test.mjs` covers profile validation/list parsing and chart geometry. `tests/frontend_components.test.ts` renders existing profile and employment components with React's server renderer: privacy/loading, source attribution, escaped content, empty/error/cache states, initial filters, exact-ID overlap and cooldown formatting. CV extraction and indicator formulas are covered by Python unit tests. `tsx` is a frontend **development-only** dependency for importing TSX in these tests. These rendering tests do not simulate clicks, hydration, or network requests.
 
-**Important:** root `pnpm run typecheck` checks libraries and selected workspace packages but does not include `src/frontend/`. Always run the frontend package typecheck explicitly after frontend changes.
+Run frontend commands with `npm --prefix src/frontend`; there is no root JavaScript workspace.
 
 ## Coverage boundaries
 
@@ -46,14 +46,14 @@ When adding API coverage:
 
 Use this checklist when a request changes an interactive user journey and browser automation is unavailable:
 
-1. Open `/` and confirm the form, privacy warning, validation feedback, and sample profiles load.
+1. Open `/profile` and confirm the form, privacy warning, validation feedback, and sample profiles load.
 2. Use a fictional sample, edit fields/skills, and submit only synthetic information.
 3. Confirm the saved profile can be retrieved and updated from the same browser.
 4. Open `/radar`; confirm real and synthetic modes are not conflated.
 5. For real observations, check measurement, publication period, source URL, and retrieval timestamp.
 6. Check empty/error/loading states when they are part of the change; do not trigger a live refresh unless the task requires it.
 7. Test `/home` shortcuts, profile record CRUD/evidence links, and saved-profile retry.
-8. Upload only fictional PDF/DOCX files to `/`, review/edit extracted sections and skill aliases, then explicitly apply and save.
+8. Upload only fictional PDF/DOCX files to `/profile`, review/edit extracted sections and skill aliases, then explicitly apply and save.
 9. Preview both saved-profile CV templates, print or Save as PDF, and inspect page breaks.
 10. In `/explore`, combine search with profile, interest, market and research views; verify unsupported filters remain disabled and details show provenance.
 11. Inspect desktop and narrow mobile layouts and keyboard focus. A static screenshot is not an interaction test.

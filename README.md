@@ -1,191 +1,95 @@
 # 3AM SDC Hackathon
 
-> A one-sentence description of what your project does and who it is for.
+A career-development prototype combining Pathwaay’s onboarding and career/SDG scenario demo with Aiversecity’s saved fictional profiles, CV tools, research evidence and employment snapshots.
 
-## Development: Next.js + FastAPI
+## Local development
 
-The application source is under `src/`: Next.js is in `src/frontend/`, and the
-FastAPI entry point is `src/main.py`. Replit starts the web and API services
-through their managed workflows. The web service serves `/`; `/api/*` is routed
-to FastAPI.
+Requires Python 3.10+ and Node.js 22.18+ (Node 24 recommended). Use npm inside `src/frontend`; this repository is not a pnpm workspace.
 
-For local development, install the Python requirements and frontend workspace
-dependencies, then run the API and frontend in separate terminals:
-
-```bash
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
 python -m pip install -r requirements.txt
-python -m uvicorn src.main:app --host 0.0.0.0 --port 8080 --reload
+npm --prefix src/frontend ci
+python scripts/dev.py
 ```
 
-```bash
-pnpm install
-pnpm --filter 3am-sdc-frontend run dev
+Open http://localhost:3000. The launcher starts FastAPI on 127.0.0.1:8080 and Next.js on port 3000, and stops both when interrupted or either service exits. `PORT` and `API_PORT` can override these development ports. The launcher requires a POSIX environment (macOS/Linux/Replit).
+
+Alternatively, run each service in its own terminal:
+
+```sh
+python -m uvicorn src.main:app --host 127.0.0.1 --port 8080 --reload
+npm --prefix src/frontend run dev
 ```
 
-Open the frontend at `http://localhost:3000`. The frontend proxies `/api/*` to
-`http://127.0.0.1:8080`; FastAPI's interactive docs are at
-`http://127.0.0.1:8080/docs`.
+Next.js proxies `/api/*` to `BACKEND_URL` (default `http://127.0.0.1:8080`). FastAPI docs are at http://127.0.0.1:8080/docs. SQLite defaults to `src/data/future_ready.sqlite3`; set `APP_DB_PATH` to change it. Keep local data and credentials out of Git.
 
----
+## Pages and integration
 
-## Team Information
+| URL | Behavior |
+| --- | --- |
+| `/` | Redirects to `/register`, matching main |
+| `/register`, `/login` | Main’s onboarding/sign-in previews; no account creation or authentication |
+| `/explorer` | Main’s illustrative career, SDG and scenario demo |
+| `/profile` | SH’s existing profile editor, sample profiles and CV upload/review (previously `/`) |
+| `/home` | Saved-profile workspace overview |
+| `/cv-studio` | Saved-profile CV previews and printing |
+| `/outlook` | Profile-content checks and cached skill evidence |
+| `/explore` | Skills catalogue with profile, research and posting filters |
+| `/radar` | OpenAlex research and Remote OK job-source evidence |
 
-| Field                  | Details                                     |
-| ---------------------- | ------------------------------------------- |
-| **Team Name**          | 3AM                                         |
-| **Team Domain**        | Domain 1                                    |
-| **SDG Track (1–17)**   | SDG 4  — Quality Education                  |
-| **Team Leader**        | Ooi Wei Lun                                 |
-| **University**         | Asia Pacific University                     |
-| **Number of Members**  | 3                                           |
+The career demo links to the workspace, and the workspace links back. Onboarding answers remain in memory and are not silently copied into saved profiles. Use fictional details only. No page implements account security or personalised career predictions.
 
-## Links
+## Structure
 
-| Resource          | Link                                           |
-| ----------------- | ---------------------------------------------- |
-| GitHub Repository | https://github.com/weiiilunnnn/3am-sdc-hackathon  |
-| Replit Project    | https://replit.com/@your-username/your-project |
-| Live Demo         | https://your-project.replit.app                |
-| RunPod Endpoint   | https://api.runpod.ai/v2/your-endpoint-id      |
-| Slide Deck        | https://example.com/slides                     |
-| Demo Video        | https://example.com/demo-video                 |
-
----
-
-## Overview
-
-### Problem
-
-Describe the real-world problem you are solving in 2–4 sentences. Who is affected, and why does it matter?
-
-### Solution
-
-Explain how your project uses AI to solve the problem and what makes it valuable.
-
-### Key Features
-
-- **Feature 1** — Short description.
-- **Feature 2** — Short description.
-- **Feature 3** — Short description.
-
-### Tech Stack
-
-| Layer         | Technology                   |
-| ------------- | ---------------------------- |
-| Frontend      | e.g. HTML, React             |
-| Backend       | e.g. Python, Flask / FastAPI |
-| Database      | e.g. PostgreSQL, SQLite      |
-| AI / Compute  | RunPod (GPU)                 |
-| Hosting / Dev | Replit                       |
-
----
-
-## Project Structure
-
-```
-.
-├── docs/                    # Screenshots, diagrams
-├── src/
-│   ├── frontend/            # Next.js application
-│   ├── main.py              # FastAPI application entry point
-│   └── utils.py             # Backend helper functions
-├── submission/              # Required submission documents
-│   ├── REPLIT PROOF OF USE.pdf
-│   ├── RUNPOD PROOF OF USE.pdf
-│   └── Submission Template SDC Hackathon.pdf
-├── tests/
-│   └── test_utils.py        # Unit tests
-├── .env.example             # Example environment variables
-├── .gitignore
-├── .replit                  # Replit run configuration
-├── LICENSE
-├── requirements.txt         # FastAPI and Uvicorn dependencies
-└── README.md
+```text
+src/
+  main.py                  FastAPI entry point
+  api/                     API routes
+  models/                  Validation and response contracts
+  services/                Business logic, SQLite storage and source adapters
+  data/                    Local vocabulary and fictional samples
+  frontend/
+    package.json           Frontend dependencies and commands
+    package-lock.json      npm lockfile
+    app/
+      (pathwaay)/           Main’s pages and root layout
+      (workspace)/          SH’s pages and root layout
+    lib/                   Frontend API client and helpers
+runpod/handler.py          Main’s unused serverless placeholder
+scripts/dev.py            Optional two-service development launcher
+tests/                    Python, frontend logic and component tests
+docs/                     Architecture, data sources and verification
+submission/               Competition documents
 ```
 
-### Architecture
+Route-group names in parentheses do not appear in URLs. Separate root layouts prevent the two existing global stylesheets from affecting each other. Crossing between groups performs a full page load; saved fictional profiles remain available through the existing browser profile ID and SQLite storage.
 
-```
-User ──► Replit (App / API) ──► RunPod Endpoint (GPU model)
-                │
-                └──► Response returned to user
-```
+## Verification
 
----
-
-## How to Run
-
-### Run on Replit
-
-Open the Replit project and start the **Project** workflow. The managed web and
-API services start Next.js and FastAPI respectively. No RunPod credentials or
-external services are needed for the starter application.
-
-### Run Locally
-
-```bash
-# Install dependencies as shown above, then run the API and frontend in
-# separate terminals.
-```
-
-### Run Tests
-
-```bash
+```sh
 python -m unittest discover tests
+npm --prefix src/frontend run test:logic
+npm --prefix src/frontend run test:components
+npm --prefix src/frontend run typecheck
+npm --prefix src/frontend run build
 ```
 
----
+Tests use synthetic fixtures and temporary databases. Live external-source availability and production hosting are separate checks. See [testing](docs/testing.md) and [branch integration](docs/branch-integration.md).
 
-## How We Use Replit *(Required)*
+## Replit and production
 
-Describe how your team used Replit. For example:
+After installing Python and frontend dependencies, the Replit Run button uses `scripts/dev.py`. Only the frontend needs a public port; it proxies API calls to the local backend. The previous artifact/workspace configuration and unrelated database post-merge hook have been removed.
 
-- **Development:** Collaborative coding in a shared Repl using Multiplayer.
-- **Hosting:** The app is deployed with Replit Deployments at the Live Demo link above.
-- **Secrets:** API keys are stored in Replit Secrets, never in the code.
+For a production server, build with `npm --prefix src/frontend run build`, run FastAPI without `--reload`, and run `npm --prefix src/frontend run start`. Configure `BACKEND_URL` when building if the API is not at the default address. Replit deployment and durable SQLite storage must be configured and verified separately; the development launcher is not a production deployment configuration.
 
-📄 Proof of use: [`submission/REPLIT PROOF OF USE.pdf`](submission/REPLIT%20PROOF%20OF%20USE.pdf)
+RunPod is not used by the app. `runpod/handler.py` is restored from main for team compatibility and still contains placeholder echo logic; it needs a separate RunPod runtime before it can be deployed.
 
-## How We Use RunPod *(Required)*
+## Team and submission
 
-RunPod has not been configured for the starter baseline. Update this section
-with the team's actual usage only after an endpoint is implemented.
+Team **3AM**, Domain 1, SDG 4 — Quality Education. Team leader: Ooi Wei Lun. University: Asia Pacific University. Team size: 3.
 
-📄 Proof of use: [`submission/RUNPOD PROOF OF USE.pdf`](submission/RUNPOD%20PROOF%20OF%20USE.pdf)
+The team still needs to supply final live-demo, slide-deck and video links and complete its submission documentation and proofs of use. Existing documents are retained under `submission/`.
 
----
-
-## Challenges & Learnings
-
-- What challenges did you face, and how did you overcome them?
-- What did your team learn?
-
-## Future Improvements
-
-- [ ] Improvement 1
-- [ ] Improvement 2
-
-## Team
-
-| Name        | Role                | GitHub                                   |
-| ----------- | ------------------- | ---------------------------------------- |
-| Member Name | Team Lead / Backend | [@username](https://github.com/username) |
-| Member Name | Frontend            | [@username](https://github.com/username) |
-| Member Name | AI / RunPod         | [@username](https://github.com/username) |
-
----
-
-## Submission Checklist
-
-- [ ] Team name, domain (Domain 1 / Domain 2) and SDG track filled in
-- [ ] Slide deck link added
-- [ ] Demo video link added
-- [ ] Replit used, with proof of use in `submission/`
-- [ ] RunPod used, with proof of use in `submission/`
-- [ ] Submission template completed in `submission/`
-- [ ] "How to Run" steps verified
-- [ ] No API keys or secrets committed to the repository
-
-## License
-
-This project is licensed under the [Apache License 2.0](LICENSE).
+Licensed under [Apache License 2.0](LICENSE).

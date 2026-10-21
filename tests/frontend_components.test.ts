@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import test from "node:test";
-import { EmploymentSnapshotView, formatCooldown, type EmploymentSnapshotViewProps } from "../src/frontend/app/radar/EmploymentSnapshot";
-import Home from "../src/frontend/app/page";
+import { EmploymentSnapshotView, formatCooldown, type EmploymentSnapshotViewProps } from "../src/frontend/app/(workspace)/radar/EmploymentSnapshot";
+import Home from "../src/frontend/app/(workspace)/profile/page";
 import type { EmploymentDashboard } from "../src/frontend/lib/api";
 
-// Resolve the app's own React version, not a different workspace artifact's React.
+// Resolve the app's own React version, with the standalone frontend package.
 const requireFrontend = createRequire(new URL("../src/frontend/package.json", import.meta.url));
 const { createElement } = requireFrontend("react");
 const { renderToStaticMarkup } = requireFrontend("react-dom/server");

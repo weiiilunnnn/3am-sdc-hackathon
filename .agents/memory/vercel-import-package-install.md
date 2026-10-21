@@ -3,6 +3,8 @@ name: Vercel import package install
 description: Recovery context for a workspace install blocked by a transitive dependency.
 ---
 
+**Historical only:** the Express/pnpm workspace was removed during branch alignment. The active frontend uses `npm --prefix src/frontend ci`; do not restore the old scaffold to resolve an install issue.
+
 When the imported workspace's install was blocked by the package firewall on transitive `proxy-addr@2.0.7`, updating the API server's direct Express dependency to its latest version allowed `pnpm install` to complete.
 
 **Why:** The initial lockfile could not be fully installed, so code generation and app checks failed until the direct dependency was updated.

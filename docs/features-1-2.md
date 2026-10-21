@@ -207,10 +207,10 @@ From the repository root:
 
 ```sh
 python -m unittest discover -s tests -p 'test_*.py'
-pnpm --dir src/frontend run test:logic
-pnpm --dir src/frontend run test:components
-pnpm --dir src/frontend run typecheck
-pnpm --dir src/frontend run build
+npm --prefix src/frontend run test:logic
+npm --prefix src/frontend run test:components
+npm --prefix src/frontend run typecheck
+npm --prefix src/frontend run build
 ```
 
 Unit and ASGI route integration tests use temporary SQLite databases and mocked
