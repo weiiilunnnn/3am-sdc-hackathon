@@ -19,6 +19,44 @@ type Career = {
   scenarios: Record<Scenario, ScenarioView>;
 };
 
+type Recommendation = { role: string; score: number; skills: string[] };
+type SkillProjection = { skill: string; demand_index: number };
+type CareerModelResult = {
+  recommendations: Recommendation[];
+  scenario_estimates: Record<Scenario, Array<{ role: string; year: number; skills: SkillProjection[] }>>;
+  model: string;
+  data_notice: string;
+};
+type SDGExplanation = {
+  role_contribution: string;
+  skill_links: Array<{ skill: string; explanation: string }>;
+  model: string;
+};
+type SDGOverview = {
+  sdg_number: string;
+  main_contribution: string;
+  target_previews: Array<{ code: string; explanation: string }>;
+  model: string;
+};
+type SDGRecommendation = {
+  role: string;
+  recommended_sdg: string;
+  ranked_sdgs: Array<{
+    number: string;
+    title: string;
+    summary: string;
+    icon_url: string;
+    relative_fit: number;
+    mapped_skill_count: number;
+    target_codes: string[];
+    targets: Array<{ code: string; title: string; definition: string }>;
+  }>;
+  skill_mappings: Array<{ name: string; goals: string[] }>;
+  data_notice: string;
+};
+const interestOptions = ["analytics", "ai", "business", "building", "communication", "product", "research"];
+const skillOptions = ["python", "sql", "statistics", "visualization", "machine_learning", "cloud"];
+
 const goalInfo: Record<string, { title: string; target: string }> = {
   "4.3": { title: "Quality Education", target: "Target 4.3 · Equal access to technical, vocational and tertiary education" },
   "4.4": { title: "Quality Education", target: "Target 4.4 · Build skills for employment and decent work" },
@@ -26,17 +64,7 @@ const goalInfo: Record<string, { title: string; target: string }> = {
   "8.5": { title: "Decent Work and Economic Growth", target: "Target 8.5 · Support productive employment and decent work" },
 };
 
-const sdgGroups = [
-  { number: "4", title: "Quality Education", description: "Skills, learning and preparation for work", targets: ["4.3", "4.4"] },
-  { number: "8", title: "Decent Work and Economic Growth", description: "Productivity, innovation and decent employment", targets: ["8.2", "8.5"] },
-];
-
-const targetDescriptions: Record<string, string> = {
-  "4.3": "Ensure equal access for women and men to affordable and quality technical, vocational and tertiary education, including university.",
-  "4.4": "Increase the number of young people and adults with relevant skills, including technical and vocational skills, for employment, decent jobs and entrepreneurship.",
-  "8.2": "Achieve higher levels of economic productivity through diversification, technological upgrading and innovation.",
-  "8.5": "Achieve full and productive employment and decent work for all, including young people and persons with disabilities, with equal pay for work of equal value.",
-};
+const sdgIconUrl = (number: string) => `https://open-sdg.github.io/sdg-translations/assets/img/goals/en/${Number(number)}.png`;
 
 const careers: Career[] = [
   {
@@ -201,7 +229,8 @@ const careers: Career[] = [
 ];
 
 function GoalTag({ number }: { number: string }) {
-  return <span className="goal-tag">SDG {number}</span>;
+  const goalNumber = number.split(".")[0];
+  return <span className="goal-tag"><img src={sdgIconUrl(goalNumber)} alt={`SDG ${goalNumber} icon`} />SDG {number}</span>;
 }
 
 function RolePicker({ selectedPath, onSelect }: { selectedPath: string; onSelect: (value: string) => void }) {
@@ -266,13 +295,146 @@ export default function Home() {
   const [hasChosenPath, setHasChosenPath] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
   const [selectedSdg, setSelectedSdg] = useState<string | null>(null);
-  const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
+  const [selectedTargets, setSelectedTargets] = useState<string[]>([]);
   const [scenario, setScenario] = useState<Scenario>("moderate");
+  const [major, setMajor] = useState("data_science");
+  const [interests, setInterests] = useState<string[]>(["analytics", "ai", "business"]);
+  const [profileSkills, setProfileSkills] = useState<string[]>(["python", "sql", "statistics"]);
+  const [experienceMonths, setExperienceMonths] = useState(6);
+  const [modelResult, setModelResult] = useState<CareerModelResult | null>(null);
+  const [modelLoading, setModelLoading] = useState(false);
+  const [modelError, setModelError] = useState("");
+  const [sdgExplanations, setSdgExplanations] = useState<Record<string, SDGExplanation> | null>(null);
+  const [sdgExplanationLoading, setSdgExplanationLoading] = useState(false);
+  const [sdgExplanationError, setSdgExplanationError] = useState("");
+  const [sdgOverview, setSdgOverview] = useState<SDGOverview | null>(null);
+  const [sdgOverviewLoading, setSdgOverviewLoading] = useState(false);
+  const [sdgOverviewError, setSdgOverviewError] = useState("");
+  const [sdgRecommendation, setSdgRecommendation] = useState<SDGRecommendation | null>(null);
+  const [sdgRecommendationLoading, setSdgRecommendationLoading] = useState(false);
+  const [sdgRecommendationError, setSdgRecommendationError] = useState("");
   const path = careers.find((item) => item.title === selectedPath) ?? careers[0];
   const currentOutlook = path.scenarios[scenario];
-  const currentGroup = sdgGroups.find((item) => item.number === selectedSdg);
-  const targetContribution = path.goals.find((goal) => goal.number === selectedTarget);
-  const targetSkills = selectedTarget ? path.skills.filter((skill) => skill.goals.includes(selectedTarget)) : [];
+  const rankedGroups = sdgRecommendation?.ranked_sdgs ?? [];
+  const currentGroup = rankedGroups.find((item) => item.number === selectedSdg);
+  const datasetSkillMap = sdgRecommendation?.role === path.title
+    ? new Map(sdgRecommendation.skill_mappings.map((item) => [item.name, item.goals]))
+    : null;
+  const pathSkills = path.skills.map((skill) => ({ ...skill, goals: datasetSkillMap?.get(skill.name) ?? [] }));
+  const targetSkills = selectedTargets.length ? pathSkills.filter((skill) => selectedTargets.some((code) => skill.goals.includes(code))) : [];
+  useEffect(() => {
+    if (!hasChosenPath) return;
+    const controller = new AbortController();
+    setSdgRecommendation(null);
+    setSdgRecommendationError("");
+    setSdgRecommendationLoading(true);
+    fetch("/api/sdg/recommendations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
+      body: JSON.stringify({ role: path.title }),
+    }).then(async (response) => {
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(response.status === 404
+          ? "The FastAPI server is out of date. Restart it from the project root to load the SDG routes."
+          : body.detail || "Could not rank the SDGs from the mapping dataset.");
+      }
+      const result = await response.json() as SDGRecommendation;
+      setSdgRecommendation(result);
+      setSelectedSdg((current) => current ?? result.recommended_sdg);
+    }).catch((error: unknown) => {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setSdgRecommendationError(error instanceof Error ? error.message : "SDG ranking is unavailable.");
+    }).finally(() => {
+      if (!controller.signal.aborted) setSdgRecommendationLoading(false);
+    });
+    return () => controller.abort();
+  }, [hasChosenPath, path]);
+
+  useEffect(() => {
+    if (!selectedSdg) {
+      setSdgOverview(null);
+      setSdgOverviewError("");
+      setSdgOverviewLoading(false);
+      return;
+    }
+    const controller = new AbortController();
+    setSdgOverview(null);
+    setSdgOverviewError("");
+    setSdgOverviewLoading(true);
+    fetch("/api/sdg/overview", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
+      body: JSON.stringify({
+        role: path.title,
+        role_summary: path.summary,
+        sdg_number: selectedSdg,
+        targets: currentGroup?.targets ?? [],
+        skills: pathSkills.map(({ name, goals }) => ({ name, goals })),
+      }),
+    }).then(async (response) => {
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(response.status === 404
+          ? "The FastAPI server is out of date. Restart it from the project root to load the SDG routes."
+          : body.detail || "Could not generate this SDG overview.");
+      }
+      setSdgOverview(await response.json() as SDGOverview);
+    }).catch((error: unknown) => {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setSdgOverviewError(error instanceof Error ? error.message : "SDG overview is unavailable.");
+    }).finally(() => {
+      if (!controller.signal.aborted) setSdgOverviewLoading(false);
+    });
+    return () => controller.abort();
+  }, [selectedSdg, path, sdgRecommendation]);
+
+  useEffect(() => {
+    if (!selectedTargets.length) {
+      setSdgExplanations(null);
+      setSdgExplanationError("");
+      setSdgExplanationLoading(false);
+      return;
+    }
+    const controller = new AbortController();
+    setSdgExplanations(null);
+    setSdgExplanationError("");
+    setSdgExplanationLoading(true);
+    Promise.all(selectedTargets.map(async (targetCode) => {
+      const targetInfo = currentGroup?.targets.find((target) => target.code === targetCode);
+      if (!targetInfo) return null;
+      const response = await fetch("/api/sdg/explanation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({
+          role: path.title,
+          role_summary: path.summary,
+          target_code: targetCode,
+          target_title: targetInfo.title,
+          target_definition: targetInfo.definition,
+          skills: pathSkills.map(({ name, goals }) => ({ name, goals })),
+        }),
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(response.status === 404
+          ? "The FastAPI server is out of date. Restart it from the project root to load the SDG routes."
+          : body.detail || "Could not generate this SDG explanation.");
+      }
+      return [targetCode, await response.json() as SDGExplanation] as const;
+    })).then((results) => {
+      setSdgExplanations(Object.fromEntries(results.filter((result): result is NonNullable<typeof result> => result !== null)));
+    }).catch((error: unknown) => {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setSdgExplanationError(error instanceof Error ? error.message : "SDG explanation is unavailable.");
+    }).finally(() => {
+      if (!controller.signal.aborted) setSdgExplanationLoading(false);
+    });
+    return () => controller.abort();
+  }, [selectedTargets, path, sdgRecommendation, selectedSdg]);
 
   useEffect(() => {
     const updateScrollState = () => setHasScrolled(window.scrollY > 8);
@@ -285,8 +447,33 @@ export default function Home() {
     setSelectedPath(title);
     setHasChosenPath(true);
     setSelectedSdg(null);
-    setSelectedTarget(null);
+    setSelectedTargets([]);
+    setSdgRecommendation(null);
     setScenario("moderate");
+  }
+
+  function toggleTarget(targetCode: string) {
+    setSelectedTargets((current) => current.includes(targetCode)
+      ? current.filter((code) => code !== targetCode)
+      : current.length < 2 ? [...current, targetCode] : current);
+  }
+
+  async function runCareerModel() {
+    setModelLoading(true);
+    setModelError("");
+    try {
+      const response = await fetch("/api/career/recommendations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ major, interests, skills: profileSkills, experience_months: experienceMonths }),
+      });
+      if (!response.ok) throw new Error("The career model could not respond. Start the FastAPI backend and try again.");
+      setModelResult(await response.json() as CareerModelResult);
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : "Career model unavailable.");
+    } finally {
+      setModelLoading(false);
+    }
   }
 
   return (
@@ -317,6 +504,23 @@ export default function Home() {
           <span className="step-number">01</span>
         </div>
         <div className="profile-note"><span className="profile-dot" /> DEMO PROFILE <strong>Data Science Student</strong><span>Computer science foundations · analytics projects · early portfolio evidence</span></div>
+        <section className="model-panel" aria-labelledby="model-heading">
+          <div className="model-heading"><div><p className="eyebrow">SYNTHETIC SIGNAL MODEL</p><h3 id="model-heading">Find roles that fit your starting point</h3></div><span className="model-status">CPU INFERENCE</span></div>
+          <div className="model-fields">
+            <label className="model-field">Study area<select value={major} onChange={(event) => setMajor(event.target.value)}><option value="data_science">Data science</option><option value="computer_science">Computer science</option><option value="business">Business</option><option value="economics">Economics</option><option value="engineering">Engineering</option><option value="other">Other</option></select></label>
+            <label className="model-field">Experience<select value={experienceMonths} onChange={(event) => setExperienceMonths(Number(event.target.value))}><option value={0}>Just starting</option><option value={6}>Early projects</option><option value={24}>1–3 years</option><option value={60}>3+ years</option></select></label>
+          </div>
+          <div className="model-chip-group"><span>Interests</span><div>{interestOptions.map((item) => <button type="button" key={item} className={`model-chip ${interests.includes(item) ? "active" : ""}`} aria-pressed={interests.includes(item)} onClick={() => setInterests((current) => current.includes(item) ? current.filter((value) => value !== item) : [...current, item])}>{item.replaceAll("_", " ")}</button>)}</div></div>
+          <div className="model-chip-group"><span>Skills you have tried</span><div>{skillOptions.map((item) => <button type="button" key={item} className={`model-chip ${profileSkills.includes(item) ? "active" : ""}`} aria-pressed={profileSkills.includes(item)} onClick={() => setProfileSkills((current) => current.includes(item) ? current.filter((value) => value !== item) : [...current, item])}>{item.replaceAll("_", " ")}</button>)}</div></div>
+          <button type="button" className="model-run" disabled={modelLoading || interests.length === 0} onClick={runCareerModel}>{modelLoading ? "Reading the signal…" : modelResult ? "Refresh role matches" : "Generate role matches"}<span>→</span></button>
+          {modelError && <p className="model-error" role="alert">{modelError}</p>}
+          {modelResult && <div className="model-results staged-reveal" aria-live="polite">
+            <div className="model-results-title"><div><span className="small-label">MODEL RANKING · SYNTHETIC FIT SCORES</span><p>Choose a role to open its SDG map and career scenarios.</p></div><span className="model-tag">{modelResult.model}</span></div>
+            <div className="model-ranking">{modelResult.recommendations.slice(0, 3).map((item, index) => <button type="button" key={item.role} className={`model-match ${selectedPath === item.role ? "selected" : ""}`} onClick={() => choosePath(item.role)}><span className="model-rank">0{index + 1}</span><span className="model-match-copy"><strong>{item.role}</strong><small>Skill signals: {item.skills.slice(0, 3).join(" · ")}</small></span><span className="model-score">{item.score.toFixed(0)}<small>FIT</small></span></button>)}</div>
+            <div className="model-outlooks">{(["moderate", "fast"] as Scenario[]).map((key) => <div key={key}><span>{key === "moderate" ? "MODERATE" : "FAST"} · 2030 SKILL SIGNAL</span><p>{modelResult.scenario_estimates[key]?.[0]?.skills.slice(0, 3).map((item) => `${item.skill} ${item.demand_index}`).join(" · ")}</p></div>)}</div>
+            <p className="model-disclaimer">{modelResult.data_notice} Scores describe similarity to simulated profiles, not a probability of employment.</p>
+          </div>}
+        </section>
         <RolePicker selectedPath={selectedPath} onSelect={choosePath} />
         {hasChosenPath && <div className="path-summary staged-reveal">
           <div className="path-icon" aria-hidden="true">↗</div>
@@ -329,42 +533,54 @@ export default function Home() {
           <div><p className="eyebrow">02 / PURPOSE IN PRACTICE</p><h2 id="impact-heading">How this path connects to the SDGs</h2></div>
           <span className="section-caption">THE 2030 AGENDA</span>
         </div>
-        <p className="section-intro">Choose a main Sustainable Development Goal, then open one of its targets to see how this role and its skills connect. These are potential links, not proof that a role achieves a goal.</p>
+        <p className="section-intro">The dataset compares this role with all 17 Sustainable Development Goals, then surfaces the two strongest skill connections. Open a target to explore a possible contribution.</p>
         <div className="sdg-dashboard">
-          <div className="dashboard-label"><span className="small-label">1 · CHOOSE A MAIN SDG</span><span className="selection-hint">Viewing: {path.title}</span></div>
+          <div className="dashboard-label"><span className="small-label">{sdgRecommendationLoading ? "1 · RANKING MAPPED GOALS ACROSS ALL 17 SDGS" : sdgRecommendation ? "1 · TOP TWO · BEST FIT: SDG " + sdgRecommendation.recommended_sdg : "1 · SDG ROLE MATCH"}</span><span className="selection-hint">Viewing: {path.title}</span></div>
           <div className="goal-grid">
-            {sdgGroups.map((group) => <button type="button" key={group.number} className={`goal-card goal-select ${selectedSdg === group.number ? "selected" : ""}`} aria-pressed={selectedSdg === group.number} onClick={() => { setSelectedSdg(group.number); setSelectedTarget(null); }}>
-              <div className={`sdg-number sdg-main-${group.number}`}>{group.number}<span>SDG</span></div>
-              <div className="goal-copy"><span className="small-label">SUSTAINABLE DEVELOPMENT GOAL {group.number}</span><h3>{group.title}</h3><p>{group.description}</p></div>
-              <span className="goal-chevron" aria-hidden="true">{selectedSdg === group.number ? "●" : "○"}</span>
-            </button>)}
+            {rankedGroups.map((group) => {
+              const isBestFit = sdgRecommendation?.recommended_sdg === group.number;
+              return <button type="button" key={group.number} disabled={!sdgRecommendation} className={"goal-card goal-select " + (selectedSdg === group.number ? "selected" : "")} aria-pressed={selectedSdg === group.number} onClick={() => { setSelectedSdg(group.number); setSelectedTargets([]); }}>
+                <img className="sdg-icon" src={group.icon_url} alt={"Official UN Sustainable Development Goal " + group.number + ": " + group.title} loading="lazy" />
+                <div className="goal-copy"><span className="small-label">SUSTAINABLE DEVELOPMENT GOAL {group.number}</span><h3>{group.title}</h3><p>{selectedSdg === group.number ? (sdgOverviewLoading ? "Building a role-specific explanation…" : sdgOverview?.main_contribution ?? (sdgOverviewError ? "Overview unavailable: " + sdgOverviewError : group.summary)) : group.mapped_skill_count + " role skills have mapped links to " + group.target_codes.join(" and ") + "."}</p><span className="goal-fit-label">{isBestFit ? "BEST FIT" : "SECOND FIT"} · RELATIVE MATCH {group.relative_fit}%</span></div>
+                <span className="goal-chevron" aria-hidden="true">{selectedSdg === group.number ? "●" : "○"}</span>
+              </button>;
+            })}
           </div>
+          {sdgRecommendationError && <p className="model-error" role="alert">{sdgRecommendationError}</p>}
+          {sdgRecommendationLoading && <p className="step-prompt">Comparing mapped role skills with the full SDG catalog…</p>}
+          {sdgRecommendation && rankedGroups.length < 2 && <p className="step-prompt">The mapping dataset found only one goal with supported skill links for this role.</p>}
+          {sdgRecommendation && <p className="sdg-data-note">{sdgRecommendation.data_notice}</p>}
+          <p className="sdg-asset-note">Official SDG icons from the <a href="https://sdgs.un.org/goals" target="_blank" rel="noreferrer">United Nations</a>. The content of this publication has not been approved by the United Nations and does not reflect the views of the United Nations or its officials or Member States.</p>
 
           {currentGroup ? <div key={selectedSdg} className="target-dashboard staged-reveal">
-            <div className="dashboard-label"><span className="small-label">2 · CHOOSE A TARGET</span><span className="selection-hint">SDG {selectedSdg} · {currentGroup.title}</span></div>
-            <div className="target-choices" role="group" aria-label={`Choose a target under SDG ${selectedSdg}`}>
-              {currentGroup.targets.map((target, index) => <button type="button" key={target} className={`target-choice target-choice-reveal target-choice-${index + 1} ${selectedTarget === target ? "active" : ""}`} aria-pressed={selectedTarget === target} onClick={() => setSelectedTarget(target)}>{target}<span>{target === "4.3" ? "Learning access" : target === "4.4" ? "Skills for work" : target === "8.2" ? "Productivity & innovation" : "Decent employment"}</span></button>)}
+            <div className="dashboard-label"><span className="small-label">2 · CHOOSE UP TO TWO TARGETS</span><span className="selection-hint">{selectedTargets.length} / 2 selected · SDG {selectedSdg} · {currentGroup.title}</span></div>
+            <div className={"target-choices" + (currentGroup.targets.length === 1 ? " target-choices-single" : "")} role="group" aria-label={"Choose a target under SDG " + selectedSdg}>
+              {currentGroup.targets.map((target, index) => <button type="button" key={target.code} className={"target-choice target-choice-reveal target-choice-" + (index + 1) + (selectedTargets.includes(target.code) ? " active" : "")} aria-pressed={selectedTargets.includes(target.code)} disabled={selectedTargets.length >= 2 && !selectedTargets.includes(target.code)} onClick={() => toggleTarget(target.code)}><span className="target-choice-code">{target.code}</span><span className="target-choice-copy"><strong>{target.title}</strong><small>{sdgOverviewLoading ? "Preparing role-specific connection…" : sdgOverview?.target_previews.find((item) => item.code === target.code)?.explanation ?? (sdgOverviewError ? "Preview unavailable." : "")}</small></span></button>)}
             </div>
-            {selectedTarget ? <article className="target-detail" aria-live="polite">
-              <div className="target-detail-heading"><div className={`sdg-number sdg-${selectedTarget.replace(".", "-")}`}>{selectedTarget}<span>TARGET</span></div><div><span className="small-label">SDG {selectedTarget} · {goalInfo[selectedTarget].title}</span><h3>{targetDescriptions[selectedTarget]}</h3></div></div>
-              <div className="target-impact"><div><span className="small-label">HOW {path.title.toUpperCase()} CONNECTS</span><p>{targetContribution?.reason ?? "This is a potential connection through the role's skills and learning pathway."}</p></div><div className="coverage"><strong>{targetSkills.length} / {path.skills.length}</strong><span>skills linked directly<br />to this target</span></div></div>
-              {targetSkills.length === 0 && <p className="mapping-note">This target focuses on access to learning. The demo maps the role pathway to it, but does not show training providers or measure access.</p>}
-            </article> : <p className="step-prompt">Choose a target to open its role contribution and matching skills.</p>}
-          </div> : <div className="sdg-prompt"><span className="prompt-arrow">↓</span><div><strong>Choose SDG 4 or SDG 8 to begin</strong><span>The selected goal’s targets and career connections will appear here.</span></div></div>}
+            {selectedTargets.length ? selectedTargets.map((targetCode) => {
+              const targetInfo = currentGroup.targets.find((target) => target.code === targetCode);
+              const explanation = sdgExplanations?.[targetCode];
+              const matchingSkills = pathSkills.filter((skill) => skill.goals.includes(targetCode));
+              return targetInfo ? <article className="target-detail" key={targetCode} aria-live="polite">
+                <div className="target-detail-heading"><div className="sdg-number sdg-target">{targetCode}<span>TARGET</span></div><div><span className="small-label">SDG {selectedSdg} · {currentGroup.title}</span><h3>{targetInfo.title}</h3><p>{targetInfo.definition}</p></div></div>
+                <div className="target-impact"><div><span className="small-label">HOW {path.title.toUpperCase()} CONNECTS</span><p>{sdgExplanationLoading ? "Preparing a role-specific explanation…" : explanation?.role_contribution ?? (sdgExplanationError ? "Explanation unavailable: " + sdgExplanationError : "")}</p></div><div className="coverage"><strong>{matchingSkills.length} / {pathSkills.length}</strong><span>skills linked directly<br />to this target</span></div></div>
+              </article> : null;
+            }) : <p className="step-prompt">Choose one or two targets to open their role contributions and matching skills.</p>}
+          </div> : <div className="sdg-prompt"><span className="prompt-arrow">↓</span><div><strong>Choose one of the two best-fit SDGs to begin</strong><span>The selected goal’s target and career connection will appear here.</span></div></div>}
         </div>
-        {selectedTarget && <div className="skills-panel">
-          <div className="skills-heading"><div><p className="eyebrow">SKILLS THAT CREATE THE LINK</p><h3>Role skills and their SDGs</h3></div><span className="small-label">{path.skills.length} SKILLS MAPPED · {targetSkills.length} MATCH SDG {selectedTarget}</span></div>
+        {selectedTargets.length > 0 && <div className="skills-panel">
+          <div className="skills-heading"><div><p className="eyebrow">SKILLS THAT CREATE THE LINK</p><h3>Role skills and their SDGs</h3></div><span className="small-label">{pathSkills.length} SKILLS MAPPED · {targetSkills.length} MATCH SELECTED TARGETS</span></div>
           <div className="skill-list">
-            {path.skills.map((skill, index) => <article className={`skill-row ${skill.goals.includes(selectedTarget) ? "skill-row-match" : ""}`} key={skill.name}>
+            {pathSkills.map((skill, index) => <article className={`skill-row ${selectedTargets.some((code) => skill.goals.includes(code)) ? "skill-row-match" : ""}`} key={skill.name}>
               <span className="skill-index">0{index + 1}</span>
-              <div className="skill-copy"><h4>{skill.name}</h4><p>{skill.reason}</p></div>
+              <div className="skill-copy"><h4>{skill.name}</h4><p>{sdgExplanationLoading ? "Preparing this skill’s target connections…" : selectedTargets.map((code) => sdgExplanations?.[code]?.skill_links.find((item) => item.skill === skill.name)?.explanation).filter(Boolean).join(" ") || (sdgExplanationError ? "Could not generate a target-specific explanation for this skill." : "")}</p></div>
               <div className="skill-tags">{skill.goals.map((goal) => <GoalTag key={goal} number={goal} />)}</div>
             </article>)}
           </div>
         </div>}
       </section>}
 
-      {hasChosenPath && selectedTarget && <section className="scenario-section card staged-reveal" aria-labelledby="scenario-heading">
+      {hasChosenPath && selectedTargets.length > 0 && <section className="scenario-section card staged-reveal" aria-labelledby="scenario-heading">
         <div className="section-heading">
           <div><p className="eyebrow">03 / PLAN FOR MORE THAN ONE FUTURE</p><h2 id="scenario-heading">Two futures. One career you can prepare for.</h2></div>
           <span className="step-number">03</span>
