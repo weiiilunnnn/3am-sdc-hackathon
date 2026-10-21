@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "generate:data": "node ../../scripts/generate_synthetic_data.mjs"
   },
   "dependencies": {
     "next": "latest",
