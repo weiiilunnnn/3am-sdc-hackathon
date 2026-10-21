@@ -10,12 +10,18 @@ const validProfile = () => ({
   field_of_study: "Computer science",
   current_occupation: "",
   years_experience: 0,
-  skills: [{ name: "Python programming", skill_id: "local:python-programming", proficiency: "beginner" }],
+  skills: [{ name: "Python programming", skill_id: "local:python-programming", proficiency: "beginner", evidence_record_ids: [] }],
   interests: ["AI"],
   work_activities: [],
   transferable_strengths: [],
   career_aspirations: "Explore software development.",
   skills_to_develop: [],
+  professional_summary: "",
+  education: [],
+  experience: [],
+  projects: [],
+  certifications: [],
+  achievements: [],
   learning_preferences: { weekly_hours: null, budget_myr: null, mode: null },
   synthetic_demo: true,
 });
@@ -51,6 +57,14 @@ test("profile validation rejects blank required data, negative experience, and n
   assert.ok(result.errors.skills);
   assert.ok(result.errors.career_aspirations);
   assert.ok(result.errors.synthetic_demo);
+});
+
+test("profile validation rejects an empty dynamic record", () => {
+  const profile = validProfile();
+  profile.experience = [{ id: "record-1", title: "", organization: "", period: "", description: "", skill_ids: [] }];
+  const result = validateProfileDraft(profile);
+  assert.equal(result.valid, false);
+  assert.match(result.errors.records, /at least one field/i);
 });
 
 test("chart geometry safely handles empty and one-period data", () => {

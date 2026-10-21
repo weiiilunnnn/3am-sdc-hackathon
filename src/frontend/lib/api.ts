@@ -19,12 +19,23 @@ export type SkillInput = {
   skill_id: string | null;
   proficiency: Proficiency;
   force_custom?: boolean;
+  evidence_record_ids: string[];
+};
+
+export type ProfileItem = {
+  id: string;
+  title: string;
+  organization: string | null;
+  period: string | null;
+  description: string;
+  skill_ids: string[];
 };
 
 export type ProfileDraft = {
   status: ProfileStatus;
   education_level: EducationLevel;
   field_of_study: string;
+  professional_summary: string;
   current_occupation: string | null;
   years_experience: number;
   skills: SkillInput[];
@@ -33,6 +44,11 @@ export type ProfileDraft = {
   transferable_strengths: string[];
   career_aspirations: string;
   skills_to_develop: string[];
+  education: ProfileItem[];
+  experience: ProfileItem[];
+  projects: ProfileItem[];
+  certifications: ProfileItem[];
+  achievements: ProfileItem[];
   learning_preferences: {
     weekly_hours: number | null;
     budget_myr: number | null;
@@ -48,6 +64,7 @@ export type NormalizedSkill = {
   proficiency: Proficiency;
   taxonomy_source: "Local prototype vocabulary" | "Custom";
   is_custom: boolean;
+  evidence_record_ids: string[];
 };
 
 export type StoredProfile = Omit<ProfileDraft, "skills"> & {
@@ -194,6 +211,38 @@ export type EmploymentDashboard = {
   error_message: string | null;
 };
 
+export type ProfileIndicator = {
+  id: string;
+  label: string;
+  status: "available" | "not_enough_information";
+  value_percent: number | null;
+  numerator: number | null;
+  denominator: number | null;
+  interpretation: string;
+  limitation: string;
+};
+
+export type ProfileInsights = {
+  profile_id: string;
+  indicators: ProfileIndicator[];
+  suggestions: string[];
+  notice: string;
+};
+
+export type CVExtraction = {
+  synthetic_demo: true;
+  filename: string;
+  summary: string | null;
+  sections: Record<"experience" | "education" | "projects" | "certifications" | "achievements" | "skills", string[]>;
+  skills: {
+    original_text: string;
+    canonical_name: string | null;
+    skill_id: string | null;
+    resolution: "exact_local_alias_match" | "unmatched_user_review_required";
+  }[];
+  warnings: string[];
+};
+
 export class ApiError extends Error {
   status: number;
 
@@ -263,11 +312,41 @@ export function getProfile(profileId: string) {
   return request<StoredProfile>(`/api/profiles/${encodeURIComponent(profileId)}`);
 }
 
+export function getProfileInsights(profileId: string) {
+  return request<ProfileInsights>(`/api/profiles/${encodeURIComponent(profileId)}/insights`);
+}
+
 export function updateProfile(profileId: string, profile: ProfileDraft) {
   return request<StoredProfile>(`/api/profiles/${encodeURIComponent(profileId)}`, {
     method: "PUT",
     body: JSON.stringify(profile),
   });
+}
+
+export async function extractCV(file: File): Promise<CVExtraction> {
+  const response = await fetch("/api/profiles/extract-cv", {
+    method: "POST",
+    cache: "no-store",
+    headers: {
+      "Content-Type": file.type || "application/octet-stream",
+      "X-Filename": file.name,
+      "X-Synthetic-Demo-Confirmed": "true",
+    },
+    body: file,
+  });
+  let body: unknown;
+  try {
+    body = await response.json();
+  } catch {
+    body = null;
+  }
+  if (!response.ok) {
+    const detail = body && typeof body === "object" && "detail" in body
+      ? (body as { detail?: unknown }).detail
+      : undefined;
+    throw new ApiError(typeof detail === "string" ? detail : `CV extraction failed with status ${response.status}.`, response.status);
+  }
+  return body as CVExtraction;
 }
 
 export function getTrendTopics() {

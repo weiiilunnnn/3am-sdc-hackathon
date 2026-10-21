@@ -118,6 +118,8 @@ class EmploymentTests(unittest.TestCase):
         self.assertEqual(result.employer_count, 2)
         python = next(item for item in result.skill_counts if item.skill_id == "local:python-programming")
         self.assertEqual((python.posting_count, python.share_percent), (1, 50.0))
+        machine_learning = next(item for item in result.skill_counts if item.skill_id == "local:machine-learning")
+        self.assertEqual((machine_learning.posting_count, machine_learning.share_percent), (0, 0.0))
         self.assertEqual(result.topic_counts["llms"], 1)
         self.assertEqual(result.unknown_location_count, 1)
         self.assertEqual(refresh_employment(FailingSource()).refresh_status, "cooldown")

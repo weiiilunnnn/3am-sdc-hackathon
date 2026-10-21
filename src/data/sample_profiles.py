@@ -120,4 +120,11 @@ SAMPLE_PROFILES: list[dict[str, Any]] = [
 
 
 def get_sample_profiles() -> list[dict[str, Any]]:
-    return deepcopy(SAMPLE_PROFILES)
+    profiles = deepcopy(SAMPLE_PROFILES)
+    for profile in profiles:
+        profile.setdefault("professional_summary", "")
+        for section in ("education", "experience", "projects", "certifications", "achievements"):
+            profile.setdefault(section, [])
+        for skill in profile["skills"]:
+            skill.setdefault("evidence_record_ids", [])
+    return profiles

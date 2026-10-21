@@ -7,7 +7,7 @@ from collections import Counter
 from datetime import datetime, timezone
 from math import ceil
 
-from src.data.employment_source import REFRESH_SECONDS, REMOTEOK_SOURCE, SOURCE_ID, TOPIC_PHRASES
+from src.data.employment_source import REFRESH_SECONDS, REMOTEOK_SOURCE, SKILL_PHRASES, SOURCE_ID, TOPIC_PHRASES
 from src.models.employment import EmploymentDashboard, EmploymentJob, SkillCount
 from src.services.sources.base import SourceAdapterError
 from src.services.sources.employment_base import EmploymentSource
@@ -33,8 +33,8 @@ def get_employment_dashboard(status: str | None = None) -> EmploymentDashboard:
         cached = db.execute("SELECT payload FROM employment_snapshots WHERE source_id = ?", (SOURCE_ID,)).fetchone()
     data = json.loads(cached["payload"]) if cached else {}
     jobs = [EmploymentJob.model_validate(item) for item in data.get("jobs", [])]
-    counts: Counter[str] = Counter()
-    labels: dict[str, str] = {}
+    counts: Counter[str] = Counter({skill_id: 0 for skill_id, _, _ in SKILL_PHRASES}) if jobs else Counter()
+    labels: dict[str, str] = {skill_id: label for skill_id, label, _ in SKILL_PHRASES} if jobs else {}
     for job in jobs:
         for mention in job.skill_mentions:
             counts[mention.skill_id] += 1
@@ -43,8 +43,10 @@ def get_employment_dashboard(status: str | None = None) -> EmploymentDashboard:
     state_status = status or (state["last_status"] if state else "never")
     return EmploymentDashboard(
         source=data.get("source", REMOTEOK_SOURCE), jobs=jobs,
-        skill_counts=[SkillCount(skill_id=key, label=labels[key], posting_count=count, share_percent=round(count / len(jobs) * 100, 2))
-                      for key, count in sorted(counts.items(), key=lambda pair: (-pair[1], pair[0]))],
+        skill_counts=[
+            SkillCount(skill_id=key, label=labels[key], posting_count=count, share_percent=round(count / len(jobs) * 100, 2))
+            for key, count in sorted(counts.items(), key=lambda pair: (-pair[1], labels[pair[0]].casefold()))
+        ],
         topic_counts={topic: sum(topic in job.topic_ids for job in jobs) for topic in TOPIC_PHRASES},
         posting_count=len(jobs), employer_count=len({job.company.casefold() for job in jobs}),
         location_labels=sorted({job.location for job in jobs if job.location}),

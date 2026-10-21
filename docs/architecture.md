@@ -9,14 +9,14 @@ This is the 3AM team's Aiversecity Future-Ready Workforce Domain 1 prototype. It
 ```text
 src/
 ├── main.py                 FastAPI app and API entry point
-├── api/                    FastAPI routers for profiles and trends
+├── api/                    FastAPI routers for profiles, CV extraction, and trends
 ├── models/                 Pydantic request and response models
-├── services/               Profile, trend, and storage logic
+├── services/               Profile, CV extraction, indicator, trend, and storage logic
 │   └── sources/            Separate research/employment contracts and adapters
 ├── data/                   Topic definitions, local skill vocabulary,
 │                           fictional sample profiles, SQLite file
 └── frontend/
-    ├── app/                Next.js App Router pages and shared styles
+    ├── app/                Home, profile, CV Studio, Outlook, Explorer, and source pages
     └── lib/                API client and frontend validation/chart helpers
 ```
 
@@ -27,11 +27,14 @@ Keep all application source code under `src/`. Root-level tests, documentation, 
 - The Next.js frontend uses the `/api` path. `src/frontend/next.config.ts` proxies these requests to FastAPI in the development setup.
 - FastAPI is created in `src/main.py`; profile and trend routes are registered from `src/api/`.
 - Request/response validation belongs in Pydantic models under `src/models/`. Business rules and persistence belong in `src/services/`.
+- The CV endpoint accepts bounded raw PDF/DOCX request bytes only after synthetic-demo confirmation. `src/services/cv_extractor.py` extracts text in memory and returns a review payload; it does not write the uploaded file or extracted draft to SQLite.
 - SQLite is the prototype database. It defaults to `src/data/future_ready.sqlite3`; `APP_DB_PATH` can select another path. SQLite files are excluded from Git.
+- Profile additions are backward-compatible defaults in the stored JSON payload; the feature adds no relational-table migration. Stable IDs identify user-editable education, experience, project, certification, and achievement records.
 - Research adapters return the provider-independent `SourceResult` contract from `src/services/sources/base.py`; OpenAlex supplies annual research counts.
 - Employment adapters use the independent `EmploymentSource`/`EmploymentResult` contract in `src/services/sources/employment_base.py`. Remote OK supplies a bounded posting snapshot. Its cache and refresh state use separate SQLite tables; employment records are never inserted into research observations.
 - Employment GET routes are cache-only; explicit POST refresh is globally limited to one attempt per 24 hours and atomically replaces a validated snapshot. Failures retain the old snapshot and last-success date.
 - Profile data is fictional-only. No authentication or real-person-data workflow is provided.
+- Profile indicators are deterministic content checks. The frontend reads cached signals on page load; it does not refresh OpenAlex or Remote OK when the user browses.
 
 ## Current data limitations
 

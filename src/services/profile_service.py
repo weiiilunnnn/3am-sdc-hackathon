@@ -64,6 +64,7 @@ def normalize_skills(skills: list[Any]) -> list[NormalizedSkill]:
                 "proficiency": skill.proficiency,
                 "taxonomy_source": taxonomy_source,
                 "is_custom": is_custom,
+                "evidence_record_ids": list(dict.fromkeys(skill.evidence_record_ids)),
             }
             continue
 
@@ -71,6 +72,9 @@ def normalize_skills(skills: list[Any]) -> list[NormalizedSkill]:
             previous["input_names"].append(raw_name)
         if _PROFICIENCY_RANK[skill.proficiency] > _PROFICIENCY_RANK[previous["proficiency"]]:
             previous["proficiency"] = skill.proficiency
+        previous["evidence_record_ids"] = list(
+            dict.fromkeys(previous["evidence_record_ids"] + skill.evidence_record_ids)
+        )
 
     return [NormalizedSkill.model_validate(item) for item in normalized.values()]
 

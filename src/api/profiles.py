@@ -3,6 +3,7 @@
 from fastapi import APIRouter, HTTPException, Query
 
 from src.data.skills_taxonomy import search_skills, taxonomy_metadata
+from src.models.insights import ProfileInsights
 from src.models.profiles import ProfileInput, ProfileRecord
 from src.services.profile_service import (
     UnknownSkillIdError,
@@ -11,6 +12,7 @@ from src.services.profile_service import (
     list_sample_profiles,
     update_profile,
 )
+from src.services.profile_insights import build_profile_insights
 
 router = APIRouter(prefix="/api")
 
@@ -23,6 +25,14 @@ def skills(q: str = Query(default="", max_length=100)) -> dict:
 @router.get("/profiles/samples")
 def sample_profiles() -> dict:
     return {"synthetic": True, "profiles": list_sample_profiles()}
+
+
+@router.get("/profiles/{profile_id}/insights", response_model=ProfileInsights)
+def profile_insights_endpoint(profile_id: str) -> ProfileInsights:
+    profile = get_profile(profile_id)
+    if profile is None:
+        raise HTTPException(status_code=404, detail="Profile not found.")
+    return build_profile_insights(profile)
 
 
 @router.post("/profiles", response_model=ProfileRecord, status_code=201)

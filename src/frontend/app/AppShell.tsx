@@ -4,8 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const sections = [
-  { href: "/", label: "Skills profile", available: true },
-  { href: "/radar", label: "Skills radar", available: true },
+  { href: "/home", label: "My Home" },
+  { href: "/", label: "My Profile" },
+  { href: "/cv-studio", label: "CV Studio" },
+  { href: "/outlook", label: "My Skills Outlook" },
+  { href: "/explore", label: "Explore Skills" },
+  { href: "/radar", label: "Source Evidence" },
 ];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -19,12 +23,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </Link>
         <nav className="nav-links" aria-label="Main navigation">
           {sections.map((item) => (
-            <Link key={item.href} href={item.href} className={`nav-link ${pathname === item.href ? "active" : ""}`} aria-current={pathname === item.href ? "page" : undefined} data-testid={`link-${item.href === "/" ? "profile" : "radar"}`}>
+            <Link key={item.href} href={item.href} className={`nav-link ${pathname === item.href ? "active" : ""}`} aria-current={pathname === item.href ? "page" : undefined} data-testid={`link-${item.href === "/" ? "profile" : item.href.slice(1)}`}>
               {item.label}
             </Link>
-          ))}
-          {["Role pathways", "Learning plans", "SDG impact", "Workforce outlook"].map((label, index) => (
-            <span className="nav-link unavailable" key={label} title="Feature not available in this version" aria-disabled="true" data-testid={`feature-unavailable-${index + 3}`}>{label}</span>
           ))}
         </nav>
         <span className="nav-meta">DEMO WORKSPACE</span>

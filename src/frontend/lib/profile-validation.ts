@@ -73,5 +73,26 @@ export function validateProfileDraft(draft: ProfileDraft): ProfileValidationResu
       errors[field] = "Use at most 20 entries, each 120 characters or fewer.";
     }
   }
+  for (const [section, records] of [
+    ["education", draft.education],
+    ["experience", draft.experience],
+    ["projects", draft.projects],
+    ["certifications", draft.certifications],
+    ["achievements", draft.achievements],
+  ] as const) {
+    if (records.some((record) =>
+      ![record.title, record.description, record.organization ?? "", record.period ?? ""].some((value) => value.trim()),
+    )) {
+      errors.records = "Complete at least one field for every profile record, or remove the empty record.";
+      break;
+    }
+    if (records.some((record) =>
+      record.title.length > 160 || (record.organization?.length ?? 0) > 160 ||
+      (record.period?.length ?? 0) > 80 || record.description.length > 2000,
+    )) {
+      errors.records = "Profile records exceed a field length limit. Shorten the highlighted content.";
+      break;
+    }
+  }
   return { valid: Object.keys(errors).length === 0, errors };
 }

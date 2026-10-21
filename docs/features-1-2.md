@@ -9,7 +9,9 @@ scenarios remain out of scope.
 - Profiles are accepted only with `synthetic_demo: true`; the web form requires
   the user to confirm that the information is fictional.
 - Do not enter real CVs, names, contact details, or other personal information.
-  There is no file upload or authentication.
+  PDF/DOCX upload is limited to fictional demonstrations. The file is processed
+  in memory and is not saved by the extraction API. The confirmation is a
+  demo-policy control, not automated personal-information detection.
 - Profile create, read, and update data is stored in SQLite. By default the
   database is `src/data/future_ready.sqlite3`; set `APP_DB_PATH` to use another
   location. SQLite database files are excluded from Git.
@@ -19,7 +21,7 @@ scenarios remain out of scope.
   the highest supplied proficiency is retained and the original labels are
   preserved. A user can explicitly keep a known alias as custom, and that
   choice is preserved when the profile is updated.
-- Five fictional sample profiles are available from
+- Two fictional sample profiles are available from
   `GET /api/profiles/samples`; loading a sample in the UI does not save it until
   the user submits the form.
 - Comma-list inputs retain unfinished separators while typing and normalize
@@ -29,6 +31,48 @@ scenarios remain out of scope.
   Only a confirmed missing-record response clears the stale reference.
 - Browser-storage failure after a successful API save is reported separately
   from a failed save; the UI keeps the returned profile ID and record.
+- Profiles include an editable professional summary and stable-ID records for
+  education, experience, projects, certifications, and achievements. Skill
+  evidence links point to those user-provided records and are self-reported,
+  never independently verified. Existing profile JSON payloads receive defaults
+  for the additive fields; this feature does not require a SQLite table migration.
+
+### Synthetic CV import
+
+- `POST /api/profiles/extract-cv` accepts PDF and DOCX bytes up to 2 MiB after
+  an explicit fictional-demo confirmation. PDF parsing is bounded to 30 pages
+  and extracted text to 30,000 characters; DOCX uses Python's standard ZIP/XML
+  libraries and rejects overly complex documents.
+- Recognized section headings preserve wording under summary, skills,
+  experience, education, projects, certifications, and achievements. Skill
+  aliases are matched only against the local vocabulary; unmatched labels stay
+  for user review. No proficiency, titles, dates, responsibilities, or
+  achievements are inferred.
+- The preview is editable and does not save a profile. The user must apply the
+  reviewed text to the ordinary profile form and save it separately. Scanned
+  PDFs, OCR, `.doc` files, corrupt files, and real personal CVs are unsupported.
+- The original file is not retained, but the API does not inspect content for
+  real personal information. Treat the synthetic-only rule as mandatory.
+
+### Profile indicators and CV Studio
+
+Four deterministic indicators use the saved fictional profile:
+
+1. **Profile information:** filled checks / 8 checks (summary, education,
+   study field, occupation or experience, skills, interests or strengths,
+   aspiration, and a project/certification/achievement).
+2. **Skills linked to examples:** skills with at least one evidence-record ID /
+   all saved skills.
+3. **Experience descriptions:** experience entries with non-empty descriptions /
+   all saved experience entries; unavailable when there are no entries.
+4. **CV structure checklist:** satisfied content-presence checks / 4
+   (summary, skills, at least one education/experience/project record, and a
+   title or description for each experience/project entry).
+
+These are profile-content checks, not writing-quality, employability, or hiring
+scores. CV Studio previews only saved profile information, offers two layouts,
+and invokes the browser's print / Save as PDF flow. Browser export and multi-page
+print layout still need manual confirmation.
 
 ### ESCO status
 
@@ -89,6 +133,29 @@ displayed as a rule, not as a ranked career match. Skills outside the current
 mapping return “no available signal.” These links do not establish employment
 outcomes.
 
+### User-facing workspace
+
+The Next.js workspace provides My Home, My Profile, CV Studio, My Skills
+Outlook, Explore Skills, and Source Evidence. Home summaries are limited to the
+saved profile and exact skill-ID matches in the cached Remote OK snapshot.
+Skills Outlook keeps exact employment keyword overlap separate from explicit
+profile-to-OpenAlex topic associations; it does not create role matches.
+
+Explore Skills supports search, a saved-profile filter, interest-word overlap,
+the local vocabulary list, and a separate dated AI research view. The research
+view only calls a topic “emerging” when a comparable period is available and
+the indexed publication count has increased; it is not a hiring-growth signal.
+The interest filter is a transparent normalized-word overlap, not semantic
+similarity.
+“Most mentioned” and “Least mentioned” order only the configured Remote OK
+keyword measures; zero counts are included only for skills whose phrases are
+configured. Other vocabulary entries say “No configured measure” rather than
+being assigned zero. Each card can expand to show measurement, denominator,
+period, retrieval time, source, coverage, and limitations. Employment growth
+filters remain disabled because only one snapshot exists; AI exposure remains
+disabled because there is no defensible task/occupation dataset mapped to the
+local skill vocabulary.
+
 ### Separate employment-posting snapshot
 
 [Remote OK](https://remoteok.com) is the selected public employment feed.
@@ -118,6 +185,8 @@ demo remains visibly synthetic and separate.
 | `POST /api/profiles` | Validate and persist a fictional profile |
 | `GET /api/profiles/{id}` | Retrieve a saved profile |
 | `PUT /api/profiles/{id}` | Replace a saved profile |
+| `GET /api/profiles/{id}/insights` | Return deterministic profile-content indicators |
+| `POST /api/profiles/extract-cv` | Extract bounded text from a confirmed synthetic PDF/DOCX without saving the upload |
 | `GET /api/trends/topics` | Return search definitions and measurement notes |
 | `GET /api/trends/sources` | Return provider and license metadata |
 | `GET /api/trends` | Return the real-data cache without making a source request |
@@ -138,10 +207,10 @@ From the repository root:
 
 ```sh
 python -m unittest discover -s tests -p 'test_*.py'
-pnpm --filter 3am-sdc-frontend run test:logic
-pnpm --filter 3am-sdc-frontend run test:components
-pnpm --filter 3am-sdc-frontend run typecheck
-pnpm --filter 3am-sdc-frontend run build
+pnpm --dir src/frontend run test:logic
+pnpm --dir src/frontend run test:components
+pnpm --dir src/frontend run typecheck
+pnpm --dir src/frontend run build
 ```
 
 Unit and ASGI route integration tests use temporary SQLite databases and mocked
