@@ -1,8 +1,10 @@
 """Profile intake and persistence response schemas."""
 
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+
+ProfileListEntry = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=120)]
 
 Status = Literal["student", "fresh_graduate", "employed", "career_switcher", "other"]
 Proficiency = Literal["beginner", "intermediate", "advanced"]
@@ -35,11 +37,11 @@ class ProfileInput(BaseModel):
     current_occupation: str | None = Field(default=None, max_length=120)
     years_experience: float = Field(ge=0, le=70)
     skills: list[SkillInput] = Field(min_length=1, max_length=40)
-    interests: list[str] = Field(default_factory=list, max_length=20)
-    work_activities: list[str] = Field(default_factory=list, max_length=20)
-    transferable_strengths: list[str] = Field(default_factory=list, max_length=20)
+    interests: list[ProfileListEntry] = Field(default_factory=list, max_length=20)
+    work_activities: list[ProfileListEntry] = Field(default_factory=list, max_length=20)
+    transferable_strengths: list[ProfileListEntry] = Field(default_factory=list, max_length=20)
     career_aspirations: str = Field(min_length=3, max_length=500)
-    skills_to_develop: list[str] = Field(default_factory=list, max_length=20)
+    skills_to_develop: list[ProfileListEntry] = Field(default_factory=list, max_length=20)
     learning_preferences: LearningPreferences = Field(default_factory=LearningPreferences)
     synthetic_demo: Literal[True] = True
 

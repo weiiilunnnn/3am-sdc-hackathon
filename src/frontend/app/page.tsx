@@ -1,8 +1,8 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import {
-  createProfile, getProfile, getSampleProfiles, getSkills, updateProfile,
+  ApiError, createProfile, getProfile, getSampleProfiles, getSkills, updateProfile,
   type EducationLevel, type LearningMode, type ProfileDraft, type ProfileStatus,
   type Proficiency, type SampleProfile, type SkillInput, type SkillOption, type StoredProfile,
 } from "../lib/api";
@@ -35,9 +35,14 @@ function draftFromProfile(profile: StoredProfile | SampleProfile): ProfileDraft 
   };
 }
 
-function listValue(event: ChangeEvent<HTMLInputElement>, key: "interests" | "work_activities" | "transferable_strengths" | "skills_to_develop", setDraft: (updater: (current: ProfileDraft) => ProfileDraft) => void) {
-  const values = splitCommaList(event.target.value);
-  setDraft((current) => ({ ...current, [key]: values }));
+type ListKey = "interests" | "work_activities" | "transferable_strengths" | "skills_to_develop";
+
+function listTexts(profile: ProfileDraft): Record<ListKey, string> {
+  return {
+    interests: profile.interests.join(", "), work_activities: profile.work_activities.join(", "),
+    transferable_strengths: profile.transferable_strengths.join(", "),
+    skills_to_develop: profile.skills_to_develop.join(", "),
+  };
 }
 
 function FormField({ label, hint, error, children, full = false }: { label: string; hint?: string; error?: string; children: React.ReactNode; full?: boolean }) {
@@ -46,10 +51,12 @@ function FormField({ label, hint, error, children, full = false }: { label: stri
 
 export default function Home() {
   const [draft, setDraft] = useState<ProfileDraft>(emptyDraft);
+  const [listInputs, setListInputs] = useState(() => listTexts(emptyDraft));
   const [samples, setSamples] = useState<SampleProfile[]>([]);
   const [sampleError, setSampleError] = useState("");
   const [sampleLoading, setSampleLoading] = useState(true);
   const [profileId, setProfileId] = useState("");
+  const [pendingProfileId, setPendingProfileId] = useState("");
   const [savedProfile, setSavedProfile] = useState<StoredProfile | null>(null);
   const [pageLoading, setPageLoading] = useState(true);
   const [saveLoading, setSaveLoading] = useState(false);
@@ -64,42 +71,59 @@ export default function Home() {
   const [skillMenu, setSkillMenu] = useState(false);
   const [skillLoadError, setSkillLoadError] = useState("");
 
+  const applyDraft = useCallback((next: ProfileDraft) => {
+    setDraft(next);
+    setListInputs(listTexts(next));
+  }, []);
+
+  const restoreProfile = useCallback(async (id: string, active: () => boolean = () => true) => {
+    setPageLoading(true);
+    setPendingProfileId(id);
+    try {
+      const profile = await getProfile(id);
+      if (active()) {
+        setProfileId(profile.id);
+        setSavedProfile(profile);
+        applyDraft(draftFromProfile(profile));
+        setPendingProfileId("");
+        setMessage("Your saved fictional profile has been reloaded.");
+        setMessageKind("success");
+      }
+    } catch (error) {
+      if (active()) {
+        if (error instanceof ApiError && error.status === 404) {
+          setPendingProfileId("");
+          let storageNote = "";
+          try { localStorage.removeItem(PROFILE_KEY); } catch { storageNote = " This browser could not clear the stale reference."; }
+          setMessage(`The saved fictional profile no longer exists on the server. Load a sample to start a new one.${storageNote}`);
+        } else {
+          setMessage("The saved profile could not be retrieved. Its reference is retained on this device. Retry loading it, or load a sample to start a separate fictional profile.");
+        }
+        setMessageKind("error");
+      }
+    } finally {
+      if (active()) setPageLoading(false);
+    }
+  }, [applyDraft]);
+
   useEffect(() => {
     let active = true;
-    const load = async () => {
-      try {
-        const result = await getSampleProfiles();
-        if (active) setSamples(result.profiles);
-      } catch {
-        if (active) setSampleError("Fictional sample profiles could not be loaded. You can still create a profile from scratch.");
-      } finally {
-        if (active) setSampleLoading(false);
-      }
-      try {
-        const id = localStorage.getItem(PROFILE_KEY);
-        if (id) {
-          const profile = await getProfile(id);
-          if (active) {
-            setProfileId(profile.id);
-            setSavedProfile(profile);
-            setDraft(draftFromProfile(profile));
-            setMessage("Your saved fictional profile has been reloaded.");
-            setMessageKind("success");
-          }
-        }
-      } catch {
-        if (active) {
-          localStorage.removeItem(PROFILE_KEY);
-          setMessage("The saved profile could not be retrieved. Start a new fictional profile or try again later.");
-          setMessageKind("error");
-        }
-      } finally {
-        if (active) setPageLoading(false);
-      }
-    };
-    void load();
+    void getSampleProfiles().then((result) => {
+      if (active) setSamples(result.profiles);
+    }).catch(() => {
+      if (active) setSampleError("Fictional sample profiles could not be loaded. You can still create a profile from scratch.");
+    }).finally(() => { if (active) setSampleLoading(false); });
+    try {
+      const id = localStorage.getItem(PROFILE_KEY);
+      if (id) void restoreProfile(id, () => active);
+      else setPageLoading(false);
+    } catch {
+      setPageLoading(false);
+      setMessage("This browser cannot access saved-profile storage. Automatic reopening may not work.");
+      setMessageKind("error");
+    }
     return () => { active = false; };
-  }, []);
+  }, [restoreProfile]);
 
   useEffect(() => {
     let active = true;
@@ -129,9 +153,10 @@ export default function Home() {
   }
 
   function loadSample(sample: SampleProfile) {
-    setDraft(draftFromProfile(sample));
+    applyDraft(draftFromProfile(sample));
     setSavedProfile(null);
     setProfileId("");
+    setPendingProfileId("");
     setConfirmed(false);
     setErrors({});
     setMessage(`${sample.label} loaded. Review the fictional details, then save when ready.`);
@@ -140,6 +165,7 @@ export default function Home() {
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (saveLoading || pageLoading || pendingProfileId) return;
     const result = validateProfileDraft(draft);
     const nextErrors = { ...result.errors };
     if (!confirmed) nextErrors.synthetic_demo = "Confirm that this is fictional demo data before saving.";
@@ -153,12 +179,17 @@ export default function Home() {
     setMessage("");
     try {
       const stored = profileId ? await updateProfile(profileId, draft) : await createProfile(draft);
-      localStorage.setItem(PROFILE_KEY, stored.id);
       setProfileId(stored.id);
       setSavedProfile(stored);
-      setDraft(draftFromProfile(stored));
-      setMessage(profileId ? "Your fictional profile has been updated." : "Your fictional profile is saved on this device and ready to revisit.");
-      setMessageKind("success");
+      applyDraft(draftFromProfile(stored));
+      try {
+        localStorage.setItem(PROFILE_KEY, stored.id);
+        setMessage(profileId ? "Your fictional profile has been updated." : "Your fictional profile is saved and its reference is remembered on this device.");
+        setMessageKind("success");
+      } catch {
+        setMessage(`The server saved profile ${stored.id}, but this browser could not remember its reference. Keep this ID; automatic reopening will not work.`);
+        setMessageKind("info");
+      }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "The profile could not be saved. Please try again.");
       setMessageKind("error");
@@ -167,16 +198,25 @@ export default function Home() {
     }
   }
 
-  const setList = (key: "interests" | "work_activities" | "transferable_strengths" | "skills_to_develop") =>
-    (event: ChangeEvent<HTMLInputElement>) => listValue(event, key, setDraft);
+  const setList = (key: ListKey) => (event: ChangeEvent<HTMLInputElement>) => {
+    const text = event.target.value;
+    // Keep unfinished separators while typing; the API still receives normalized lists.
+    setListInputs((current) => ({ ...current, [key]: text }));
+    setDraft((current) => ({ ...current, [key]: splitCommaList(text) }));
+  };
 
   return (
     <main className="page-wrap">
       <div className="page-kicker"><span className="kicker-dot" /> FEATURE 01 <span>·</span> SKILLS PROFILE INTAKE</div>
       <div className="hero-row">
         <div><h1>Start with what<br />you already bring.</h1><p className="hero-copy">A clear, practical picture of your skills and next learning steps — no CV required. This workspace is built for fictional examples only.</p></div>
-        <span className="hero-index">MALAYSIA · LEARNER WORKSPACE / 01</span>
+        <span className="hero-index">INTERNATIONAL · LEARNER WORKSPACE / 01</span>
       </div>
+      {pageLoading && <div className="message info" role="status" data-testid="loading-profile-message">Loading your profile workspace and checking for a saved fictional profile…</div>}
+      {!pageLoading && pendingProfileId && <div className="message error" role="alert" data-testid="error-profile-retrieval">
+        <span>{message}</span>{" "}
+        <button type="button" className="button secondary small" onClick={() => void restoreProfile(pendingProfileId)} data-testid="button-retry-profile">Retry saved profile</button>
+      </div>}
       <div className="notice" role="note" data-testid="notice-fictional-only">
         <span className="notice-icon" aria-hidden="true">!</span>
         <div><strong>Fictional demo profiles only</strong>Do not enter a real CV, your name, contact details, or any other personal information. There are no uploads or accounts here. Use one of the fictional samples or make up a profile.</div>
@@ -188,7 +228,7 @@ export default function Home() {
             <div className="section-heading"><span className="section-no">01</span><div><h2>Try a fictional starting point</h2><p>Loading a sample fills this form only; it will not save until you choose Save.</p></div></div>
             {sampleError && <div className="message error" role="alert" data-testid="error-samples">{sampleError}</div>}
             <div className="sample-row">
-              {samples.slice(0, 5).map((sample) => <button type="button" className="button secondary small" key={sample.sample_id} onClick={() => loadSample(sample)} data-testid={`button-sample-${sample.sample_id}`}>{sample.label} <span aria-hidden="true">↗</span></button>)}
+              {samples.slice(0, 5).map((sample) => <button type="button" disabled={pageLoading || saveLoading} className="button secondary small" key={sample.sample_id} onClick={() => loadSample(sample)} data-testid={`button-sample-${sample.sample_id}`}>{sample.label} <span aria-hidden="true">↗</span></button>)}
               {samples.length === 0 && !sampleError && <span className="field-hint">{sampleLoading ? "Loading fictional samples…" : "Samples will appear when available."}</span>}
             </div>
           </section>
@@ -238,10 +278,10 @@ export default function Home() {
           <section className="form-section">
             <div className="section-heading"><span className="section-no">04</span><div><h2>What gives your work shape</h2><p>Comma-separated lists work well here. Keep each entry short and fictional.</p></div></div>
             <div className="field-grid">
-              <FormField label="Interests" error={errors.interests}><input value={draft.interests.join(", ")} onChange={setList("interests")} placeholder="e.g. sustainable cities, design" data-testid="input-interests" /></FormField>
-              <FormField label="Work activities" error={errors.work_activities}><input value={draft.work_activities.join(", ")} onChange={setList("work_activities")} placeholder="e.g. coordinating events, testing" data-testid="input-work-activities" /></FormField>
-              <FormField label="Transferable strengths" error={errors.transferable_strengths}><input value={draft.transferable_strengths.join(", ")} onChange={setList("transferable_strengths")} placeholder="e.g. clear communication, patience" data-testid="input-strengths" /></FormField>
-              <FormField label="Skills to develop" error={errors.skills_to_develop}><input value={draft.skills_to_develop.join(", ")} onChange={setList("skills_to_develop")} placeholder="e.g. data visualisation, facilitation" data-testid="input-skills-to-develop" /></FormField>
+              <FormField label="Interests" error={errors.interests}><input value={listInputs.interests} onChange={setList("interests")} placeholder="e.g. sustainable cities, design" data-testid="input-interests" /></FormField>
+              <FormField label="Work activities" error={errors.work_activities}><input value={listInputs.work_activities} onChange={setList("work_activities")} placeholder="e.g. coordinating events, testing" data-testid="input-work-activities" /></FormField>
+              <FormField label="Transferable strengths" error={errors.transferable_strengths}><input value={listInputs.transferable_strengths} onChange={setList("transferable_strengths")} placeholder="e.g. clear communication, patience" data-testid="input-strengths" /></FormField>
+              <FormField label="Skills to develop" error={errors.skills_to_develop}><input value={listInputs.skills_to_develop} onChange={setList("skills_to_develop")} placeholder="e.g. data visualisation, facilitation" data-testid="input-skills-to-develop" /></FormField>
               <FormField label="Career aspiration" error={errors.career_aspirations} full><textarea value={draft.career_aspirations} onChange={(e) => setDraft({ ...draft, career_aspirations: e.target.value })} placeholder="Describe a kind of work you would like to move toward." data-testid="input-aspiration" /></FormField>
             </div>
           </section>
@@ -256,10 +296,10 @@ export default function Home() {
           </section>
           <div className="save-bar">
             <label className="confirm-row"><input type="checkbox" checked={confirmed} onChange={(e) => { setConfirmed(e.target.checked); setErrors((current) => ({ ...current, synthetic_demo: "" })); }} data-testid="checkbox-fictional-confirmation" /><span>I confirm this profile contains fictional demonstration data only, with no real CV or personal information.</span></label>
-            <button className="button" type="submit" disabled={saveLoading || pageLoading} data-testid="button-save-profile">{saveLoading ? "Saving profile…" : profileId ? "Update profile" : "Save profile"} <span aria-hidden="true">→</span></button>
+            <button className="button" type="submit" disabled={saveLoading || pageLoading || Boolean(pendingProfileId)} data-testid="button-save-profile">{saveLoading ? "Saving profile…" : profileId ? "Update profile" : "Save profile"} <span aria-hidden="true">→</span></button>
           </div>
           {errors.synthetic_demo && <div className="message error" role="alert" data-testid="error-fictional-confirmation">{errors.synthetic_demo}</div>}
-          {message && <div className={`message ${messageKind}`} role={messageKind === "error" ? "alert" : "status"} data-testid={`status-profile-${messageKind}`}>{message}</div>}
+          {message && !pendingProfileId && <div className={`message ${messageKind}`} role={messageKind === "error" ? "alert" : "status"} data-testid={`status-profile-${messageKind}`}>{message}</div>}
         </form>
 
         <aside className="panel side-panel" aria-label="Profile workspace guide">
@@ -270,7 +310,7 @@ export default function Home() {
             <div className="step"><span className="step-num">C</span><div><strong>Save when it feels right</strong><p>Your saved record can be reopened on this device using its profile ID.</p></div></div>
           </div>
           <div className="side-rule" />
-          {pageLoading ? <div className="skeleton" style={{ height: 58 }} aria-label="Loading saved profile" data-testid="loading-saved-profile" /> : savedProfile ? <><span className="saved-badge" data-testid="status-saved-profile">SAVED · {savedProfile.id.slice(0, 12)}</span><p className="field-hint" style={{ marginTop: 10 }}>Last updated {new Date(savedProfile.updated_at).toLocaleString()}</p></> : <><span className="field-hint" data-testid="status-no-saved-profile">No saved profile on this device yet.</span><div className="side-rule" /><p className="field-hint">The intake and samples are synthetic-only. No real CVs, names, contact details, or uploads belong here.</p></>}
+          {pageLoading ? <div className="skeleton" style={{ height: 58 }} aria-label="Loading saved profile" data-testid="loading-saved-profile" /> : savedProfile ? <><span className="saved-badge" data-testid="status-saved-profile">SAVED · {savedProfile.id.slice(0, 12)}</span><p className="field-hint" style={{ marginTop: 10 }}>Last updated {new Date(savedProfile.updated_at).toLocaleString()}</p></> : pendingProfileId ? <p className="field-hint">Saved profile reference retained · waiting for a successful retry.</p> : <><span className="field-hint" data-testid="status-no-saved-profile">No saved profile on this device yet.</span><div className="side-rule" /><p className="field-hint">The intake and samples are synthetic-only. No real CVs, names, contact details, or uploads belong here.</p></>}
         </aside>
       </div>
     </main>

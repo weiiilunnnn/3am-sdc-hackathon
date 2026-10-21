@@ -6,6 +6,8 @@ This repository contains a synthetic-data prototype for Aiversecity's Future-Rea
 
 The eventual product has six required capabilities: Skills Profile Intake, AI-Trend Signal Layer, Explainable Future-Role Matching, Personalised Reskilling Pathway, SDG Mapping, and multiple future scenarios for uncertainty. The current application implements the first two only. Do not imply that the remaining capabilities are implemented.
 
+The product scope is global/international, not Malaysia-only. Source coverage must still be stated accurately; one international remote-job board is not the global labour market.
+
 ## Architecture and source of truth
 
 - Preserve Next.js + React + TypeScript in `src/frontend/`.

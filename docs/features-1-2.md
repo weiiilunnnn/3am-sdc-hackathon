@@ -1,4 +1,4 @@
-# Features 1–2: profile intake and research-trend signals
+# Features 1–2: profile intake, research signals and employment snapshots
 
 This prototype implements only Skills Profile Intake and the AI-Trend Signal
 Layer. Career matching, reskilling recommendations, SDG mapping, and future
@@ -22,6 +22,13 @@ scenarios remain out of scope.
 - Five fictional sample profiles are available from
   `GET /api/profiles/samples`; loading a sample in the UI does not save it until
   the user submits the form.
+- Comma-list inputs retain unfinished separators while typing and normalize
+  lists for submission. The API rejects blank or over-120-character list entries.
+- A temporary saved-profile retrieval failure retains the device's saved ID,
+  provides a retry, and prevents accidental save while recovery is unresolved.
+  Only a confirmed missing-record response clears the stale reference.
+- Browser-storage failure after a successful API save is reported separately
+  from a failed save; the UI keeps the returned profile ID and record.
 
 ### ESCO status
 
@@ -82,6 +89,26 @@ displayed as a rule, not as a ranked career match. Skills outside the current
 mapping return “no available signal.” These links do not establish employment
 outcomes.
 
+### Separate employment-posting snapshot
+
+[Remote OK](https://remoteok.com) is the selected public employment feed.
+The [source evaluation and reuse conditions](employment-source.md) cover the
+alternatives, conditional attribution permission, collection limits and metric.
+The scope is international, not Malaysia-only, but this one remote board is not
+representative of the global labour market.
+
+An explicit refresh retains up to 100 validated, deduplicated postings.
+Publication/retrieval dates, source IDs/URLs, source metadata and exact keyword
+evidence are stored separately from OpenAlex. Indicators count each posting once
+per configured skill, divided by all retained postings. No historical employment
+growth is calculated. Job availability and keyword requirements are not verified.
+
+The radar has research topic selection, separate employment topic/skill filters,
+inspectable original posting links, and explicit cache/loading/error/empty states.
+Exact non-null skill IDs can show saved-profile keyword overlap; this is not
+Feature 3 role matching. Source snapshots are real only; the existing research
+demo remains visibly synthetic and separate.
+
 ## API routes
 
 | Route | Purpose |
@@ -98,6 +125,9 @@ outcomes.
 | `POST /api/trends/refresh` | Explicitly request a live refresh |
 | `GET /api/trends/demo` | Return visibly synthetic example observations |
 | `GET /api/trends/relevance?profile_id=...` | Explain explicit skill-to-topic links |
+| `GET /api/employment/source` | Return Remote OK provenance and conditional reuse notes |
+| `GET /api/employment` | Read the employment snapshot without contacting a provider |
+| `POST /api/employment/refresh` | Explicit bounded refresh, at most one attempt per 24 hours |
 
 FastAPI's interactive schema is available at `/docs` when the API server is
 running.
@@ -109,10 +139,12 @@ From the repository root:
 ```sh
 python -m unittest discover -s tests -p 'test_*.py'
 pnpm --filter 3am-sdc-frontend run test:logic
+pnpm --filter 3am-sdc-frontend run test:components
 pnpm --filter 3am-sdc-frontend run typecheck
 pnpm --filter 3am-sdc-frontend run build
 ```
 
-The unit tests use temporary SQLite databases and fake trend sources; they do
-not contact OpenAlex. The interface chart and profile-validation checks use
-Node's built-in test runner.
+Unit and ASGI route integration tests use temporary SQLite databases and mocked
+providers; they do not contact external services. Frontend logic and React
+component-rendering tests use Node's built-in test runner. See
+[testing procedures](testing.md) and [the executed verification report](feature-1-2-verification.md).

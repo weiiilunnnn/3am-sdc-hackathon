@@ -61,6 +61,19 @@ def initialize_database() -> None:
                 retrieved_at TEXT NOT NULL,
                 PRIMARY KEY (topic_id, period_year)
             );
+
+            CREATE TABLE IF NOT EXISTS employment_snapshots (
+                source_id TEXT PRIMARY KEY,
+                payload TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS employment_refresh_state (
+                source_id TEXT PRIMARY KEY,
+                last_attempt_at TEXT,
+                last_success_at TEXT,
+                last_status TEXT NOT NULL DEFAULT 'never',
+                last_error TEXT
+            );
             """
         )
         db.execute(

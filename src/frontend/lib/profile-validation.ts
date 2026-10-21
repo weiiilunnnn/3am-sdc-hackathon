@@ -31,8 +31,8 @@ export function validateProfileDraft(draft: ProfileDraft): ProfileValidationResu
   if (draft.skills.length === 0 || draft.skills.length > 40) {
     errors.skills = "Add between 1 and 40 skills.";
   }
-  if (draft.skills.some((skill) => skill.name.trim().length > 100)) {
-    errors.skills = "Each skill name must be 100 characters or fewer.";
+  if (draft.skills.some((skill) => !skill.name.trim() || skill.name.trim().length > 100)) {
+    errors.skills = "Each skill name must contain between 1 and 100 characters.";
   }
   if (
     draft.current_occupation &&

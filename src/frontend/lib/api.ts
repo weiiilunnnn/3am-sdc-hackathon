@@ -153,6 +153,47 @@ export type TrendHistory = {
   }[];
 };
 
+export type EmploymentJob = {
+  source_job_id: string;
+  title: string;
+  company: string;
+  location: string | null;
+  source_url: string;
+  source_date: string;
+  published_at: string;
+  retrieved_at: string;
+  tags: string[];
+  skill_mentions: { skill_id: string; label: string; terms: string[]; fields: string[] }[];
+  topic_ids: string[];
+};
+
+export type EmploymentDashboard = {
+  mode: "real";
+  source: {
+    id: string; name: string; url: string; website_url: string; documentation_url: string;
+    terms_url: string; terms_reviewed_on: string; permitted_use: string; coverage: string;
+    measurement: string; limitations: string; refresh_policy: string; sample_limit: number;
+  };
+  jobs: EmploymentJob[];
+  skill_counts: { skill_id: string; label: string; posting_count: number; share_percent: number }[];
+  topic_counts: Record<string, number>;
+  posting_count: number;
+  employer_count: number;
+  location_labels: string[];
+  unknown_location_count: number;
+  published_from: string | null;
+  published_to: string | null;
+  source_feed_updated_at: string | null;
+  received_records: number;
+  excluded_records: number;
+  last_successful_refresh: string | null;
+  last_attempt_at: string | null;
+  refresh_status: "never" | "refreshing" | "success" | "failed" | "cooldown";
+  cooldown_seconds: number;
+  cache_fallback: boolean;
+  error_message: string | null;
+};
+
 export class ApiError extends Error {
   status: number;
 
@@ -254,4 +295,12 @@ export function getProfileRelevance(profileId: string) {
   return request<ProfileRelevance>(
     `/api/trends/relevance?profile_id=${encodeURIComponent(profileId)}`,
   );
+}
+
+export function getEmployment() {
+  return request<EmploymentDashboard>("/api/employment");
+}
+
+export function refreshEmployment() {
+  return request<EmploymentDashboard>("/api/employment/refresh", { method: "POST" });
 }

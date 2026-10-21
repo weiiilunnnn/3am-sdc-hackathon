@@ -6,6 +6,7 @@ import {
   type ProfileRelevance, type TrendDashboard, type TrendObservation, type TrendTopic,
 } from "../../lib/api";
 import { buildTrendChartGeometry } from "../../lib/chart-utils";
+import EmploymentSnapshot from "./EmploymentSnapshot";
 
 const PROFILE_KEY = "aiversecity.synthetic-profile-id";
 
@@ -74,6 +75,7 @@ export default function RadarPage() {
   const [relevanceError, setRelevanceError] = useState("");
   const [relevanceLoading, setRelevanceLoading] = useState(false);
   const [profileId, setProfileId] = useState("");
+  const [topicFilter, setTopicFilter] = useState("");
 
   const loadCached = useCallback(async () => {
     setLoading(true);
@@ -148,13 +150,15 @@ export default function RadarPage() {
   }
 
   const refreshText = refreshing || dashboard?.refresh_status === "refreshing" ? "Refreshing OpenAlex…" : countdown > 0 ? `Refresh available in ${countdown}s` : "Refresh research data";
+  const topicLabels = useMemo(() => Object.fromEntries([...(dashboard?.topics ?? []), ...(demo?.topics ?? [])].map((t) => [t.topic_id, t.label])), [dashboard, demo]);
+  const visibleTopics = (list: TrendTopic[]) => topicFilter ? list.filter((t) => t.topic_id === topicFilter) : list;
   const lastRetrieved = dashboard?.last_successful_refresh;
 
   return <main className="page-wrap">
     <div className="page-kicker"><span className="kicker-dot" /> FEATURE 02 <span>·</span> FUTURE SKILLS RADAR</div>
     <div className="hero-row">
       <div><h1>Research signals,<br />with the dates attached.</h1><p className="hero-copy">Explore what academic research has been publishing about selected skill topics. A useful signal to investigate — never a proxy for hiring demand.</p></div>
-      <span className="hero-index">OPEN RESEARCH · MALAYSIA / 02</span>
+      <span className="hero-index">OPEN RESEARCH · INTERNATIONAL SCOPE / 02</span>
     </div>
     <div className="notice" role="note" data-testid="notice-research-interpretation">
       <span className="notice-icon" aria-hidden="true">i</span>
@@ -167,7 +171,9 @@ export default function RadarPage() {
     {dashboard?.cache_fallback && <div className="message info" role="status" data-testid="status-cache-fallback"><strong>Showing cached data.</strong> The most recent refresh could not replace the saved observations. {dashboard.error_message || dashboard.notice}</div>}
     {dashboard?.notice && <p className="field-hint" data-testid="text-dashboard-notice">{dashboard.notice}</p>}
     {error && <div className="message error" role="alert" data-testid="error-radar"><span>{error}</span> <button type="button" className="button ghost small" onClick={() => void loadCached()} data-testid="button-retry-trends">Retry cached load</button></div>}
-    {loading ? <div className="radar-cards" aria-label="Loading cached research observations" data-testid="loading-trends"><div className="skeleton" /><div className="skeleton" /></div> : dashboard ? dashboard.topics.length ? <div className="radar-cards" data-testid="list-real-topics">{dashboard.topics.map((topic) => <TopicCard topic={topic} mode={dashboard.mode} key={topic.topic_id} />)}</div> : <div className="panel message info" role="status" data-testid="empty-real-topics">No cached topic observations are available yet. A refresh is an explicit action and may retrieve new research records.</div> : !error && <div className="panel message info" role="status">No research cache loaded yet.</div>}
+    <label className="field topic-filter"><span className="label-text">Filter research topics</span><select value={topicFilter} onChange={(e) => setTopicFilter(e.target.value)} data-testid="select-research-topic"><option value="">All topics</option>{Object.entries(topicLabels).map(([id, label]) => <option key={id} value={id}>{label}</option>)}</select></label>
+    <p className="field-hint">Research sources are international in scope (global OpenAlex index); results are not representative of any single country.</p>
+    {loading ? <div className="radar-cards" aria-label="Loading cached research observations" data-testid="loading-trends"><div className="skeleton" /><div className="skeleton" /></div> : dashboard ? dashboard.topics.length ? visibleTopics(dashboard.topics).length ? <div className="radar-cards" data-testid="list-real-topics">{visibleTopics(dashboard.topics).map((topic) => <TopicCard topic={topic} mode={dashboard.mode} key={topic.topic_id} />)}</div> : <div className="panel message info" role="status" data-testid="empty-filtered-topics">No research topic matches this filter.</div> : <div className="panel message info" role="status" data-testid="empty-real-topics">No cached topic observations are available yet. A refresh is an explicit action and may retrieve new research records.</div> : !error && <div className="panel message info" role="status">No research cache loaded yet.</div>}
 
     {profileId && <section className="panel relevance-panel" aria-labelledby="profile-signal-heading" data-testid="panel-profile-relevance">
       <div className="section-heading"><span className="section-no">↗</span><div><h2 id="profile-signal-heading">Your saved profile · explicit topic links</h2><p>Only skill-to-topic associations returned for this saved synthetic profile are shown here.</p></div></div>
@@ -175,6 +181,8 @@ export default function RadarPage() {
       {relevanceError && <div className="message error" role="alert" data-testid="error-relevance">{relevanceError}</div>}
       {relevance && <><p className="field-hint" data-testid="text-relevance-notice">{relevance.notice}</p><div className="relevance-list">{relevance.skills.map((skill, index) => <article className="relevance-item" key={`${skill.skill_id ?? "custom"}-${skill.skill_name}-${index}`} data-testid={`relevance-skill-${index}`}><strong>{skill.skill_name}</strong>{skill.status === "no_available_signal" && <div className="relevance-unavailable">No available signal</div>}<p>{skill.explanation}</p>{skill.topics.map((topic) => <p key={topic.topic_id}><b>{topic.label}</b> · {topic.explanation}{topic.latest_period_year ? ` Latest year: ${topic.latest_period_year}.` : ""}{!topic.signal_available ? " No topic signal available." : ""}</p>)}</article>)}</div></>}
     </section>}
+
+    <EmploymentSnapshot topicLabels={topicLabels} profileSkills={relevance?.skills ?? []} />
 
     <section style={{ marginTop: 34 }}>
       <div className="radar-toolbar" style={{ marginBottom: 13 }}>
@@ -184,7 +192,7 @@ export default function RadarPage() {
       {showDemo && <div data-testid="section-synthetic-demo">
         <span className="mode-pill synthetic" data-testid="status-synthetic-mode">SYNTHETIC · FICTIONAL OBSERVATIONS</span>
         {demoLoading && <div className="radar-cards" style={{ marginTop: 15 }}><div className="skeleton" /></div>}
-        {!demoLoading && demo && <><p className="message info" role="note" data-testid="notice-synthetic-demo"><strong>Fictional data, not OpenAlex.</strong> This opt-in demonstration must not be interpreted as real research activity.</p><div className="radar-cards" style={{ marginTop: 14 }}>{demo.topics.map((topic) => <TopicCard topic={topic} mode="synthetic" key={topic.topic_id} />)}</div></>}
+        {!demoLoading && demo && <><p className="message info" role="note" data-testid="notice-synthetic-demo"><strong>Fictional data, not OpenAlex.</strong> This opt-in demonstration must not be interpreted as real research activity.</p><div className="radar-cards" style={{ marginTop: 14 }}>{visibleTopics(demo.topics).map((topic) => <TopicCard topic={topic} mode="synthetic" key={topic.topic_id} />)}{!visibleTopics(demo.topics).length && <p className="message info" role="status">No demo topic matches this filter.</p>}</div></>}
         {!demoLoading && !demo && <p className="message info" role="status">Synthetic demo has not loaded. The real cached view remains separate.</p>}
       </div>}
     </section>

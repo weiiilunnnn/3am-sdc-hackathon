@@ -13,6 +13,9 @@ PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests -p 'test_*.py' -v
 # Frontend helper logic tests (Node built-in test runner)
 pnpm --filter 3am-sdc-frontend run test:logic
 
+# React component rendering tests (Node test runner via the dev-only tsx tool)
+pnpm --filter 3am-sdc-frontend run test:components
+
 # Frontend TypeScript check
 pnpm --filter 3am-sdc-frontend run typecheck
 
@@ -20,13 +23,17 @@ pnpm --filter 3am-sdc-frontend run typecheck
 pnpm --filter 3am-sdc-frontend run build
 ```
 
-The Python tests are in `tests/test_profiles.py`, `tests/test_trends.py`, and `tests/test_utils.py`. The frontend logic tests are in `tests/frontend_logic.test.mjs`. Profile/trend tests use temporary SQLite databases and fake sources. Frontend logic tests cover profile validation/list parsing and chart geometry.
+Python tests cover profiles, trends, utilities, employment snapshots, mocked HTTP adapters and FastAPI routes. `tests/test_api.py` drives the real ASGI application in process without an extra HTTP-client dependency. Every storage test uses temporary SQLite databases. External responses are mocked; ordinary tests do not fetch a provider.
+
+`tests/frontend_logic.test.mjs` covers profile validation/list parsing and chart geometry. `tests/frontend_components.test.ts` renders the actual profile and employment components with React's server renderer: privacy/loading, source attribution, escaped content, empty/error/cache states, initial filters, exact-ID overlap and cooldown formatting. `tsx` is a frontend **development-only** dependency for importing TSX in these tests. These rendering tests do not simulate clicks, hydration, or network requests.
 
 **Important:** root `pnpm run typecheck` checks libraries and selected workspace packages but does not include `src/frontend/`. Always run the frontend package typecheck explicitly after frontend changes.
 
 ## Coverage boundaries
 
-The current suite does not provide automated FastAPI route integration tests, browser component tests, or browser E2E tests. The OpenAlex adapter parser and trend service are tested with fixtures/fake sources, but the HTTP adapter is not a live-service test. Do not describe screenshots as interaction tests.
+The committed suite now includes FastAPI integration tests and component-rendering tests. Mocked OpenAlex and Remote OK HTTP tests cover valid responses and provider/JSON/network failures; they do not establish live-service availability. The actual profile browser journey was also exercised during this implementation with a temporary backend/database. The session's browser automation is not a committed, locally runnable Playwright suite. Do not describe static screenshots or server rendering as interaction tests.
+
+See [the verification report](feature-1-2-verification.md) for the exact executed results, browser defect/fix checks and live-source coverage.
 
 When adding API coverage:
 

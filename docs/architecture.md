@@ -12,7 +12,7 @@ src/
 ├── api/                    FastAPI routers for profiles and trends
 ├── models/                 Pydantic request and response models
 ├── services/               Profile, trend, and storage logic
-│   └── sources/            Provider contract and OpenAlex adapter
+│   └── sources/            Separate research/employment contracts and adapters
 ├── data/                   Topic definitions, local skill vocabulary,
 │                           fictional sample profiles, SQLite file
 └── frontend/
@@ -28,12 +28,16 @@ Keep all application source code under `src/`. Root-level tests, documentation, 
 - FastAPI is created in `src/main.py`; profile and trend routes are registered from `src/api/`.
 - Request/response validation belongs in Pydantic models under `src/models/`. Business rules and persistence belong in `src/services/`.
 - SQLite is the prototype database. It defaults to `src/data/future_ready.sqlite3`; `APP_DB_PATH` can select another path. SQLite files are excluded from Git.
-- Trend provider adapters return the provider-independent `SourceResult` contract from `src/services/sources/base.py`. OpenAlex is the current active source.
+- Research adapters return the provider-independent `SourceResult` contract from `src/services/sources/base.py`; OpenAlex supplies annual research counts.
+- Employment adapters use the independent `EmploymentSource`/`EmploymentResult` contract in `src/services/sources/employment_base.py`. Remote OK supplies a bounded posting snapshot. Its cache and refresh state use separate SQLite tables; employment records are never inserted into research observations.
+- Employment GET routes are cache-only; explicit POST refresh is globally limited to one attempt per 24 hours and atomically replaces a validated snapshot. Failures retain the old snapshot and last-success date.
 - Profile data is fictional-only. No authentication or real-person-data workflow is provided.
 
 ## Current data limitations
 
-OpenAlex query counts describe indexed research activity, not labor-market demand. The current taxonomy is a small local vocabulary, not an active ESCO integration. RunPod is reserved for possible later work and is not used by the active app. See [Features 1–2 notes](features-1-2.md) and [the data-source template](data-source-template.md).
+OpenAlex query counts describe indexed research activity, not labor-market demand. Remote OK indicators count configured keyword mentions in a single remote-board sample, not global demand or historical growth. Source IDs, URLs, dates, evidence and snapshot provenance are retained. See [the source assessment](employment-source.md).
+
+The current taxonomy is a small local vocabulary, not an active ESCO integration. RunPod is reserved for possible later work and is not used by the active app. See [Features 1–2 notes](features-1-2.md) and [the data-source template](data-source-template.md).
 
 ## Repository scaffolding
 

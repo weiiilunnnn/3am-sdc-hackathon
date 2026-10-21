@@ -1,9 +1,8 @@
 """Small, documented skill vocabulary for the prototype.
 
 ESCO's web service returned HTTP 500 during its announced maintenance on
-2026-10-21. The two ESCO entries below were found in the official ESCO search
-results as released concepts. The remaining entries are explicitly local
-prototype terms and are not presented as ESCO concepts.
+2026-10-21. All entries below are explicitly local prototype terms; none is
+presented as an ESCO concept or URI.
 """
 
 from __future__ import annotations
