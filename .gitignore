@@ -1,20 +1,65 @@
-# Python
+# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+
+# compiled output
+dist
+tmp
+out-tsc
+*.tsbuildinfo
+.next/
+out/
+.expo
+.expo-shared
 __pycache__/
 *.py[cod]
 venv/
 .venv/
+.pythonlibs/
+/src/data/*.sqlite
+/src/data/*.sqlite3
+/src/data/*.db
 
-# Node / Next.js
-node_modules/
-.next/
-out/
-src/frontend/.env.local
-src/frontend/next-env.d.ts
+# dependencies
+node_modules
 
-# Environment
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
 .env
+src/frontend/next-env.d.ts
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
 
-# OS / Editor
+# System Files
 .DS_Store
-.vscode/
-.idea/
+Thumbs.db
+
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
+
+# Replit
+.cache/
+.local/
+
+# Local agent attachments and preserved migration backups
+/attached_assets/
+.migration-backup/ported-vite-express/
