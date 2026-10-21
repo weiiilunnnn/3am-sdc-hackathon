@@ -50,7 +50,7 @@ test("variable counts, pagination and server-side role search", async ({ page })
     await page.getByRole("button", { name: "Show more qualifying roles" }).click();
     const next: DiscoveryResponse = await (await response).json(); await expect(cards).toHaveCount(result.results.length + next.results.length);
   }
-  await page.getByLabel("Search qualifying roles").fill(result.results[0].role_title);
+  await page.getByLabel("Search occupations").fill(result.results[0].role_title);
   await page.getByRole("button", { name: "Search roles", exact: true }).click();
   await expect(cards.first().getByRole("heading")).toHaveText(new RegExp(result.results[0].role_title, "i"));
   await page.getByLabel("Synthetic profile").selectOption("demo-graduate-c");
@@ -100,7 +100,7 @@ test("new discovered occupation hands off to unchanged pathways", async ({ page,
   const result: DiscoveryResponse = await (await request.post("/api/v2/matches", { data: { schema_version: "2.0", profile: boot.profiles[0], page_size:25 } })).json();
   const selected = result.results.find(r => !original.has(r.role_id)); expect(selected).toBeTruthy();
   await page.goto("/"); await match(page);
-  await page.getByLabel("Search qualifying roles").fill(selected!.role_title); await page.getByRole("button", { name: "Search roles", exact:true }).click();
+  await page.getByLabel("Search occupations").fill(selected!.role_title); await page.getByRole("button", { name: "Search roles", exact:true }).click();
   const pathResponse = page.waitForResponse(r => r.url().endsWith("/api/pathways"));
   await page.getByTestId("career-card").first().getByRole("button", { name:"Explore pathway" }).click();
   const response = await pathResponse; expect(response.ok()).toBeTruthy(); const pathway = await response.json();

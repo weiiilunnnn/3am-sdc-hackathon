@@ -107,3 +107,20 @@ class DiscoveryResponse(BaseModel):
     sources: list[Source]
     warnings: list[str]
     scenario_context: ScenarioConfig | None = None
+
+
+class RoleSearchRequest(DiscoveryRequest):
+    schema_version: Literal['2.1']
+    role_query: str = Field(min_length=1, max_length=100)
+
+
+class RoleSearchResult(DiscoveryRole):
+    qualification_status: Literal['search_result'] = 'search_result'
+    score_unavailable_reason: str | None = None
+
+
+class RoleSearchResponse(DiscoveryResponse):
+    schema_version: Literal['2.1'] = '2.1'
+    status: Literal['search_results', 'no_title_matches']
+    total_search_results: int
+    results: list[RoleSearchResult]

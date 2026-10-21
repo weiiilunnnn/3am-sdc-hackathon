@@ -39,3 +39,12 @@ export type DiscoveryResponse = { schema_version: "2.0"; profile_id: string; pro
   discovered_candidate_count: number; total_qualifying_roles: number; filtered_qualifying_roles: number; offset: number; role_query: string; next_offset: number | null;
   page_size: number; diagnostic_counts: Record<string, number>; results: DiscoveryRole[]; sources: Source[]; warnings: string[]; scenario_context: ScenarioContext | null;
 };
+
+// Additive title-search contract: v2 qualified recommendations remain unchanged.
+export type RoleSearchResult = Omit<DiscoveryRole, "qualification_status"> & {
+  qualification_status: "search_result"; score_unavailable_reason: string | null;
+};
+export type RoleSearchResponse = Omit<DiscoveryResponse, "schema_version" | "status" | "results"> & {
+  schema_version: "2.1"; status: "search_results" | "no_title_matches";
+  total_search_results: number; results: RoleSearchResult[];
+};

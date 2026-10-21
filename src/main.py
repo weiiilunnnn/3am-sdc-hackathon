@@ -27,6 +27,8 @@ else:
     from src.skills_intake import normalize_profile
 
 from src.discovery_models import DiscoveryRequest, DiscoveryResponse
+from src.discovery_models import RoleSearchRequest, RoleSearchResponse
+from src.role_search import search_roles
 from src.occupation_index import get_occupation_index
 from src.profile_relevance import discover, RelevanceConfig
 from src.esco_api import client as esco_client, EscoError
@@ -176,6 +178,15 @@ def role_detail(role_id: str = Query(max_length=200)):
 
 @app.post('/api/v2/matches', response_model=DiscoveryResponse)
 def discovery_matching(request: DiscoveryRequest):
+    return _discovery_response(request)
+
+
+@app.post('/api/v2.1/roles/search', response_model=RoleSearchResponse)
+def occupation_title_search(request: RoleSearchRequest):
+    return _discovery_response(request, title_search=True)
+
+
+def _discovery_response(request, title_search=False):
     from src.data_repository import supported
     index, bundle = get_occupation_index(), catalogues()
     try:
@@ -190,7 +201,8 @@ def discovery_matching(request: DiscoveryRequest):
                 raise ValueError('Verified SDG mappings require registered evidence')
         # Incoming metadata cannot modify the pinned graph/statistics. Trend
         # contracts are retained but deliberately absent from relevance output.
-        result = discover(request.profile, index, resources=bundle.resources,
+        service = search_roles if title_search else discover
+        result = service(request.profile, index, resources=bundle.resources,
             config=RelevanceConfig(threshold_pct=request.qualification_threshold_pct),
             page_size=request.page_size, offset=request.offset, role_query=request.role_query,
             scenario=request.scenario_config, sdg_mappings=request.sdg_mappings, response_sources=sources)

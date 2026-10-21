@@ -1,14 +1,15 @@
 "use client";
 import { useId, useState } from "react";
-import type { DiscoveryRole, Source } from "@/lib/contracts";
+import type { DiscoveryRole, RoleSearchResult, Source } from "@/lib/contracts";
 import SourceLinks from "./SourceLinks";
 
-export default function CareerCard({ match: m, sources, onSelect, busy }: { match: DiscoveryRole; sources: Source[]; onSelect: () => void; busy: boolean }) {
+export default function CareerCard({ match: m, sources, onSelect, busy }: { match: DiscoveryRole | RoleSearchResult; sources: Source[]; onSelect: () => void; busy: boolean }) {
   const [expanded, setExpanded] = useState(false);
   const descriptionId = useId();
   const score = m.score;
   return <article className="career-card discovery-card" data-testid="career-card">
-    <div className="career-top"><div><p className="eyebrow">MATCH {String(m.rank).padStart(2, "0")} <span className="tiny-tag">ESCO · VERIFIED</span></p><h3>{m.role_title}</h3></div><div className="score"><strong>{score.profile_relevance_pct?.toFixed(2) ?? "—"}%</strong><span>Profile relevance</span></div></div>
+    <div className="career-top"><div><p className="eyebrow">{m.qualification_status === "search_result" ? "SEARCH RESULT" : "MATCH"} {String(m.rank).padStart(2, "0")} <span className="tiny-tag">ESCO · VERIFIED</span></p><h3>{m.role_title}</h3></div><div className="score"><strong>{score.profile_relevance_pct === null ? "Not assessable" : `${score.profile_relevance_pct.toFixed(2)}%`}</strong><span>Profile relevance</span></div></div>
+    {"score_unavailable_reason" in m && m.score_unavailable_reason && <p className="notice small">{m.score_unavailable_reason}</p>}
     <div className="coverage-track" role="progressbar" aria-label="Profile relevance, not readiness or hiring probability" aria-valuemin={0} aria-valuemax={100} aria-valuenow={score.profile_relevance_pct ?? undefined}><span style={{ width: `${score.profile_relevance_pct ?? 0}%` }} /></div>
     <p className="coverage-caption">{score.matched_recognised_skill_count} relevant listed skills · {score.matched_essential_skill_count} essential<span>Self-reported · not hiring probability</span></p>
     <div className="description-block"><p id={descriptionId} data-testid="role-description" className={`small muted ${expanded ? "" : "description-clamped"}`}>{m.description}</p><button type="button" className="text-button description-toggle" aria-controls={descriptionId} aria-expanded={expanded} onClick={() => setExpanded(v => !v)}>{expanded ? "Show less" : "Read more"}<span className="sr-only"> about {m.role_title}</span></button></div>
@@ -18,7 +19,7 @@ export default function CareerCard({ match: m, sources, onSelect, busy }: { matc
       {m.unshown_not_evidenced_count > 0 && <p className="micro">{m.unshown_not_evidenced_count} additional essential concepts are not yet evidenced; the complete graph remains available for backend audit.</p>}
       {m.grouping_warning && <p className="micro">{m.grouping_warning}</p>}
     </div>
-    <div className="card-footer"><span className="micro">{m.pathway_coverage_status === "no_verified_resources" ? "No verified pathway resources available yet for this role" : "Reviewed starter resources · coverage may be incomplete"}</span><button className="secondary" disabled={busy || !m.pathway_available} onClick={onSelect}>Explore pathway <span aria-hidden="true">→</span></button></div>
+    <div className="card-footer"><span className="micro">{!m.pathway_available ? "Pathway unavailable until this role can be assessed" : m.pathway_coverage_status === "no_verified_resources" ? "No verified pathway resources available yet for this role" : "Reviewed starter resources · coverage may be incomplete"}</span><button className="secondary" disabled={busy || !m.pathway_available} onClick={onSelect}>Explore pathway <span aria-hidden="true">→</span></button></div>
     <details className="role-details"><summary>Why this match?</summary>{m.qualification_reason.map(t => <p className="small" key={t}>{t}</p>)}
       <p className="micro">Based on how your listed, recognised skills relate to this ESCO occupation; not a measure of readiness or hiring probability.</p>
       <p className="small">Profile relevance: weighted overlap {score.weighted_matched_sum.toFixed(3)} / {score.weighted_profile_sum.toFixed(3)}. The backend uses full precision to rank.</p>
