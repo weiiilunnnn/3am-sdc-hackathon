@@ -1,13 +1,26 @@
 """FastAPI backend for the hackathon project."""
 
 import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
+from src.api.profiles import router as profile_router
+from src.api.trends import router as trend_router
+from src.services.storage import initialize_database
 from src.utils import format_greeting, summarize
 
-app = FastAPI(title=os.getenv("PROJECT_NAME", "Hackathon API"))
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    initialize_database()
+    yield
+
+
+app = FastAPI(title=os.getenv("PROJECT_NAME", "Hackathon API"), lifespan=lifespan)
+app.include_router(profile_router)
+app.include_router(trend_router)
 
 
 class SummarizeRequest(BaseModel):

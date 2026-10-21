@@ -14,6 +14,9 @@ __pycache__/
 venv/
 .venv/
 .pythonlibs/
+/src/data/*.sqlite
+/src/data/*.sqlite3
+/src/data/*.db
 
 # dependencies
 node_modules
