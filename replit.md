@@ -1,45 +1,55 @@
-# [Project name]
+# 3AM SDC Hackathon — Aiversecity Domain 1
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+This repository contains a synthetic-data prototype for Aiversecity's Future-Ready Workforce challenge. Keep this project separate from Talent Bank and CareerOS.
 
-## Run & Operate
+## Product scope
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+The eventual product has six required capabilities: Skills Profile Intake, AI-Trend Signal Layer, Explainable Future-Role Matching, Personalised Reskilling Pathway, SDG Mapping, and multiple future scenarios for uncertainty. The current application implements the first two only. Do not imply that the remaining capabilities are implemented.
 
-## Stack
+## Architecture and source of truth
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- Preserve Next.js + React + TypeScript in `src/frontend/`.
+- Preserve FastAPI in `src/`, with `src/main.py` as the entry point.
+- Backend routes belong in `src/api/`; schemas in `src/models/`; business logic in `src/services/`; provider adapters in `src/services/sources/`; structured local data in `src/data/`.
+- The prototype uses SQLite at `src/data/future_ready.sqlite3` by default; `APP_DB_PATH` can override the location.
+- Keep application source code under `src/`. Repository-level tests, configuration, docs, and Agent instructions may remain at the root.
+- Replit workflows are configured for the web and API artifacts. Reuse them rather than creating duplicate servers.
 
-## Where things live
+## Data and privacy boundaries
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- Profiles are synthetic-only. Do not ask for or store real CVs, names, contact details, or other personal information.
+- OpenAlex publication counts measure research activity, not vacancies, hiring, employer demand, or forecasts.
+- RunPod is reserved for a possible future integration. Do not configure it or add paid services without explicit approval.
+- Preserve source attribution, measurement definitions, observation periods, retrieval timestamps, and limitations. See [the data-source template](docs/data-source-template.md) and [Features 1–2 notes](docs/features-1-2.md).
 
-## Architecture decisions
+## Project skills and guides
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+Replit supports project skills under `.agents/skills/`. Use the matching skill before relevant work:
 
-## Product
+- [Project standards](.agents/skills/3am-project-standards/SKILL.md) — architecture and engineering changes.
+- [Design system](.agents/skills/3am-design-system/SKILL.md) — frontend and visual changes.
+- [Data integrity](.agents/skills/3am-data-integrity/SKILL.md) — sources, metrics, and persistence.
+- [Testing quality](.agents/skills/3am-testing-quality/SKILL.md) — tests, verification, and completion reports.
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+Supporting references: [architecture](docs/architecture.md), [design system](docs/design-system.md), [data-source template](docs/data-source-template.md), [testing](docs/testing.md), and [definition of done](docs/definition-of-done.md).
 
-## User preferences
+## Verification commands
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+From the repository root:
 
-## Gotchas
+```sh
+PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests -p 'test_*.py' -v
+pnpm --filter 3am-sdc-frontend run test:logic
+pnpm --filter 3am-sdc-frontend run typecheck
+pnpm --filter 3am-sdc-frontend run build
+```
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+The root `pnpm run typecheck` command does not include `src/frontend`; run the frontend package typecheck directly. The production build writes generated `.next` output. Read [testing procedures](docs/testing.md) for coverage and manual checks.
 
-## Pointers
+## Existing frontend conventions
 
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+The shared visual tokens and class-based UI styles are in `src/frontend/app/globals.css`; shared navigation is in `src/frontend/app/AppShell.tsx`. Read [the design-system guide](docs/design-system.md) before adding or changing components. Preserve the existing identity and accessibility conventions; do not add a component library without a concrete need.
+
+## Next.js instructions
+
+Keep `src/frontend/AGENTS.md`. It is generated by the installed Next.js version and directs agents to that version's local documentation before frontend implementation work.
