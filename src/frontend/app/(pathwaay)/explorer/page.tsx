@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 
 type Goal = { number: string; title: string; target: string; reason: string };
@@ -54,6 +53,7 @@ type SDGRecommendation = {
   skill_mappings: Array<{ name: string; goals: string[] }>;
   data_notice: string;
 };
+
 const interestOptions = ["analytics", "ai", "business", "building", "communication", "product", "research"];
 const skillOptions = ["python", "sql", "statistics", "visualization", "machine_learning", "cloud"];
 
@@ -293,7 +293,6 @@ function RolePicker({ selectedPath, onSelect }: { selectedPath: string; onSelect
 export default function Home() {
   const [selectedPath, setSelectedPath] = useState("");
   const [hasChosenPath, setHasChosenPath] = useState(false);
-  const [hasScrolled, setHasScrolled] = useState(false);
   const [selectedSdg, setSelectedSdg] = useState<string | null>(null);
   const [selectedTargets, setSelectedTargets] = useState<string[]>([]);
   const [scenario, setScenario] = useState<Scenario>("moderate");
@@ -436,13 +435,6 @@ export default function Home() {
     return () => controller.abort();
   }, [selectedTargets, path, sdgRecommendation, selectedSdg]);
 
-  useEffect(() => {
-    const updateScrollState = () => setHasScrolled(window.scrollY > 8);
-    updateScrollState();
-    window.addEventListener("scroll", updateScrollState, { passive: true });
-    return () => window.removeEventListener("scroll", updateScrollState);
-  }, []);
-
   function choosePath(title: string) {
     setSelectedPath(title);
     setHasChosenPath(true);
@@ -482,11 +474,6 @@ export default function Home() {
       event.currentTarget.style.setProperty("--pointer-y", `${event.clientY}px`);
     }}>
       <div className="ambient-layer" aria-hidden="true" />
-      <header className={`topbar ${hasScrolled ? "is-scrolled" : ""}`}>
-        <a className="brand" href="#top" aria-label="Pathwaay home"><span className="brand-mark">P</span> Pathwaay <span className="brand-note">CAREER EXPLORER</span></a>
-        <Link className="demo-pill" href="/home">Open skills workspace ↗</Link>
-      </header>
-
       <section className="hero" id="top">
         <span className="orbit-system" aria-hidden="true">
           <span className="orbit-core" />

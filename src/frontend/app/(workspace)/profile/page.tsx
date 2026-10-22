@@ -7,6 +7,8 @@ import {
   type ProfileItem, type Proficiency, type SampleProfile, type SkillOption, type StoredProfile,
 } from "@/lib/api";
 import { splitCommaList, validateProfileDraft } from "@/lib/profile-validation";
+import { PATHWAAY_PROFILE_HANDOFF_KEY, readPathwaayRegistrationProfile, type PathwaayRegistrationProfile } from "@/lib/pathwaay-profile";
+import CompletedProfile from "./CompletedProfile";
 
 const PROFILE_KEY = "aiversecity.synthetic-profile-id";
 const statusOptions: [ProfileStatus, string][] = [["student", "Student"], ["fresh_graduate", "Fresh graduate"], ["employed", "Employed"], ["career_switcher", "Career switcher"], ["other", "Other"]];
@@ -73,6 +75,8 @@ function newRecord(): ProfileItem {
 }
 
 export default function Home() {
+  const [profileHandoffLoaded, setProfileHandoffLoaded] = useState(false);
+  const [registrationProfile, setRegistrationProfile] = useState<PathwaayRegistrationProfile | null>(null);
   const [draft, setDraft] = useState<ProfileDraft>(emptyDraft);
   const [listInputs, setListInputs] = useState(() => listTexts(emptyDraft));
   const [samples, setSamples] = useState<SampleProfile[]>([]);
@@ -101,6 +105,22 @@ export default function Home() {
   const [unratedSkills, setUnratedSkills] = useState<string[]>([]);
   const [cvNotice, setCvNotice] = useState("");
   const [cvError, setCvError] = useState("");
+
+  useEffect(() => {
+    setRegistrationProfile(readPathwaayRegistrationProfile());
+    setProfileHandoffLoaded(true);
+    const syncRegistrationProfile = (event: Event) => {
+      const next = (event as CustomEvent<PathwaayRegistrationProfile>).detail;
+      if (next && typeof next.firstName === "string") setRegistrationProfile(next);
+    };
+    window.addEventListener("pathwaay-profile-updated", syncRegistrationProfile);
+    return () => window.removeEventListener("pathwaay-profile-updated", syncRegistrationProfile);
+  }, []);
+
+  const updateRegistrationProfile = useCallback((next: PathwaayRegistrationProfile) => {
+    setRegistrationProfile(next);
+    try { window.sessionStorage.setItem(PATHWAAY_PROFILE_HANDOFF_KEY, JSON.stringify(next)); } catch { /* Keep this view usable when session storage is full or unavailable. */ }
+  }, []);
 
   const applyDraft = useCallback((next: ProfileDraft) => {
     setDraft(next);
@@ -360,6 +380,9 @@ export default function Home() {
     setListInputs((current) => ({ ...current, [key]: text }));
     setDraft((current) => ({ ...current, [key]: splitCommaList(text) }));
   };
+
+  if (!profileHandoffLoaded) return <main className="page-wrap"><div className="message info" role="status">Opening your completed profile…</div></main>;
+  if (registrationProfile) return <CompletedProfile profile={registrationProfile} onProfileChange={updateRegistrationProfile} />;
 
   return (
     <main className="page-wrap">

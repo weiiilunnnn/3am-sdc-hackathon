@@ -15,7 +15,7 @@ SRC_DIR = Path(__file__).resolve().parents[1]
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = Path(os.getenv("PATHWAAY_DATA_DIR", PROJECT_ROOT / "data"))
 MODEL_DIR = Path(os.getenv("PATHWAAY_MODEL_DIR", PROJECT_ROOT / "models"))
-PROFILE_DATA = DATA_DIR / "synthetic_role_profiles.csv"
+PROFILE_DATA = DATA_DIR / "unified_profile_career_dataset.csv"
 TREND_DATA = DATA_DIR / "synthetic_skill_scenarios.csv"
 
 ROLE_SKILLS = {
@@ -74,11 +74,12 @@ class CareerModel:
             return
 
         profile_rows = _read_rows(PROFILE_DATA)
-        x_profile = [
-            {key: (int(value) if key.startswith(("interest_", "skill_")) or key == "experience_months" else value)
-             for key, value in row.items() if key != "target_role"}
-            for row in profile_rows
-        ]
+        feature_columns = ("major", *(f"interest_{name}" for name in INTERESTS),
+                           *(f"skill_{name}" for name in SKILLS), "experience_months")
+        x_profile = [{
+            key: (int(row[key]) if key.startswith(("interest_", "skill_")) or key == "experience_months" else row[key])
+            for key in feature_columns
+        } for row in profile_rows]
         y_profile = [row["target_role"] for row in profile_rows]
         self.matcher.fit(self.profile_vectorizer.fit_transform(x_profile), y_profile)
 
