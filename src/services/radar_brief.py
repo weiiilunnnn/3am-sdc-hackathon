@@ -75,7 +75,7 @@ def get_brief(profile_id: str | None = None) -> dict | None:
         "cards": cards,
         "research_refreshed_at": research.last_successful_refresh,
         "posting_refreshed_at": employment.last_successful_refresh,
-        "method": "Research direction compares adjacent complete-year OpenAlex phrase-match counts; changing index coverage can affect those counts. Posting mentions come from one bounded Remote OK feed snapshot. Profile links use explicit local skill-to-topic rules. These are separate signals; no combined demand or future-readiness score is computed.",
+        "method": "Research direction compares adjacent complete-year OpenAlex quoted-search counts; provider stemming, keyword matches and changing index coverage can affect those counts. Posting mentions come from one bounded Remote OK feed snapshot. Profile links use explicit local skill-to-topic rules. These are separate signals; no combined demand or future-readiness score is computed.",
     }
 
 

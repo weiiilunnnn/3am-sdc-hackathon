@@ -12,13 +12,14 @@ OPENALEX_SOURCE = {
 }
 
 MEASUREMENT = (
-    "Count of OpenAlex Works records whose indexed searchable full text matches the "
-    "topic phrase, grouped by publication year."
+    "Count of OpenAlex Works search results for the quoted topic phrase, grouped by publication year. "
+    "Search covers titles, abstracts, available full text and provider keywords."
 )
 
 LIMITATIONS = (
-    "This is research activity, not employer demand. Full-text phrase matches are an "
-    "imperfect proxy, topic definitions can overlap, and OpenAlex coverage changes over time."
+    "This is research activity, not employer demand. OpenAlex may stem words and match provider "
+    "keywords; a quoted query is not a strict unstemmed full-text match. Topics can overlap, "
+    "and index coverage changes over time."
 )
 
 TREND_TOPICS = [
@@ -26,31 +27,31 @@ TREND_TOPICS = [
         "id": "llms",
         "label": "Large language models",
         "query": "large language model",
-        "definition": 'OpenAlex full-text search phrase: "large language model".',
+        "definition": 'OpenAlex Works search query: "large language model".',
     },
     {
         "id": "ai_agents",
         "label": "AI agents",
         "query": "AI agent",
-        "definition": 'OpenAlex full-text search phrase: "AI agent".',
+        "definition": 'OpenAlex Works search query: "AI agent".',
     },
     {
         "id": "rag",
         "label": "Retrieval-augmented generation",
         "query": "retrieval augmented generation",
-        "definition": 'OpenAlex full-text search phrase: "retrieval augmented generation".',
+        "definition": 'OpenAlex Works search query: "retrieval augmented generation".',
     },
     {
         "id": "computer_vision",
         "label": "Computer vision",
         "query": "computer vision",
-        "definition": 'OpenAlex full-text search phrase: "computer vision".',
+        "definition": 'OpenAlex Works search query: "computer vision".',
     },
     {
         "id": "responsible_ai",
         "label": "Responsible AI",
         "query": "responsible AI",
-        "definition": 'OpenAlex full-text search phrase: "responsible AI".',
+        "definition": 'OpenAlex Works search query: "responsible AI".',
     },
 ]
 

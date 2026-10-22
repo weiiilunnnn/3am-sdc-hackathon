@@ -145,7 +145,7 @@ export default function RegisterPage() {
       <div className="ambient-layer" aria-hidden="true" />
       <header className={`login-topbar ${hasScrolled ? "is-scrolled" : ""}`}>
         <Link className="brand" href="/" aria-label="Pathwaay home"><span className="brand-mark">P</span> Pathwaay <span className="brand-note">CAREER EXPLORER</span></Link>
-        <nav className="entry-links" aria-label="Demo navigation"><Link className="login-back-link" href="/home">Skills workspace <span aria-hidden="true">↗</span></Link><Link className="login-back-link" href="/login">Log in</Link></nav>
+        <nav className="entry-links" aria-label="Demo navigation"><Link className="login-back-link" href="/signals">Skills workspace <span aria-hidden="true">↗</span></Link><Link className="login-back-link" href="/login">Log in</Link></nav>
       </header>
       <div className={`journey-transition ${journeyTransition ? "is-active" : ""}`} aria-hidden="true"><span /><span /><span /></div>
       {showRegisterIntro && <div className="register-intro" aria-hidden="true"><span className="register-intro-mark">P</span><span className="register-intro-word">Pathwaay.</span></div>}

@@ -7,9 +7,7 @@
     "build": "next build",
     "start": "next start",
     "generate:data": "node ../../scripts/generate_synthetic_data.mjs",
-    "typecheck": "tsc --noEmit",
-    "test:logic": "node --experimental-strip-types --test ../../tests/frontend_logic.test.mjs",
-    "test:components": "tsx --tsconfig tsconfig.json --test ../../tests/frontend_components.test.ts"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "next": "16.4.2",

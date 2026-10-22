@@ -78,7 +78,7 @@ export default function LoginPage() {
 
           <div className="login-divider"><span>NEW TO PATHWAAY?</span></div>
           <Link className="register-button" href="/register"><span>Create account</span><span aria-hidden="true">→</span></Link>
-          <Link className="login-explore-link" href="/home">Open the skills workspace <span aria-hidden="true">↗</span></Link>
+          <Link className="login-explore-link" href="/signals">Open the skills workspace <span aria-hidden="true">↗</span></Link>
           <p className="login-privacy-note"><span aria-hidden="true">◈</span> Your career decisions stay yours. Explore at your own pace.</p>
         </div>
       </section>

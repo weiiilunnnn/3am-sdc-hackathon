@@ -1,6 +1,7 @@
 """FastAPI backend for the hackathon project."""
 
 import os
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
@@ -13,13 +14,23 @@ from src.api.cv import router as cv_router
 from src.api.career import router as career_router
 from src.api.sdg import router as sdg_router
 from src.services.storage import initialize_database
+from src.services.evidence_refresh import refresh_loop
 from src.utils import format_greeting, summarize
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     initialize_database()
-    yield
+    task = asyncio.create_task(refresh_loop()) if os.getenv("EVIDENCE_AUTO_REFRESH", "1") == "1" else None
+    try:
+        yield
+    finally:
+        if task:
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
 
 
 app = FastAPI(title=os.getenv("PROJECT_NAME", "Hackathon API"), lifespan=lifespan)

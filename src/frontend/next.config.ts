@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["127.0.0.1", "localhost", "*.sisko.replit.dev"],
+  async redirects() {
+    return ["/home", "/profile", "/cv-studio", "/outlook", "/explore", "/radar"].map((source) => ({
+      source, destination: "/signals", permanent: false,
+    }));
+  },
   async rewrites() {
     return [
       {

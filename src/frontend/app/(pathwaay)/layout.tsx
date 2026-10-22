@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Pathwaay | Career Explorer",
-  description: "Explore career paths, their links to the Sustainable Development Goals, and illustrative AI futures.",
+  title: "Pathwaay | Skills Workspace",
+  description: "Explore profile-linked AI research signals and illustrative career paths.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

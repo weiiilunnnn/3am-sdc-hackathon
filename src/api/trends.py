@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, Query
 
 from src.services.dosm_service import get_dosm_dashboard, refresh_dosm
 from src.services.radar_brief import explain_brief, get_brief
+from src.services.trend_experience import get_trend_experience
 
 from src.models.trends import ProfileRelevance, TrendDashboard, TrendSourceInfo
 from src.services.trend_service import (
@@ -17,6 +18,17 @@ from src.services.trend_service import (
 )
 
 router = APIRouter(prefix="/api/trends")
+
+
+@router.get("/experience")
+def trend_experience(
+    sample_id: str | None = Query(default=None, max_length=80),
+    profile_id: str | None = Query(default=None, max_length=80),
+) -> dict:
+    result = get_trend_experience(sample_id, profile_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Profile not found.")
+    return result
 
 
 @router.get("/brief")

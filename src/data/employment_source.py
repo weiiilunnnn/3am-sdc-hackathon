@@ -31,7 +31,7 @@ REMOTEOK_SOURCE = {
         "mentions are not evidence a skill is unnecessary. Coverage and tags may be biased."
     ),
     "refresh_policy": (
-        "Manual, at most one attempt per 24 hours. The provider publishes no numeric limit "
+        "Backend polling, at most one attempt per 24 hours. The provider publishes no numeric limit "
         "in the cited FAQ; this conservative cache policy is an application limit."
     ),
     "sample_limit": SAMPLE_LIMIT,

@@ -1,6 +1,6 @@
 # 3AM SDC Hackathon
 
-A career-development prototype combining Pathwaay’s onboarding and career/SDG scenario demo with Aiversecity’s saved fictional profiles, CV tools, research evidence and employment snapshots.
+A career-development prototype combining Pathwaay’s career/SDG scenario demo with profile-linked AI research signals and a cached job-posting snapshot.
 
 ## Local development
 
@@ -31,15 +31,10 @@ Next.js proxies `/api/*` to `BACKEND_URL` (default `http://127.0.0.1:8080`). Fas
 | --- | --- |
 | `/` | Redirects to `/register`, matching main |
 | `/register`, `/login` | Main’s onboarding/sign-in previews; no account creation or authentication |
-| `/explorer` | Main’s career matching, SDG mapping and scenario demo |
-| `/profile` | SH’s existing profile editor, sample profiles and CV upload/review (previously `/`) |
-| `/home` | Saved-profile workspace overview |
-| `/cv-studio` | Saved-profile CV previews and printing |
-| `/outlook` | Profile-content checks and cached skill evidence |
-| `/explore` | Skills catalogue with profile, research and posting filters |
-| `/radar` | Profile-linked OpenAlex research, Remote OK posting snapshot and DOSM Malaysia occupation context |
+| `/signals` | Personalized AI trend signals with evidence, skill search and a premade fictional profile |
+| `/explorer` | Career matching, SDG mapping and synthetic scenario demo |
 
-The career demo links to the workspace, and the workspace links back. Onboarding answers remain in memory and are not silently copied into saved profiles. Use fictional details only. Pathwaay's role matches, scenario estimates, and SDG rankings demonstrate the workflow using generated synthetic data; they are not real labour-market forecasts or measured SDG impact. No page implements account security.
+The skills workspace has two navigation destinations: AI trend signals and Career demo. Both pages use the selected fictional profile; the career demo pre-fills the model controls with fields it can map and lets the learner adjust them. The signals page reads real cached OpenAlex and Remote OK observations. The career demo uses generated synthetic career data. Former workspace URLs redirect to `/signals`. Onboarding answers remain in memory and are not silently copied into a profile. No page implements account security.
 
 ## Pathwaay model and data
 
@@ -58,24 +53,20 @@ src/
     package.json           Frontend dependencies and commands
     package-lock.json      npm lockfile
     app/
-      (pathwaay)/           Main’s pages and root layout
-      (workspace)/          SH’s pages and root layout
-    lib/                   Frontend API client and helpers
+      (pathwaay)/           Onboarding, AI signals and career demo with a shared theme
 runpod/handler.py          Optional career inference Serverless handler
 scripts/dev.py            Optional two-service development launcher
-tests/                    Python, frontend logic and component tests
+tests/                    Python source, API, and evidence tests
 docs/                     Architecture, data sources and verification
 submission/               Competition documents
 ```
 
-Route-group names in parentheses do not appear in URLs. Separate root layouts prevent the two existing global stylesheets from affecting each other. Crossing between groups performs a full page load; saved fictional profiles remain available through the existing browser profile ID and SQLite storage.
+Route-group names in parentheses do not appear in URLs. The skills workspace uses one Pathwaay theme. A saved fictional profile ID from a previous session is still accepted by the signals API; otherwise the page opens with a clearly marked sample profile.
 
 ## Verification
 
 ```sh
-python -m unittest discover tests
-npm --prefix src/frontend run test:logic
-npm --prefix src/frontend run test:components
+python -m unittest discover -s tests -p 'test_*.py'
 npm --prefix src/frontend run typecheck
 npm --prefix src/frontend run build
 ```
@@ -92,11 +83,11 @@ RunPod is optional. FastAPI can use the local career model without RunPod. Gener
 
 ## Future Skills Radar data
 
-The radar reads cached evidence on page load. **Update source evidence** explicitly refreshes three independent sources: quoted exact-phrase annual counts from OpenAlex, up to 100 current Remote OK feed postings, and the official DOSM quarterly workbook. The default DOSM release is Q2 2026; set `DOSM_WORKBOOK_URL` and `DOSM_RELEASE_PAGE_URL` to newer official `https://www.dosm.gov.my/` URLs after checking its layout. The refresh parser validates occupation-group totals and compares the latest complete quarter with the same quarter one year earlier. A missing baseline is shown as unavailable. The workbook and date appear in the UI.
+The signals page reads saved SQLite evidence and does not call external providers. A FastAPI background task rechecks OpenAlex and Remote OK at most daily and the configured DOSM workbook weekly, including on startup when due. Set `EVIDENCE_AUTO_REFRESH=0` to disable that task. Provider failures keep the last good cache. DOSM does not offer a release-discovery feed in this implementation: the configured official workbook is rechecked, and a newer release requires changing `DOSM_WORKBOOK_URL` and `DOSM_RELEASE_PAGE_URL`. The default is Q2 2026. There is no user-facing refresh button.
 
-Research counts measure indexed publications, not employer demand; OpenAlex coverage can change. Remote OK is a bounded international board snapshot, so its mentions have no rising/falling direction. DOSM reports Malaysian online offerings by **major occupation group**, not individual roles or skills. The radar never combines these sources into a forecast score. Saved fictional profile skills and requested development skills link to a few explicitly mapped topics; unmatched skills remain unmatched. Optional RunPod GLM text only rephrases supplied topic/practice context and is not used to calculate trends or scores.
+The chart compares adjacent complete-year OpenAlex quoted-search counts; percentage change is `(latest − previous) / previous × 100` only when both years have at least 10 records. OpenAlex also stems words and matches provider keywords, so these are not strict phrase counts. A 100-post maximum Remote OK snapshot supplies current mentions, not growth rates. Neither source proves a skill is losing job demand or will be replaced by AI. The page does not invent such a result. Profile relevance uses explicit, inspectable skill-to-topic rules; the fictional sample is not market data. A skill search covers the local vocabulary and observed posting terms and says when no measured series exists. DOSM supplies broad Malaysian occupation context through its existing API, not individual skill trends.
 
-API reads: `GET /api/trends/brief[?profile_id=...]`, `GET /api/trends/malaysia`. Explicit refreshes: `POST /api/trends/refresh`, `POST /api/employment/refresh`, `POST /api/trends/malaysia/refresh`. `POST /api/trends/brief/explain?profile_id=...` is optional and reports unavailable when RunPod is not configured. To add a new official DOSM release, update `DOSM_WORKBOOK_URL` and inspect its source date and parser output before presenting it.
+The page reads `GET /api/trends/experience?sample_id=cs-student` or a saved demo `profile_id`. Existing operator refresh endpoints remain available for development but are not used by the UI. Optional RunPod explanations remain an API-only feature and do not compute trends.
 
 ## Team and submission
 

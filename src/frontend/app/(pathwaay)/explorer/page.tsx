@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import WorkspaceNav from "../WorkspaceNav";
 
 type Goal = { number: string; title: string; target: string; reason: string };
 type Skill = { name: string; goals: string[]; reason: string };
@@ -53,6 +53,10 @@ type SDGRecommendation = {
   }>;
   skill_mappings: Array<{ name: string; goals: string[] }>;
   data_notice: string;
+};
+type DemoProfile = {
+  label: string; aspiration: string; field_of_study: string; years_experience: number;
+  interests: string[]; skills: { id: string | null; name: string }[];
 };
 const interestOptions = ["analytics", "ai", "business", "building", "communication", "product", "research"];
 const skillOptions = ["python", "sql", "statistics", "visualization", "machine_learning", "cloud"];
@@ -301,6 +305,7 @@ export default function Home() {
   const [interests, setInterests] = useState<string[]>(["analytics", "ai", "business"]);
   const [profileSkills, setProfileSkills] = useState<string[]>(["python", "sql", "statistics"]);
   const [experienceMonths, setExperienceMonths] = useState(6);
+  const [demoProfile, setDemoProfile] = useState<DemoProfile | null>(null);
   const [modelResult, setModelResult] = useState<CareerModelResult | null>(null);
   const [modelLoading, setModelLoading] = useState(false);
   const [modelError, setModelError] = useState("");
@@ -322,6 +327,31 @@ export default function Home() {
     : null;
   const pathSkills = path.skills.map((skill) => ({ ...skill, goals: datasetSkillMap?.get(skill.name) ?? [] }));
   const targetSkills = selectedTargets.length ? pathSkills.filter((skill) => selectedTargets.some((code) => skill.goals.includes(code))) : [];
+  useEffect(() => {
+    const controller = new AbortController();
+    let query = "sample_id=cs-student";
+    try {
+      const saved = localStorage.getItem("aiversecity.synthetic-profile-id");
+      const sample = localStorage.getItem("pathwaay.sample-id") || "cs-student";
+      query = saved && localStorage.getItem("pathwaay.profile-mode") === "saved"
+        ? `profile_id=${encodeURIComponent(saved)}` : `sample_id=${encodeURIComponent(sample)}`;
+    } catch { /* Use the premade profile when browser storage is unavailable. */ }
+    fetch(`/api/trends/experience?${query}`, { signal: controller.signal })
+      .then((response) => response.ok ? response.json() as Promise<{ profile: DemoProfile }> : Promise.reject(new Error("Profile unavailable")))
+      .then(({ profile }) => {
+        setDemoProfile(profile);
+        const field = profile.field_of_study.toLowerCase();
+        setMajor(field.includes("computer science") ? "computer_science" : field.includes("data science") ? "data_science" : field.includes("business") ? "business" : field.includes("economics") ? "economics" : field.includes("engineering") ? "engineering" : "other");
+        const text = `${profile.interests.join(" ")} ${profile.aspiration}`.toLowerCase();
+        setInterests(interestOptions.filter((item) => item === "ai" ? text.includes("artificial intelligence") || /\bai\b/.test(text) : item === "analytics" ? text.includes("data") || text.includes("analytic") : text.includes(item)));
+        const available = new Set(profile.skills.map((skill) => skill.id));
+        setProfileSkills(skillOptions.filter((item) => item === "python" ? available.has("local:python-programming") : item === "machine_learning" ? available.has("local:machine-learning") : false));
+        const months = profile.years_experience * 12;
+        setExperienceMonths([0, 6, 24, 60].reduce((closest, option) => Math.abs(months - option) < Math.abs(months - closest) ? option : closest, 0));
+      })
+      .catch(() => { if (!controller.signal.aborted) setDemoProfile(null); });
+    return () => controller.abort();
+  }, []);
   useEffect(() => {
     if (!hasChosenPath) return;
     const controller = new AbortController();
@@ -482,10 +512,7 @@ export default function Home() {
       event.currentTarget.style.setProperty("--pointer-y", `${event.clientY}px`);
     }}>
       <div className="ambient-layer" aria-hidden="true" />
-      <header className={`topbar ${hasScrolled ? "is-scrolled" : ""}`}>
-        <a className="brand" href="#top" aria-label="Pathwaay home"><span className="brand-mark">P</span> Pathwaay <span className="brand-note">CAREER EXPLORER</span></a>
-        <Link className="demo-pill" href="/home">Open skills workspace ↗</Link>
-      </header>
+      <WorkspaceNav active="explorer" scrolled={hasScrolled} />
 
       <section className="hero" id="top">
         <span className="orbit-system" aria-hidden="true">
@@ -503,7 +530,7 @@ export default function Home() {
           <div><p className="eyebrow">01 / YOUR CAREER PATH</p><h2 id="path-heading">Start from your profile</h2></div>
           <span className="step-number">01</span>
         </div>
-        <div className="profile-note"><span className="profile-dot" /> DEMO PROFILE <strong>Data Science Student</strong><span>Computer science foundations · analytics projects · early portfolio evidence</span></div>
+        <div className="profile-note"><span className="profile-dot" /> DEMO PROFILE <strong>{demoProfile?.label ?? "Loading profile"}</strong><span>{demoProfile?.aspiration ?? "The premade profile will set the starting inputs when loaded."}</span></div>
         <section className="model-panel" aria-labelledby="model-heading">
           <div className="model-heading"><div><p className="eyebrow">SYNTHETIC SIGNAL MODEL</p><h3 id="model-heading">Find roles that fit your starting point</h3></div><span className="model-status">CPU INFERENCE</span></div>
           <div className="model-fields">
