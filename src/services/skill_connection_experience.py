@@ -9,6 +9,7 @@ from src.data.signal_contexts import role_family_for_profile
 from src.services.employment_service import get_employment_dashboard
 from src.services.skill_connections import get_saved_skill_connections
 from src.services.connection_model import get_cached_connection_explanation
+from src.services.connection_jobs import queue_discovery_job
 from src.services.trend_experience import get_active_profile
 
 
@@ -46,6 +47,8 @@ def get_skill_connection_experience(sample_id: str | None = None, profile_id: st
     default = max(skills, key=priority)["key"] if skills else None
     selected = skill_id or default
     selected_skill = next((item for item in skills if item["key"] == selected), None)
+    coverage = (queue_discovery_job(selected_skill["key"], selected_skill["name"], role, evidence_version)
+                if selected_skill and not counts.get(selected_skill["id"], 0) else "supported")
     items = []
     for item in saved:
         if item["current_skill_id"] != (selected_skill["id"] if selected_skill else None):
@@ -53,13 +56,16 @@ def get_skill_connection_experience(sample_id: str | None = None, profile_id: st
         in_role = bool(role and role in item["role_families"])
         task_overlap = bool(set(word.casefold() for task in profile.get("work_tasks", []) for word in task.split())
                             & set(word.casefold() for word in item["work_task"].split()))
+        cached_wording = get_cached_connection_explanation(item)
         enriched = {**item, "current_skill_name": selected_skill["name"] if selected_skill else "",
                     "in_occupation_scope": in_role, "stale": _stale(item["source"]["collected_at"]),
-                    "cached_model_explanation": get_cached_connection_explanation(item),
+                    "cached_model_explanation": cached_wording,
+                    "explanation": cached_wording["explanation"] if cached_wording else item["explanation"],
+                    "relationship": cached_wording["relationship"] if cached_wording else item["relationship"],
                     "relevance": (
-                        "Your listed skill connects to software-building work in these postings."
+                        "Your listed skill appears in source tasks for this occupation group."
                         if in_role else
-                        "A connection to your listed skill; the source examples are software roles, not your occupation."
+                        "A skill-level connection; the cited jobs may be outside your occupation."
                     )}
         items.append((enriched, task_overlap))
     items.sort(key=lambda pair: (not pair[0]["in_occupation_scope"], not pair[1],
@@ -67,6 +73,7 @@ def get_skill_connection_experience(sample_id: str | None = None, profile_id: st
     employment = get_employment_dashboard()
     return {
         "profile": profile, "selected_skill_id": selected, "evidence_version": evidence_version,
+        "coverage": coverage,
         "skills": [{**skill, "connection_count": counts.get(skill["id"], 0)} for skill in skills],
         "connections": [item for item, _ in items[:3]],
         "samples": [{"id": item["sample_id"], "label": item["label"]} for item in get_sample_profiles()],
@@ -74,5 +81,5 @@ def get_skill_connection_experience(sample_id: str | None = None, profile_id: st
                          "collected_at": employment.last_successful_refresh,
                          "posting_sample_size": employment.posting_count,
                          "cache_fallback": employment.cache_fallback},
-        "method": "Exact phrases in retained job descriptions propose a connection. Reviewed mappings describe the possible work implication. Co-occurrence is not correlation, growth, replacement or a requirement for every role.",
+        "method": "Exact source passages identify skills and AI work. A pair appears only with same-task evidence or repeated independent-employer co-occurrence. Co-occurrence does not prove causation, demand growth, or replacement.",
     }

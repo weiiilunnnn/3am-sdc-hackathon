@@ -7,6 +7,7 @@ from src.services.dosm_service import get_dosm_dashboard, refresh_dosm
 from src.services.radar_brief import explain_brief, get_brief
 from src.services.trend_experience import get_trend_experience
 from src.services.skill_connection_experience import get_skill_connection_experience
+from src.services.ai_skill_exploration import get_ai_skill_exploration
 
 from src.models.trends import ProfileRelevance, TrendDashboard, TrendSourceInfo
 from src.services.trend_service import (
@@ -20,6 +21,11 @@ from src.services.trend_service import (
 )
 
 router = APIRouter(prefix="/api/trends")
+
+
+@router.get("/explore-ai-skills")
+def explore_ai_skills() -> dict:
+    return get_ai_skill_exploration()
 
 
 @router.get("/connections")

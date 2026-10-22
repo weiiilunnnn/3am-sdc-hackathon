@@ -11,6 +11,7 @@ from src.services.employment_service import get_employment_dashboard, refresh_em
 from src.services.trend_service import get_dashboard, refresh_trends
 from src.services.signal_findings import process_shared_findings
 from src.services.skill_connections import process_skill_connections
+from src.services.connection_jobs import process_discovery_jobs
 
 LOG = logging.getLogger(__name__)
 CHECK_INTERVAL_SECONDS = 6 * 60 * 60
@@ -49,6 +50,10 @@ def refresh_due_sources() -> None:
         process_skill_connections()
     except Exception:
         LOG.exception("Skill connection processing failed; previous connections remain available")
+    try:
+        process_discovery_jobs()
+    except Exception:
+        LOG.exception("Queued discovery failed; saved connections remain available")
 
 
 async def refresh_loop() -> None:

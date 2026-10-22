@@ -175,6 +175,27 @@ def initialize_database() -> None:
                 created_at TEXT NOT NULL
             );
 
+            CREATE TABLE IF NOT EXISTS signal_connection_reviews (
+                cache_key TEXT PRIMARY KEY,
+                connection_id TEXT NOT NULL,
+                evidence_version TEXT NOT NULL,
+                status TEXT NOT NULL,
+                payload TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS signal_discovery_jobs (
+                job_key TEXT PRIMARY KEY,
+                skill_id TEXT NOT NULL,
+                skill_name TEXT NOT NULL,
+                role_context TEXT,
+                evidence_version TEXT NOT NULL,
+                status TEXT NOT NULL,
+                attempts INTEGER NOT NULL DEFAULT 0,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+
             CREATE TABLE IF NOT EXISTS dosm_snapshot (
                 id INTEGER PRIMARY KEY CHECK (id = 1),
                 payload TEXT NOT NULL,
