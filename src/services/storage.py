@@ -82,6 +82,55 @@ def initialize_database() -> None:
                 last_error TEXT
             );
 
+            CREATE TABLE IF NOT EXISTS signal_documents (
+                source_id TEXT NOT NULL,
+                document_id TEXT NOT NULL,
+                content_hash TEXT NOT NULL,
+                payload TEXT NOT NULL,
+                first_seen_at TEXT NOT NULL,
+                last_seen_at TEXT NOT NULL,
+                PRIMARY KEY (source_id, document_id)
+            );
+
+            CREATE TABLE IF NOT EXISTS signal_extractions (
+                source_id TEXT NOT NULL,
+                document_id TEXT NOT NULL,
+                content_hash TEXT NOT NULL,
+                extraction_version TEXT NOT NULL,
+                payload TEXT NOT NULL,
+                processed_at TEXT NOT NULL,
+                PRIMARY KEY (source_id, document_id, content_hash, extraction_version)
+            );
+
+            CREATE TABLE IF NOT EXISTS signal_findings (
+                evidence_version TEXT NOT NULL,
+                finding_id TEXT NOT NULL,
+                context_id TEXT NOT NULL,
+                payload TEXT NOT NULL,
+                PRIMARY KEY (evidence_version, finding_id)
+            );
+
+            CREATE TABLE IF NOT EXISTS signal_processing_state (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                evidence_version TEXT,
+                processed_at TEXT,
+                last_error TEXT
+            );
+
+            CREATE TABLE IF NOT EXISTS signal_explanations (
+                cache_key TEXT PRIMARY KEY,
+                evidence_version TEXT NOT NULL,
+                model TEXT NOT NULL,
+                payload TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS signal_model_usage (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                requests INTEGER NOT NULL DEFAULT 0,
+                tokens INTEGER NOT NULL DEFAULT 0
+            );
+
             CREATE TABLE IF NOT EXISTS dosm_snapshot (
                 id INTEGER PRIMARY KEY CHECK (id = 1),
                 payload TEXT NOT NULL,
@@ -92,6 +141,8 @@ def initialize_database() -> None:
         db.execute(
             "INSERT OR IGNORE INTO trend_refresh_state (id, last_status) VALUES (1, 'never')"
         )
+        db.execute("INSERT OR IGNORE INTO signal_processing_state (id) VALUES (1)")
+        db.execute("INSERT OR IGNORE INTO signal_model_usage (id) VALUES (1)")
         # Retain the last snapshot from databases created before collection
         # history existed. Later successful refreshes add new dated rows.
         db.execute(

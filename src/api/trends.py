@@ -1,6 +1,7 @@
 """OpenAlex research-activity trend endpoints."""
 
 from fastapi import APIRouter, HTTPException, Query
+from typing import Literal
 
 from src.services.dosm_service import get_dosm_dashboard, refresh_dosm
 from src.services.radar_brief import explain_brief, get_brief
@@ -24,8 +25,9 @@ router = APIRouter(prefix="/api/trends")
 def trend_experience(
     sample_id: str | None = Query(default=None, max_length=80),
     profile_id: str | None = Query(default=None, max_length=80),
+    role_family: Literal["software_engineering"] | None = None,
 ) -> dict:
-    result = get_trend_experience(sample_id, profile_id)
+    result = get_trend_experience(sample_id, profile_id, role_family)
     if result is None:
         raise HTTPException(status_code=404, detail="Profile not found.")
     return result

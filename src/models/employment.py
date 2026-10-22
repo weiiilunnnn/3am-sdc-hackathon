@@ -10,6 +10,8 @@ class SkillMention(BaseModel):
     label: str
     terms: list[str]
     fields: list[str]
+    excerpt: str | None = None
+    excerpt_field: str | None = None
 
 
 class EmploymentJob(BaseModel):
@@ -24,6 +26,7 @@ class EmploymentJob(BaseModel):
     tags: list[str]
     skill_mentions: list[SkillMention]
     topic_ids: list[str]
+    evidence_text: str = ""
 
 
 class SkillCount(BaseModel):

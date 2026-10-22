@@ -9,6 +9,7 @@ from datetime import datetime, timedelta, timezone
 from src.services.dosm_service import get_dosm_dashboard, refresh_dosm
 from src.services.employment_service import get_employment_dashboard, refresh_employment
 from src.services.trend_service import get_dashboard, refresh_trends
+from src.services.signal_findings import process_shared_findings
 
 LOG = logging.getLogger(__name__)
 CHECK_INTERVAL_SECONDS = 6 * 60 * 60
@@ -39,6 +40,10 @@ def refresh_due_sources() -> None:
                 refresh()
         except Exception:
             LOG.exception("Background refresh failed for %s; cached data remains available", name)
+    try:
+        process_shared_findings()
+    except Exception:
+        LOG.exception("Shared finding processing failed; previous findings remain available")
 
 
 async def refresh_loop() -> None:

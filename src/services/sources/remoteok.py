@@ -72,9 +72,17 @@ def extract_mentions(fields: dict[str, str]) -> tuple[list[SkillMention], list[s
     for skill_id, label, phrases in SKILL_PHRASES:
         terms = sorted({phrase for phrase in phrases if any(_contains(text, phrase) for text in fields.values())})
         if terms:
+            matched_fields = [name for name, text in fields.items() if any(_contains(text, term) for term in terms)]
+            excerpt_field = matched_fields[0]
+            text = fields[excerpt_field]
+            match = next((found for term in terms if (found := re.search(r"(?<!\w)" + re.escape(term) + r"(?!\w)", text, re.I))), None)
+            excerpt = None
+            if match:
+                start, end = max(0, match.start() - 85), min(len(text), match.end() + 85)
+                excerpt = text[start:end].strip()
             mentions.append(SkillMention(
                 skill_id=skill_id, label=label, terms=terms,
-                fields=[name for name, text in fields.items() if any(_contains(text, term) for term in terms)],
+                fields=matched_fields, excerpt=excerpt, excerpt_field=excerpt_field,
             ))
     combined = " ".join(fields.values())
     topics = [topic for topic, phrases in TOPIC_PHRASES.items() if any(_contains(combined, phrase) for phrase in phrases)]
@@ -121,17 +129,21 @@ class RemoteOKSource:
             if identifier in jobs or url.casefold() in urls:
                 continue
             tags = sorted({plain_text(tag, 80) for tag in raw.get("tags", []) if isinstance(tag, str) and plain_text(tag, 80)})[:40] if isinstance(raw.get("tags"), list) else []
+            evidence_text = plain_text(raw.get("description"), 4_000)
             mentions, topics = extract_mentions({
                 "title": title,
                 "tags": " ".join(tags),
-                "description": plain_text(raw.get("description"), 40_000),
+                "description": evidence_text,
             })
+            for mention in mentions:
+                if mention.excerpt_field == "tags":
+                    mention.excerpt = next((tag for tag in tags if any(_contains(tag, term) for term in mention.terms)), None)
             jobs[identifier] = EmploymentJob(
                 source_job_id=identifier, title=title, company=company,
                 location=plain_text(raw.get("location"), 250) or None,
                 source_url=url, source_date=source_date,
                 published_at=published, retrieved_at=retrieved_at, tags=tags,
-                skill_mentions=mentions, topic_ids=topics,
+                skill_mentions=mentions, topic_ids=topics, evidence_text=evidence_text,
             )
             urls.add(url.casefold())
         retained = tuple(sorted(jobs.values(), key=lambda item: (item.published_at, item.source_job_id), reverse=True)[:SAMPLE_LIMIT])
