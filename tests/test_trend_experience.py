@@ -58,5 +58,6 @@ class TrendExperienceTests(unittest.TestCase):
              patch("src.services.evidence_refresh.refresh_dosm") as dosm:
             refresh_due_sources()
         research.assert_not_called()
-        jobs.assert_not_called()
+        # The existing Remote OK attempt is fresh; the new independent source is due.
+        jobs.assert_called_once()
         dosm.assert_called_once()

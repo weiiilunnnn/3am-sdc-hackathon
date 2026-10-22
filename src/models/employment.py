@@ -16,17 +16,21 @@ class SkillMention(BaseModel):
 
 class EmploymentJob(BaseModel):
     source_job_id: str
+    source_id: str = "remoteok"
     title: str
     company: str
     location: str | None
     source_url: str
     source_date: str
+    source_date_kind: str = "published"
     published_at: str
     retrieved_at: str
     tags: list[str]
     skill_mentions: list[SkillMention]
     topic_ids: list[str]
     evidence_text: str = ""
+    expires_at: str | None = None
+    eligible_countries: list[str] = []
 
 
 class SkillCount(BaseModel):

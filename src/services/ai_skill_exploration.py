@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from src.data.ai_capabilities import CAPABILITIES
 from src.data.employment_source import SOURCE_ID
 from src.data.signal_contexts import role_family_for_title
-from src.services.employment_service import get_employment_dashboard
+from src.services.employment_service import get_signal_employment_dashboard
 from src.services.skill_connections import TASK_VERBS, _contains, _sentences, get_saved_skill_connections
 from src.services.storage import connection, initialize_database
 
@@ -30,11 +30,13 @@ def _passage(job, alias: str) -> str:
     return job.evidence_text[max(0, at - 70):at + len(alias) + 130].strip()
 
 
-def _history_windows() -> tuple[list, list] | None:
+def _history_windows(source_id: str = SOURCE_ID) -> tuple[list, list] | None:
+    if source_id != SOURCE_ID:
+        return None  # No retained full-text history for expiring Himalayas listings.
     initialize_database()
     with connection() as db:
         snapshots = db.execute("SELECT retrieved_at, payload FROM employment_snapshot_history "
-                               "WHERE source_id = ? ORDER BY retrieved_at", (SOURCE_ID,)).fetchall()
+                               "WHERE source_id = ? ORDER BY retrieved_at", (source_id,)).fetchall()
     if len(snapshots) < 2:
         return None
     first = datetime.fromisoformat(snapshots[0]["retrieved_at"].replace("Z", "+00:00"))
@@ -59,9 +61,11 @@ def _history_windows() -> tuple[list, list] | None:
 
 
 def get_ai_skill_exploration() -> dict:
-    employment = get_employment_dashboard()
+    employment = get_signal_employment_dashboard()
+    source_id = employment.source["id"]
+    source_name = employment.source["name"]
     jobs = list({job.source_job_id: job for job in employment.jobs}.values())
-    history = _history_windows()
+    history = _history_windows(source_id)
     capabilities = list(CAPABILITIES)
     known_ids = {item[0] for item in capabilities}
     _, discovered = get_saved_skill_connections()
@@ -87,9 +91,10 @@ def get_ai_skill_exploration() -> dict:
             recent_count = sum(bool(_observed(job, aliases)) for job in history[1])
             if min(earlier_count, recent_count) < MIN_MENTIONS:
                 continue
-        evidence = [{"id": f"{SOURCE_ID}:{job.source_job_id}", "title": job.title,
+        evidence = [{"id": f"{source_id}:{job.source_job_id}", "title": job.title,
                      "company": job.company, "url": job.source_url, "published_at": job.published_at,
-                     "source": "Remote OK", "source_quote": _passage(job, alias),
+                     "date_kind": job.source_date_kind,
+                     "source": source_name, "source_quote": _passage(job, alias),
                      "ai_quote": _passage(job, alias)} for job, alias in observed[:3]]
         tasks = list(dict.fromkeys(sentence for job, alias in observed for sentence in _sentences(job.evidence_text)
                                    if len(sentence) <= 180 and _contains(sentence, alias) and TASK_VERBS.search(sentence)))[:2]
@@ -104,7 +109,8 @@ def get_ai_skill_exploration() -> dict:
         result.append({"id": key, "name": name, "definition": definition, "roles": roles,
                        "role_families": sorted({role_family_for_title(job.title) for job, _ in observed if role_family_for_title(job.title)}),
                        "tasks": tasks, "metric": metric, "evidence": evidence,
-                       "source": {"name": "Remote OK", "collected_at": employment.last_successful_refresh,
+                       "source": {"name": source_name, "collected_at": employment.last_successful_refresh,
+                                  "date_kind": "last_updated" if source_id == "himalayas" else "published",
                                   "scope": "Bounded mixed-location remote-job sample"}})
     if history:
         result.sort(key=lambda item: (-item["metric"]["percentage_points"], -item["metric"]["recent"]["numerator"], item["name"]))
@@ -113,7 +119,7 @@ def get_ai_skill_exploration() -> dict:
     return {"mode": mode, "title": ("Fastest rising in sampled postings" if history else
                                      "Most mentioned in our remote-job sample"),
             "sample_size": len(jobs), "collected_at": employment.last_successful_refresh,
-            "source_scope": "Remote OK · capped mixed-location remote postings",
+            "source_scope": f"{source_name} · capped mixed-location remote postings",
             "periods": ({"earlier_days": WINDOW_DAYS, "recent_days": WINDOW_DAYS,
                          "earlier_postings": len(history[0]), "recent_postings": len(history[1])} if history else None),
             "items": result[:8]}

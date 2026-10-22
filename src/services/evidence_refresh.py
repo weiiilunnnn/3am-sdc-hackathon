@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 
 from src.services.dosm_service import get_dosm_dashboard, refresh_dosm
 from src.services.employment_service import get_employment_dashboard, refresh_employment
+from src.services.sources.himalayas import HimalayasSource
 from src.services.trend_service import get_dashboard, refresh_trends
 from src.services.signal_findings import process_shared_findings
 from src.services.skill_connections import process_skill_connections
@@ -32,6 +33,8 @@ def refresh_due_sources() -> None:
     sources = (
         ("OpenAlex", get_dashboard, refresh_trends, timedelta(hours=24), "last_attempt_at"),
         ("Remote OK", get_employment_dashboard, refresh_employment, timedelta(hours=24), "last_attempt_at"),
+        ("Himalayas", lambda: get_employment_dashboard(source_id="himalayas"),
+         lambda: refresh_employment(HimalayasSource()), timedelta(hours=24), "last_attempt_at"),
         ("DOSM", get_dosm_dashboard, refresh_dosm, timedelta(days=7), "retrieved_at"),
     )
     for name, read, refresh, interval, field in sources:

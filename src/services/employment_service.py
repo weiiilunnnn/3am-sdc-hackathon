@@ -8,10 +8,12 @@ from datetime import datetime, timezone
 from math import ceil
 
 from src.data.employment_source import REFRESH_SECONDS, REMOTEOK_SOURCE, SKILL_PHRASES, SOURCE_ID, TOPIC_PHRASES
+from src.data.himalayas_source import HIMALAYAS_SOURCE
 from src.models.employment import EmploymentDashboard, EmploymentJob, SkillCount
 from src.services.sources.base import SourceAdapterError
 from src.services.sources.employment_base import EmploymentSource
 from src.services.sources.remoteok import RemoteOKSource
+from src.services.sources.himalayas import HimalayasSource
 from src.services.storage import connection, initialize_database
 
 
@@ -26,13 +28,15 @@ def _remaining(attempt: str | None) -> int:
     return max(0, ceil(REFRESH_SECONDS - elapsed))
 
 
-def get_employment_dashboard(status: str | None = None) -> EmploymentDashboard:
+def get_employment_dashboard(status: str | None = None, source_id: str = SOURCE_ID) -> EmploymentDashboard:
     initialize_database()
     with connection() as db:
-        state = db.execute("SELECT * FROM employment_refresh_state WHERE source_id = ?", (SOURCE_ID,)).fetchone()
-        cached = db.execute("SELECT payload FROM employment_snapshots WHERE source_id = ?", (SOURCE_ID,)).fetchone()
+        state = db.execute("SELECT * FROM employment_refresh_state WHERE source_id = ?", (source_id,)).fetchone()
+        cached = db.execute("SELECT payload FROM employment_snapshots WHERE source_id = ?", (source_id,)).fetchone()
     data = json.loads(cached["payload"]) if cached else {}
     jobs = [EmploymentJob.model_validate(item) for item in data.get("jobs", [])]
+    now = _now()
+    jobs = [job for job in jobs if not job.expires_at or job.expires_at > now]
     counts: Counter[str] = Counter({skill_id: 0 for skill_id, _, _ in SKILL_PHRASES}) if jobs else Counter()
     labels: dict[str, str] = {skill_id: label for skill_id, label, _ in SKILL_PHRASES} if jobs else {}
     for job in jobs:
@@ -42,7 +46,7 @@ def get_employment_dashboard(status: str | None = None) -> EmploymentDashboard:
     dates = sorted(job.published_at for job in jobs)
     state_status = status or (state["last_status"] if state else "never")
     return EmploymentDashboard(
-        source=data.get("source", REMOTEOK_SOURCE), jobs=jobs,
+        source=data.get("source", HIMALAYAS_SOURCE if source_id == "himalayas" else REMOTEOK_SOURCE), jobs=jobs,
         skill_counts=[
             SkillCount(skill_id=key, label=labels[key], posting_count=count, share_percent=round(count / len(jobs) * 100, 2))
             for key, count in sorted(counts.items(), key=lambda pair: (-pair[1], labels[pair[0]].casefold()))
@@ -77,39 +81,48 @@ def get_employment_history_summary() -> dict[str, str | int | None]:
 
 def refresh_employment(source: EmploymentSource | None = None) -> EmploymentDashboard:
     initialize_database()
+    source = source or RemoteOKSource()
+    source_id = "himalayas" if isinstance(source, HimalayasSource) else SOURCE_ID
     attempted = _now()
     cooling = False
     with connection() as db:
         db.execute("BEGIN IMMEDIATE")
-        state = db.execute("SELECT * FROM employment_refresh_state WHERE source_id = ?", (SOURCE_ID,)).fetchone()
+        state = db.execute("SELECT * FROM employment_refresh_state WHERE source_id = ?", (source_id,)).fetchone()
         if state and _remaining(state["last_attempt_at"]):
             cooling = True
         else:
             db.execute(
                 "INSERT INTO employment_refresh_state (source_id, last_attempt_at, last_status) VALUES (?, ?, 'refreshing') "
                 "ON CONFLICT(source_id) DO UPDATE SET last_attempt_at = excluded.last_attempt_at, last_status = 'refreshing', last_error = NULL",
-                (SOURCE_ID, attempted),
+                (source_id, attempted),
             )
     if cooling:
-        return get_employment_dashboard("cooldown")
+        return get_employment_dashboard("cooldown", source_id)
     try:
-        result = (source or RemoteOKSource()).fetch_snapshot()
-        if result.source_id != SOURCE_ID or not result.jobs:
+        result = source.fetch_snapshot()
+        if result.source_id != source_id or not result.jobs:
             raise SourceAdapterError("The employment provider returned an incompatible or empty snapshot.")
         payload = json.dumps({
-            "source": REMOTEOK_SOURCE,
+            "source": HIMALAYAS_SOURCE if source_id == "himalayas" else REMOTEOK_SOURCE,
             "jobs": [job.model_dump(mode="json") for job in result.jobs],
             "feed_updated_at": result.feed_updated_at, "received_records": result.received_records,
             "excluded_records": result.excluded_records,
         }, ensure_ascii=False)
         with connection() as db:
-            db.execute("INSERT INTO employment_snapshots (source_id, payload) VALUES (?, ?) ON CONFLICT(source_id) DO UPDATE SET payload = excluded.payload", (SOURCE_ID, payload))
-            db.execute(
-                "INSERT OR REPLACE INTO employment_snapshot_history (source_id, retrieved_at, payload) VALUES (?, ?, ?)",
-                (SOURCE_ID, result.retrieved_at, payload),
-            )
-            db.execute("UPDATE employment_refresh_state SET last_success_at = ?, last_status = 'success', last_error = NULL WHERE source_id = ?", (result.retrieved_at, SOURCE_ID))
+            db.execute("INSERT INTO employment_snapshots (source_id, payload) VALUES (?, ?) ON CONFLICT(source_id) DO UPDATE SET payload = excluded.payload", (source_id, payload))
+            if source_id == SOURCE_ID:
+                db.execute(
+                    "INSERT OR REPLACE INTO employment_snapshot_history (source_id, retrieved_at, payload) VALUES (?, ?, ?)",
+                    (source_id, result.retrieved_at, payload),
+                )
+            db.execute("UPDATE employment_refresh_state SET last_success_at = ?, last_status = 'success', last_error = NULL WHERE source_id = ?", (result.retrieved_at, source_id))
     except SourceAdapterError as exc:
         with connection() as db:
-            db.execute("UPDATE employment_refresh_state SET last_status = 'failed', last_error = ? WHERE source_id = ?", (str(exc), SOURCE_ID))
-    return get_employment_dashboard()
+            db.execute("UPDATE employment_refresh_state SET last_status = 'failed', last_error = ? WHERE source_id = ?", (str(exc), source_id))
+    return get_employment_dashboard(source_id=source_id)
+
+
+def get_signal_employment_dashboard() -> EmploymentDashboard:
+    """Prefer the broader attributed remote sample, retaining the old source as fallback."""
+    primary = get_employment_dashboard(source_id="himalayas")
+    return primary if primary.posting_count else get_employment_dashboard()

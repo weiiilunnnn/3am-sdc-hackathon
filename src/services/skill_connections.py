@@ -12,12 +12,13 @@ from src.data.ai_capabilities import CAPABILITIES
 from src.data.employment_source import SOURCE_ID
 from src.data.signal_contexts import role_family_for_title
 from src.data.skills_taxonomy import SKILLS
-from src.services.employment_service import get_employment_dashboard
+from src.services.employment_service import get_signal_employment_dashboard
 from src.services.storage import connection, initialize_database
 
-EXTRACTION_VERSION = "task-evidence-v4"
-CONNECTION_VERSION = "dynamic-connections-v1"
-TASK_VERBS = re.compile(r"\b(?:build|develop|design|evaluate|test|create|implement|integrate|use|apply|manage|analy[sz]e|automate|improve|deploy|work(?:ing)? with)\b", re.I)
+EXTRACTION_VERSION = "task-evidence-v7"
+CONNECTION_VERSION = "dynamic-connections-v4"
+TASK_VERBS = re.compile(r"\b(?:build(?:ing|s)?|develop(?:ing|s)?|design(?:ing|s)?|evaluat(?:e|ing|es)|test(?:ing|s)?|creat(?:e|ing|es)|implement(?:ing|s)?|integrat(?:e|ing|es)|use|using|apply|manag(?:e|ing|es)|analy[sz](?:e|ing|es)|automat(?:e|ing|es)|improv(?:e|ing|es)|deploy(?:ing|s)?|work(?:ing)? with)\b", re.I)
+GENERIC_TRANSFERABLE_SKILLS = {"local:teamwork", "local:communication", "local:problem-solving"}
 FORBIDDEN_CLAIMS = re.compile(r"\b(?:replac\w*|forecast\w*|predict\w*|rising|growth|declin\w*|correlat\w*|guarantee\w*)\b|\d+\s*%", re.I)
 
 
@@ -38,7 +39,7 @@ def _contains(text: str, term: str) -> bool:
 
 
 def _sentences(text: str) -> list[str]:
-    return [part.strip() for part in re.split(r"(?<=[.!?;])\s+|(?<=:)\s+", text)
+    return [part.strip() for part in re.split(r"(?<=[.!?;])\s+|(?<=:)\s+|\n+", text)
             if 20 <= len(part.strip()) <= 360]
 
 
@@ -132,14 +133,17 @@ def _candidate_support(extracted: dict, task: dict) -> list[tuple[str, str, dict
 
 
 def _evidence(job, task: dict, skill: dict) -> dict:
-    return {"id": f"{SOURCE_ID}:{job.source_job_id}", "document_id": job.source_job_id,
+    source_id = getattr(job, "source_id", SOURCE_ID)
+    return {"id": f"{source_id}:{job.source_job_id}", "document_id": job.source_job_id,
             "title": job.title, "company": job.company, "url": job.source_url,
-            "published_at": job.published_at, "source_quote": skill["quote"], "ai_quote": task["quote"],
-            "source": "Remote OK"}
+            "published_at": job.published_at, "date_kind": job.source_date_kind,
+            "source_quote": skill["quote"], "ai_quote": task["quote"],
+            "source": "Himalayas" if source_id == "himalayas" else "Remote OK"}
 
 
 def _make_connection(key: tuple[str, str], support: list[tuple], jobs: list,
-                     collected_at: str | None, version: str) -> dict:
+                     collected_at: str | None, version: str, source: dict | None = None) -> dict:
+    source = source or {"id": SOURCE_ID, "name": "Remote OK", "url": "https://remoteok.com/api"}
     direct_support = [row for row in support if _contains(row[1]["quote"], row[2]["observed_term"])]
     if direct_support:
         support = direct_support
@@ -163,7 +167,7 @@ def _make_connection(key: tuple[str, str], support: list[tuple], jobs: list,
                    f"These sampled roles list {skill['name']} and describe {capability['name']} work; the skill's role in that work is an inference.")
     return {"id": _hash(key)[:20], "evidence_version": version, "current_skill_id": key[0],
             "current_skill_name": skill["name"], "ai_skill": {"id": key[1], "name": capability["name"],
-            "definition": capability["definition"]}, "relationship": "builds_on", "work_task": task_label,
+            "definition": capability["definition"]}, "relationship": "builds_on" if direct else "co_occurs", "work_task": task_label,
             "explanation": explanation, "interpretation_origin": "source-grounded template",
             "role_families": role_families, "basis": "same_task_passage" if direct else "same_posting",
             "extraction_version": EXTRACTION_VERSION, "prompt_version": None, "model_version": None,
@@ -171,7 +175,8 @@ def _make_connection(key: tuple[str, str], support: list[tuple], jobs: list,
             "metric": metric, "employer_count": len({job.company.strip().casefold() for job, *_ in support}),
             "observation_period": {"from": min(job.published_at for job, *_ in support),
                                    "to": max(job.published_at for job, *_ in support)},
-            "source": {"name": "Remote OK", "url": "https://remoteok.com/api", "collected_at": collected_at,
+            "source": {"name": source["name"], "url": source["url"], "collected_at": collected_at,
+                       "date_kind": "last_updated" if source["id"] == "himalayas" else "published",
                        "scope": f"Bounded mixed-location remote feed · {len(role_jobs)} postings in this role scope"},
             "limitations": ("The same task passage supports an application of the listed skill, not demand growth, causation, or replacement."
                             if direct else "The postings list the skill and AI work in separate passages. Their pairing does not establish how the skill is used or whether work changes.")}
@@ -180,13 +185,14 @@ def _make_connection(key: tuple[str, str], support: list[tuple], jobs: list,
 def process_skill_connections() -> dict:
     """Reuse unchanged document extractions and atomically publish a new evidence version."""
     initialize_database()
-    employment = get_employment_dashboard()
+    employment = get_signal_employment_dashboard()
+    source_id = employment.source["id"]
     jobs = list({job.source_job_id: job for job in employment.jobs}.values())
     with connection() as db:
         model_keys = [row["cache_key"] for row in db.execute(
             "SELECT cache_key FROM signal_model_extractions WHERE source_id = ? AND extraction_version = ? ORDER BY cache_key",
-            (SOURCE_ID, EXTRACTION_VERSION))]
-    version = _hash({"documents": sorted((job.source_job_id, _hash(_document_payload(job))) for job in jobs),
+            (source_id, EXTRACTION_VERSION))]
+    version = _hash({"source": source_id, "documents": sorted((job.source_job_id, _hash(_document_payload(job))) for job in jobs),
                      "versions": [EXTRACTION_VERSION, CONNECTION_VERSION], "model_keys": model_keys})
     with connection() as db:
         db.execute("BEGIN IMMEDIATE")
@@ -199,7 +205,7 @@ def process_skill_connections() -> dict:
             content_hash = _hash(_document_payload(job))
             cached = db.execute("SELECT payload FROM signal_connection_extractions WHERE source_id = ? AND document_id = ? "
                                 "AND content_hash = ? AND extraction_version = ?",
-                                (SOURCE_ID, job.source_job_id, content_hash, EXTRACTION_VERSION)).fetchone()
+                                (source_id, job.source_job_id, content_hash, EXTRACTION_VERSION)).fetchone()
             if cached:
                 extracted = validate_extraction(json.loads(cached["payload"]), job)
             else:
@@ -207,11 +213,11 @@ def process_skill_connections() -> dict:
                 db.execute("INSERT INTO signal_connection_extractions "
                            "(source_id, document_id, content_hash, extraction_version, payload, processed_at) "
                            "VALUES (?, ?, ?, ?, ?, ?)",
-                           (SOURCE_ID, job.source_job_id, content_hash, EXTRACTION_VERSION, _json(extracted), _now()))
+                           (source_id, job.source_job_id, content_hash, EXTRACTION_VERSION, _json(extracted), _now()))
                 processed += 1
             model_rows = db.execute("SELECT payload FROM signal_model_extractions WHERE source_id = ? AND document_id = ? "
                                     "AND content_hash = ? AND extraction_version = ?",
-                                    (SOURCE_ID, job.source_job_id, content_hash, EXTRACTION_VERSION)).fetchall()
+                                    (source_id, job.source_job_id, content_hash, EXTRACTION_VERSION)).fetchall()
             tasks = list(extracted["tasks"])
             for row in model_rows:
                 model_extraction = validate_extraction(json.loads(row["payload"]), job)
@@ -226,9 +232,10 @@ def process_skill_connections() -> dict:
                     support[(skill_id, capability_id)].append((job, task, skill, capability))
         published = 0
         for key, rows in support.items():
-            item = _make_connection(key, rows, jobs, employment.last_successful_refresh, version)
+            item = _make_connection(key, rows, jobs, employment.last_successful_refresh, version, employment.source)
             direct = item["basis"] == "same_task_passage"
-            if not item["metric"] or not item["evidence"] or (not direct and item["employer_count"] < 2):
+            if not item["metric"] or not item["evidence"] or (not direct and
+                    (item["employer_count"] < 2 or key[0] in GENERIC_TRANSFERABLE_SKILLS)):
                 db.execute("INSERT OR REPLACE INTO signal_connection_reviews "
                            "(cache_key, connection_id, evidence_version, status, payload, created_at) "
                            "VALUES (?, ?, ?, 'pending', ?, ?)",
@@ -240,6 +247,20 @@ def process_skill_connections() -> dict:
             published += 1
         db.execute("UPDATE signal_connection_state SET evidence_version = ?, processed_at = ?, last_error = NULL WHERE id = 1",
                    (version, _now()))
+        if source_id == "himalayas":
+            # Himalayas requires expired/removed listings to leave the cache.
+            # Retain only current document hashes; an updated posting is extracted again.
+            live = {(job.source_job_id, _hash(_document_payload(job))) for job in jobs}
+            for table in ("signal_connection_extractions", "signal_model_extractions"):
+                rows = db.execute(f"SELECT document_id, content_hash FROM {table} WHERE source_id = ?",
+                                  (source_id,)).fetchall()
+                for row in rows:
+                    if (row["document_id"], row["content_hash"]) not in live:
+                        db.execute(f"DELETE FROM {table} WHERE source_id = ? AND document_id = ? AND content_hash = ?",
+                                   (source_id, row["document_id"], row["content_hash"]))
+            db.execute("DELETE FROM signal_connections WHERE evidence_version != ?", (version,))
+            db.execute("DELETE FROM signal_connection_reviews WHERE evidence_version != ?", (version,))
+            db.execute("DELETE FROM signal_connection_explanations WHERE evidence_version != ?", (version,))
     return {"status": "processed", "evidence_version": version, "documents_processed": processed,
             "connections": published}
 

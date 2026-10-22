@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 
 from src.data.skills_taxonomy import find_skill_by_id
 from src.services.connection_model import enabled, prepare_connection_explanation, prepare_model_extraction
-from src.services.employment_service import get_employment_dashboard
+from src.services.employment_service import get_signal_employment_dashboard
 from src.services.skill_connections import _contains, get_saved_skill_connections, process_skill_connections
 from src.services.storage import connection, initialize_database
 
@@ -46,7 +46,7 @@ def process_discovery_jobs(batch_limit: int = 2) -> dict:
     for row in pending:
         taxonomy = find_skill_by_id(row["skill_id"])
         aliases = (row["skill_name"], *(taxonomy["aliases"] if taxonomy else []))
-        candidates = [job for job in get_employment_dashboard().jobs if job.evidence_text and
+        candidates = [job for job in get_signal_employment_dashboard().jobs if job.evidence_text and
                       any(_contains(job.evidence_text, alias) for alias in aliases) and
                       any(word in job.evidence_text.casefold() for word in ("ai agent", "llm", "machine learning", "model evaluation", "retrieval"))]
         candidates = candidates[:2]

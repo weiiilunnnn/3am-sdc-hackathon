@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 
 from src.data.sample_profiles import get_sample_profiles
 from src.data.signal_contexts import role_family_for_profile
-from src.services.employment_service import get_employment_dashboard
+from src.services.employment_service import get_signal_employment_dashboard
 from src.services.skill_connections import get_saved_skill_connections
 from src.services.connection_model import get_cached_connection_explanation
 from src.services.connection_jobs import queue_discovery_job
@@ -70,14 +70,14 @@ def get_skill_connection_experience(sample_id: str | None = None, profile_id: st
         items.append((enriched, task_overlap))
     items.sort(key=lambda pair: (not pair[0]["in_occupation_scope"], not pair[1],
                                  -(pair[0]["employer_count"] or 0), pair[0]["stale"], pair[0]["id"]))
-    employment = get_employment_dashboard()
+    employment = get_signal_employment_dashboard()
     return {
         "profile": profile, "selected_skill_id": selected, "evidence_version": evidence_version,
         "coverage": coverage,
         "skills": [{**skill, "connection_count": counts.get(skill["id"], 0)} for skill in skills],
         "connections": [item for item, _ in items[:3]],
         "samples": [{"id": item["sample_id"], "label": item["label"]} for item in get_sample_profiles()],
-        "source_state": {"posting_status": employment.refresh_status,
+        "source_state": {"name": employment.source["name"], "posting_status": employment.refresh_status,
                          "collected_at": employment.last_successful_refresh,
                          "posting_sample_size": employment.posting_count,
                          "cache_fallback": employment.cache_fallback},

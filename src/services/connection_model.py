@@ -11,7 +11,7 @@ from src.data.employment_source import SOURCE_ID
 from src.data.ai_capabilities import BY_ID
 from src.data.signal_contexts import role_family_for_title
 from src.data.skills_taxonomy import find_skill_by_label
-from src.services.employment_service import get_employment_dashboard
+from src.services.employment_service import get_signal_employment_dashboard
 from src.services.sdg_text import LLM_ENDPOINT_ID
 from src.services.signal_model_budget import reconcile_budget, reserve_budget
 from src.services.skill_connections import (
@@ -119,11 +119,12 @@ def _validated_model_document(raw: dict, job, supplied_text: str) -> dict:
 
 
 def prepare_model_extraction(document_id: str) -> dict:
-    job = next((item for item in get_employment_dashboard().jobs if item.source_job_id == document_id), None)
+    job = next((item for item in get_signal_employment_dashboard().jobs if item.source_job_id == document_id), None)
     if not job or not job.evidence_text:
         return {"status": "no_saved_description"}
     content_hash = _hash(_document_payload(job))
-    cache_key = _key({"source": SOURCE_ID, "document": document_id, "hash": content_hash,
+    source_id = getattr(job, "source_id", SOURCE_ID)
+    cache_key = _key({"source": source_id, "document": document_id, "hash": content_hash,
                       "extraction": EXTRACTION_VERSION, "prompt": EXTRACT_PROMPT_VERSION, "model": model_name()})
     initialize_database()
     with connection() as db:
@@ -151,7 +152,7 @@ def prepare_model_extraction(document_id: str) -> dict:
         db.execute("INSERT OR IGNORE INTO signal_model_extractions "
                    "(cache_key, source_id, document_id, content_hash, extraction_version, model, payload, created_at) "
                    "VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))",
-                   (cache_key, SOURCE_ID, document_id, content_hash, EXTRACTION_VERSION, model_name(),
+                   (cache_key, source_id, document_id, content_hash, EXTRACTION_VERSION, model_name(),
                     json.dumps(valid, ensure_ascii=False)))
     process_skill_connections()
     return {"status": "generated", "tasks": len(valid["tasks"])}
@@ -183,7 +184,7 @@ def validate_connection_wording(output: dict, item: dict) -> dict:
     task = output.get("work_task")
     limitation = output.get("limitation")
     allowed = {row["id"] for row in item["evidence"]}
-    if relationship not in ("builds_on", "changes_workflow", "may_automate_task"):
+    if relationship not in ("builds_on", "changes_workflow", "may_automate_task", "co_occurs"):
         raise ValueError("Invalid relationship.")
     if not isinstance(text, str) or not 30 <= len(text) <= 190 or FORBIDDEN_CLAIMS.search(text):
         raise ValueError("Unsupported interpretation.")
@@ -198,8 +199,8 @@ def validate_connection_wording(output: dict, item: dict) -> dict:
         raise ValueError("Automation is not explicit in the cited task.")
     if relationship == "changes_workflow" and not re.search(r"\b(?:workflow|process|integrat\w*|transform\w*|shift\w*)\b", quotes):
         raise ValueError("Workflow change is not explicit in the cited task.")
-    if item["basis"] == "same_posting" and relationship != "builds_on":
-        raise ValueError("Separate posting passages cannot support a stronger relationship.")
+    if item["basis"] == "same_posting" and relationship != "co_occurs":
+        raise ValueError("Separate posting passages only support observed co-occurrence.")
     if item["basis"] == "same_posting" and not re.search(r"\b(?:posting|postings|role|roles|listed|mentions?)\b", text, re.I):
         raise ValueError("Co-occurrence must be described as an observation.")
     return {"status": "supported", "relationship": relationship, "explanation": text.strip(),
@@ -229,7 +230,7 @@ def prepare_connection_explanation(connection_id: str) -> dict:
     status, output = _run(facts, (
         "Assess whether the evidence supports this skill connection. Return JSON with status "
         "supported or insufficient_evidence. For supported, return current_skill_id, ai_skill_id, "
-        "relationship (builds_on, changes_workflow, may_automate_task), work_task copied from input, "
+        "relationship (co_occurs, builds_on, changes_workflow, may_automate_task), work_task copied from input, "
         "one-sentence explanation, evidence_ids and limitation. Separate observed posting facts from "
         "an inferred work implication. Co-occurrence alone never proves replacement, growth or automation. "
         "If task linkage is ambiguous, return insufficient_evidence. No invented numbers."
