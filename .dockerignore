@@ -1,0 +1,10 @@
+.git
+.next
+node_modules
+src/frontend/node_modules
+__pycache__
+*.py[cod]
+models
+.env
+.venv
+tests

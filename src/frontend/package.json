@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0",
     "build": "next build",
-    "start": "next start --hostname 0.0.0.0",
+    "start": "next start",
+    "generate:data": "node ../../scripts/generate_synthetic_data.mjs",
     "typecheck": "tsc --noEmit",
     "test:logic": "node --experimental-strip-types --test ../../tests/frontend_logic.test.mjs",
     "test:components": "tsx --tsconfig tsconfig.json --test ../../tests/frontend_components.test.ts"
