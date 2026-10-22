@@ -15,7 +15,7 @@ def main() -> int:
     web_port = os.getenv("PORT", "3000")
     env = {**os.environ, "BACKEND_URL": f"http://127.0.0.1:{api_port}"}
     commands = [
-        [sys.executable, "-m", "uvicorn", "src.main:app", "--host", "127.0.0.1", "--port", api_port, "--reload"],
+        [sys.executable, "-m", "uvicorn", "src.main:app", "--host", "127.0.0.1", "--port", api_port, "--reload", "--reload-dir", "src"],
         ["npm", "--prefix", "src/frontend", "run", "dev", "--", "--port", web_port],
     ]
     processes: list[subprocess.Popen] = []

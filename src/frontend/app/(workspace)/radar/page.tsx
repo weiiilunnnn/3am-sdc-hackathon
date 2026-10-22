@@ -7,6 +7,7 @@ import {
 } from "@/lib/api";
 import { buildTrendChartGeometry } from "@/lib/chart-utils";
 import EmploymentSnapshot from "./EmploymentSnapshot";
+import RadarOverview from "./RadarOverview";
 
 const PROFILE_KEY = "aiversecity.synthetic-profile-id";
 
@@ -157,9 +158,12 @@ export default function RadarPage() {
   return <main className="page-wrap">
     <div className="page-kicker"><span className="kicker-dot" /> FEATURE 02 <span>·</span> FUTURE SKILLS RADAR</div>
     <div className="hero-row">
-      <div><h1>Research signals,<br />with the dates attached.</h1><p className="hero-copy">Explore what academic research has been publishing about selected skill topics. A useful signal to investigate — never a proxy for hiring demand.</p></div>
-      <span className="hero-index">OPEN RESEARCH · INTERNATIONAL SCOPE / 02</span>
+      <div><h1>See what’s moving.<br />Know what it means for you.</h1><p className="hero-copy">A personal reading of research activity, current job-posting examples, and Malaysian occupation context — with the source behind every number.</p></div>
+      <span className="hero-index">FUTURE SKILLS RADAR / 02</span>
     </div>
+    <RadarOverview />
+    <details className="radar-deep-dive">
+      <summary>Inspect the full source evidence <span>Annual charts, methodology, and original posting examples</span></summary>
     <div className="notice" role="note" data-testid="notice-research-interpretation">
       <span className="notice-icon" aria-hidden="true">i</span>
       <div><strong>Activity is not demand</strong>These counts describe research activity in the source and publication years shown. They do not measure vacancies, employer demand, salaries, or likely career outcomes. Missing years are left visible as gaps.</div>
@@ -196,5 +200,6 @@ export default function RadarPage() {
         {!demoLoading && !demo && <p className="message info" role="status">Synthetic demo has not loaded. The real cached view remains separate.</p>}
       </div>}
     </section>
+    </details>
   </main>;
 }

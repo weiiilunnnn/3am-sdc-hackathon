@@ -37,7 +37,7 @@ Next.js proxies `/api/*` to `BACKEND_URL` (default `http://127.0.0.1:8080`). Fas
 | `/cv-studio` | Saved-profile CV previews and printing |
 | `/outlook` | Profile-content checks and cached skill evidence |
 | `/explore` | Skills catalogue with profile, research and posting filters |
-| `/radar` | OpenAlex research and Remote OK job-source evidence |
+| `/radar` | Profile-linked OpenAlex research, Remote OK posting snapshot and DOSM Malaysia occupation context |
 
 The career demo links to the workspace, and the workspace links back. Onboarding answers remain in memory and are not silently copied into saved profiles. Use fictional details only. Pathwaay's role matches, scenario estimates, and SDG rankings demonstrate the workflow using generated synthetic data; they are not real labour-market forecasts or measured SDG impact. No page implements account security.
 
@@ -89,6 +89,14 @@ After installing Python and frontend dependencies, the Replit Run button uses `s
 For a production server, build with `npm --prefix src/frontend run build`, run FastAPI without `--reload`, and run `npm --prefix src/frontend run start`. Configure `BACKEND_URL` when building if the API is not at the default address. Replit deployment and durable SQLite storage must be configured and verified separately; the development launcher is not a production deployment configuration.
 
 RunPod is optional. FastAPI can use the local career model without RunPod. Generated SDG explanations require a configured RunPod language-model endpoint; the fixed SDG reference text and dataset-ranked goals do not. `runpod/handler.py` is a Serverless handler for career inference and requires the included synthetic dataset at deployment.
+
+## Future Skills Radar data
+
+The radar reads cached evidence on page load. **Update source evidence** explicitly refreshes three independent sources: quoted exact-phrase annual counts from OpenAlex, up to 100 current Remote OK feed postings, and the official DOSM quarterly workbook. The default DOSM release is Q2 2026; set `DOSM_WORKBOOK_URL` and `DOSM_RELEASE_PAGE_URL` to newer official `https://www.dosm.gov.my/` URLs after checking its layout. The refresh parser validates occupation-group totals and compares the latest complete quarter with the same quarter one year earlier. A missing baseline is shown as unavailable. The workbook and date appear in the UI.
+
+Research counts measure indexed publications, not employer demand; OpenAlex coverage can change. Remote OK is a bounded international board snapshot, so its mentions have no rising/falling direction. DOSM reports Malaysian online offerings by **major occupation group**, not individual roles or skills. The radar never combines these sources into a forecast score. Saved fictional profile skills and requested development skills link to a few explicitly mapped topics; unmatched skills remain unmatched. Optional RunPod GLM text only rephrases supplied topic/practice context and is not used to calculate trends or scores.
+
+API reads: `GET /api/trends/brief[?profile_id=...]`, `GET /api/trends/malaysia`. Explicit refreshes: `POST /api/trends/refresh`, `POST /api/employment/refresh`, `POST /api/trends/malaysia/refresh`. `POST /api/trends/brief/explain?profile_id=...` is optional and reports unavailable when RunPod is not configured. To add a new official DOSM release, update `DOSM_WORKBOOK_URL` and inspect its source date and parser output before presenting it.
 
 ## Team and submission
 

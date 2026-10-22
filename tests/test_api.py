@@ -141,9 +141,21 @@ class ApiIntegrationTests(unittest.TestCase):
 
     def test_cached_routes_do_not_contact_providers(self):
         with patch("src.services.sources.openalex.urlopen", side_effect=AssertionError("unexpected network")), patch("src.services.sources.remoteok.urlopen", side_effect=AssertionError("unexpected network")):
-            for path in ("/api/skills?q=python", "/api/trends", "/api/trends/topics", "/api/trends/sources", "/api/trends/demo", "/api/trends/history", "/api/employment", "/api/employment/source"):
+            for path in ("/api/skills?q=python", "/api/trends", "/api/trends/topics", "/api/trends/sources", "/api/trends/demo", "/api/trends/history", "/api/trends/brief", "/api/trends/malaysia", "/api/employment", "/api/employment/source"):
                 self.assertEqual(request("GET", path)[0], 200, path)
             self.assertEqual(request("GET", "/api/employment")[1]["posting_count"], 0)
+
+    def test_radar_brief_profile_and_optional_explanation(self):
+        _, profile = request("POST", "/api/profiles", self.draft())
+        status, brief = request("GET", f"/api/trends/brief?profile_id={profile['id']}")
+        self.assertEqual(status, 200)
+        self.assertEqual(brief["profile_id"], profile["id"])
+        self.assertEqual(len(brief["cards"]), 5)
+        self.assertEqual(request("GET", "/api/trends/brief?profile_id=missing")[0], 404)
+        with patch.dict(os.environ, {"RUNPOD_API_KEY": ""}):
+            status, explanation = request("POST", f"/api/trends/brief/explain?profile_id={profile['id']}")
+        self.assertEqual(status, 200)
+        self.assertFalse(explanation["available"])
 
     def test_profile_records_survive_round_trip_and_evidence_is_validated(self):
         draft = self.draft()

@@ -74,8 +74,32 @@ def initialize_database() -> None:
                 last_status TEXT NOT NULL DEFAULT 'never',
                 last_error TEXT
             );
+
+            CREATE TABLE IF NOT EXISTS dosm_snapshot (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                payload TEXT NOT NULL,
+                retrieved_at TEXT NOT NULL
+            );
             """
         )
         db.execute(
             "INSERT OR IGNORE INTO trend_refresh_state (id, last_status) VALUES (1, 'never')"
         )
+        # Earlier versions searched unquoted words (AND across fields) while
+        # labelling them as phrases. Those counts must not survive the switch
+        # to quoted exact-phrase queries.
+        legacy = db.execute(
+            "SELECT 1 FROM trend_observations "
+            "WHERE source_url LIKE 'https://api.openalex.org/works?search=%' "
+            "AND instr(source_url, 'search=%22') = 0 LIMIT 1"
+        ).fetchone()
+        if legacy:
+            db.execute(
+                "DELETE FROM trend_observations "
+                "WHERE source_url LIKE 'https://api.openalex.org/works?search=%' "
+                "AND instr(source_url, 'search=%22') = 0"
+            )
+            db.execute(
+                "UPDATE trend_refresh_state SET last_attempt_at = NULL, last_success_at = NULL, "
+                "last_status = 'never', last_error = NULL WHERE id = 1"
+            )

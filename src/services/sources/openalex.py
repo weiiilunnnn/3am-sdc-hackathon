@@ -20,7 +20,9 @@ class OpenAlexSource:
     @staticmethod
     def build_query_url(topic: dict, start_year: int, end_year: int) -> str:
         params = {
-            "search": topic["query"],
+            # OpenAlex treats unquoted words as an AND search across fields. A
+            # quoted phrase is needed for the topic definitions shown in the UI.
+            "search": f'"{topic["query"]}"',
             "filter": (
                 f"from_publication_date:{start_year}-01-01,"
                 f"to_publication_date:{end_year}-12-31"

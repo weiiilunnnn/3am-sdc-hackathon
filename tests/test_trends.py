@@ -39,7 +39,7 @@ class FakeSource:
         return SourceResult(
             source_id=self.source_id,
             topic_id=topic["id"],
-            query_url=f"https://api.openalex.org/works?search={topic['query']}",
+            query_url=OpenAlexSource.build_query_url(topic, start_year, end_year),
             measurement="Test count of indexed records grouped by publication year.",
             retrieved_at="2026-10-21T00:00:00Z",
             observations=(

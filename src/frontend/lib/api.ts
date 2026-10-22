@@ -170,6 +170,38 @@ export type TrendHistory = {
   }[];
 };
 
+export type RadarBrief = {
+  profile_id: string | null;
+  profile_context: { current_occupation: string | null; career_aspirations: string; skills_to_develop: string[]; synthetic_demo: boolean } | null;
+  cards: {
+    topic_id: string; label: string; definition: string;
+    direction: "more_research_records" | "fewer_research_records" | "unchanged_research_records" | "insufficient_data";
+    research_count: number | null; research_year: number | null;
+    previous_count: number | null; previous_year: number | null;
+    research_change_percent: number | null; research_source_url: string | null;
+    research_retrieved_at: string | null; posting_mentions: number;
+    posting_denominator: number; posting_source_url: string; posting_retrieved_at: string | null;
+    matched_profile_skills: string[]; development_profile_skills: string[]; practice: string;
+  }[];
+  research_refreshed_at: string | null; posting_refreshed_at: string | null; method: string;
+};
+
+export type MalaysiaContext = {
+  status: "empty" | "available";
+  retrieved_at: string | null;
+  data: null | {
+    source_name: string; source_url: string; source_page: string; scope: string;
+    latest_period: string; comparison_period: string;
+    latest_total: number; comparison_total: number; limitation: string;
+    groups: {
+      name: string; current_count: number; previous_count: number | null;
+      current_share_percent: number; previous_share_percent: number | null;
+      share_point_change: number | null;
+      direction: "higher_share" | "lower_share" | "unchanged_share" | "not_comparable";
+    }[];
+  };
+};
+
 export type EmploymentJob = {
   source_job_id: string;
   title: string;
@@ -355,6 +387,25 @@ export function getTrendTopics() {
 
 export function getTrends() {
   return request<TrendDashboard>("/api/trends");
+}
+
+export function getRadarBrief(profileId?: string) {
+  return request<RadarBrief>(`/api/trends/brief${profileId ? `?profile_id=${encodeURIComponent(profileId)}` : ""}`);
+}
+
+export function explainRadarBrief(profileId?: string) {
+  return request<{ available: boolean; reason: string | null; summary: string | null; model: string | null }>(
+    `/api/trends/brief/explain${profileId ? `?profile_id=${encodeURIComponent(profileId)}` : ""}`,
+    { method: "POST" },
+  );
+}
+
+export function getMalaysiaContext() {
+  return request<MalaysiaContext>("/api/trends/malaysia");
+}
+
+export function refreshMalaysiaContext() {
+  return request<MalaysiaContext>("/api/trends/malaysia/refresh", { method: "POST" });
 }
 
 export function refreshTrends() {
