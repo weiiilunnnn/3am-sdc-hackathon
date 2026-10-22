@@ -10,6 +10,7 @@ from src.services.dosm_service import get_dosm_dashboard, refresh_dosm
 from src.services.employment_service import get_employment_dashboard, refresh_employment
 from src.services.trend_service import get_dashboard, refresh_trends
 from src.services.signal_findings import process_shared_findings
+from src.services.skill_connections import process_skill_connections
 
 LOG = logging.getLogger(__name__)
 CHECK_INTERVAL_SECONDS = 6 * 60 * 60
@@ -44,6 +45,10 @@ def refresh_due_sources() -> None:
         process_shared_findings()
     except Exception:
         LOG.exception("Shared finding processing failed; previous findings remain available")
+    try:
+        process_skill_connections()
+    except Exception:
+        LOG.exception("Skill connection processing failed; previous connections remain available")
 
 
 async def refresh_loop() -> None:

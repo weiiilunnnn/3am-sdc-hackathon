@@ -52,6 +52,11 @@ def _profile_data(sample_id: str | None, profile_id: str | None) -> dict | None:
     }
 
 
+def get_active_profile(sample_id: str | None = None, profile_id: str | None = None) -> dict | None:
+    """One profile shape for sample and saved profiles across signal views."""
+    return _profile_data(sample_id, profile_id)
+
+
 def _stale(collected_at: str | None) -> bool:
     if not collected_at:
         return True

@@ -6,8 +6,7 @@ import hashlib
 import json
 import os
 import re
-from math import ceil
-
+from src.services.signal_model_budget import reconcile_budget, reserve_budget
 from src.services.sources.runpod_api import RunPodRequestError, run_sync, unwrap_llm_output
 from src.services.storage import connection, initialize_database
 
@@ -67,20 +66,9 @@ def prepare_explanation(profile: dict, finding: dict) -> dict:
     serialized = json.dumps(facts, ensure_ascii=False)
     if len(serialized) > MAX_INPUT_CHARS:
         return {"status": "input_too_large"}
-    reservation = ceil(len(serialized) / 3) + MAX_OUTPUT_TOKENS
-    try:
-        request_limit = max(0, int(os.getenv("EVIDENCE_LLM_REQUEST_BUDGET", "0")))
-        token_limit = max(0, int(os.getenv("EVIDENCE_LLM_TOKEN_BUDGET", "0")))
-    except ValueError:
-        return {"status": "invalid_budget"}
-    initialize_database()
-    with connection() as db:
-        db.execute("BEGIN IMMEDIATE")
-        usage = db.execute("SELECT requests, tokens FROM signal_model_usage WHERE id = 1").fetchone()
-        if usage["requests"] >= request_limit or usage["tokens"] + reservation > token_limit:
-            return {"status": "budget_exhausted"}
-        db.execute("UPDATE signal_model_usage SET requests = requests + 1, tokens = tokens + ? WHERE id = 1",
-                   (reservation,))
+    budget_status, reservation = reserve_budget(serialized, MAX_OUTPUT_TOKENS)
+    if budget_status != "reserved":
+        return {"status": budget_status}
     payload = {"input": {
         "model": os.getenv("EVIDENCE_LLM_MODEL", "glm-5.3"),
         "messages": [
@@ -100,10 +88,7 @@ def prepare_explanation(profile: dict, finding: dict) -> dict:
         result = run_sync(endpoint, payload, timeout=35)
         output = unwrap_llm_output(result)
         reported = output.get("usage") or result.get("usage")
-        if isinstance(reported, dict) and isinstance(reported.get("total_tokens"), int):
-            with connection() as db:
-                db.execute("UPDATE signal_model_usage SET tokens = MAX(0, tokens + ?) WHERE id = 1",
-                           (reported["total_tokens"] - reservation,))
+        reconcile_budget(reported, reservation)
         text = output["choices"][0]["message"]["content"]
         generated = validate_generated_wording(json.loads(text), {item["id"] for item in facts["evidence"]})
         model = os.getenv("EVIDENCE_LLM_MODEL", "glm-5.3")

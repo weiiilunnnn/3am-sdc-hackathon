@@ -6,6 +6,7 @@ from typing import Literal
 from src.services.dosm_service import get_dosm_dashboard, refresh_dosm
 from src.services.radar_brief import explain_brief, get_brief
 from src.services.trend_experience import get_trend_experience
+from src.services.skill_connection_experience import get_skill_connection_experience
 
 from src.models.trends import ProfileRelevance, TrendDashboard, TrendSourceInfo
 from src.services.trend_service import (
@@ -19,6 +20,21 @@ from src.services.trend_service import (
 )
 
 router = APIRouter(prefix="/api/trends")
+
+
+@router.get("/connections")
+def skill_connections(
+    sample_id: str | None = Query(default=None, max_length=80),
+    profile_id: str | None = Query(default=None, max_length=80),
+    skill_id: str | None = Query(default=None, max_length=120),
+) -> dict:
+    try:
+        result = get_skill_connection_experience(sample_id, profile_id, skill_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    if result is None:
+        raise HTTPException(status_code=404, detail="Profile not found.")
+    return result
 
 
 @router.get("/experience")
