@@ -67,6 +67,13 @@ def initialize_database() -> None:
                 payload TEXT NOT NULL
             );
 
+            CREATE TABLE IF NOT EXISTS employment_snapshot_history (
+                source_id TEXT NOT NULL,
+                retrieved_at TEXT NOT NULL,
+                payload TEXT NOT NULL,
+                PRIMARY KEY (source_id, retrieved_at)
+            );
+
             CREATE TABLE IF NOT EXISTS employment_refresh_state (
                 source_id TEXT PRIMARY KEY,
                 last_attempt_at TEXT,
@@ -84,6 +91,15 @@ def initialize_database() -> None:
         )
         db.execute(
             "INSERT OR IGNORE INTO trend_refresh_state (id, last_status) VALUES (1, 'never')"
+        )
+        # Retain the last snapshot from databases created before collection
+        # history existed. Later successful refreshes add new dated rows.
+        db.execute(
+            "INSERT OR IGNORE INTO employment_snapshot_history (source_id, retrieved_at, payload) "
+            "SELECT snapshot.source_id, state.last_success_at, snapshot.payload "
+            "FROM employment_snapshots AS snapshot "
+            "JOIN employment_refresh_state AS state ON state.source_id = snapshot.source_id "
+            "WHERE state.last_success_at IS NOT NULL"
         )
         # Earlier versions searched unquoted words (AND across fields) while
         # labelling them as phrases. Those counts must not survive the switch

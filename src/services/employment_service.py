@@ -62,6 +62,19 @@ def get_employment_dashboard(status: str | None = None) -> EmploymentDashboard:
     )
 
 
+def get_employment_history_summary() -> dict[str, str | int | None]:
+    """Collection coverage, not a claim about changing skill demand."""
+    initialize_database()
+    with connection() as db:
+        row = db.execute(
+            "SELECT COUNT(*) AS snapshots, MIN(retrieved_at) AS first_collected_at, "
+            "MAX(retrieved_at) AS last_collected_at "
+            "FROM employment_snapshot_history WHERE source_id = ?",
+            (SOURCE_ID,),
+        ).fetchone()
+    return dict(row)
+
+
 def refresh_employment(source: EmploymentSource | None = None) -> EmploymentDashboard:
     initialize_database()
     attempted = _now()
@@ -91,6 +104,10 @@ def refresh_employment(source: EmploymentSource | None = None) -> EmploymentDash
         }, ensure_ascii=False)
         with connection() as db:
             db.execute("INSERT INTO employment_snapshots (source_id, payload) VALUES (?, ?) ON CONFLICT(source_id) DO UPDATE SET payload = excluded.payload", (SOURCE_ID, payload))
+            db.execute(
+                "INSERT OR REPLACE INTO employment_snapshot_history (source_id, retrieved_at, payload) VALUES (?, ?, ?)",
+                (SOURCE_ID, result.retrieved_at, payload),
+            )
             db.execute("UPDATE employment_refresh_state SET last_success_at = ?, last_status = 'success', last_error = NULL WHERE source_id = ?", (result.retrieved_at, SOURCE_ID))
     except SourceAdapterError as exc:
         with connection() as db:

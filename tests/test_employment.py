@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from unittest.mock import patch
 from urllib.error import URLError
 
-from src.services.employment_service import get_employment_dashboard, refresh_employment
+from src.services.employment_service import get_employment_dashboard, get_employment_history_summary, refresh_employment
 from src.services.sources.base import SourceAdapterError
 from src.services.sources.remoteok import MAX_BYTES, RemoteOKSource, extract_mentions, plain_text
 from src.services.storage import connection
@@ -35,6 +35,14 @@ class FakeSource:
 class FailingSource:
     def fetch_snapshot(self):
         raise SourceAdapterError("Synthetic provider failure")
+
+
+class DatedSource:
+    def __init__(self, retrieved_at: str):
+        self.retrieved_at = retrieved_at
+
+    def fetch_snapshot(self):
+        return RemoteOKSource.parse_payload(feed(), self.retrieved_at)
 
 
 class EmploymentTests(unittest.TestCase):
@@ -134,6 +142,26 @@ class EmploymentTests(unittest.TestCase):
         self.assertEqual(failed.jobs, previous.jobs)
         self.assertEqual(failed.last_successful_refresh, previous.last_successful_refresh)
         self.assertTrue(refresh_employment(FailingSource()).cache_fallback)
+
+    def test_successful_snapshots_are_retained_without_claiming_a_trend(self):
+        self.assertEqual(get_employment_history_summary()["snapshots"], 0)
+        refresh_employment(DatedSource("2026-10-21T00:00:00Z"))
+        with connection() as db:
+            db.execute("UPDATE employment_refresh_state SET last_attempt_at = '2000-01-01T00:00:00Z'")
+        refresh_employment(DatedSource("2026-10-22T00:00:00Z"))
+        history = get_employment_history_summary()
+        self.assertEqual(history["snapshots"], 2)
+        self.assertEqual(history["first_collected_at"], "2026-10-21T00:00:00Z")
+        self.assertEqual(history["last_collected_at"], "2026-10-22T00:00:00Z")
+        with connection() as db:
+            saved = db.execute("SELECT payload FROM employment_snapshot_history ORDER BY retrieved_at").fetchall()
+        self.assertEqual(len(saved), 2)
+        self.assertEqual(json.loads(saved[0]["payload"])["jobs"][0]["source_job_id"],
+                         json.loads(saved[1]["payload"])["jobs"][0]["source_job_id"])
+        with connection() as db:
+            db.execute("UPDATE employment_refresh_state SET last_attempt_at = '2000-01-01T00:00:00Z'")
+        refresh_employment(FailingSource())
+        self.assertEqual(get_employment_history_summary()["snapshots"], 2)
 
 
 if __name__ == "__main__":

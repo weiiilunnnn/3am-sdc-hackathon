@@ -38,6 +38,7 @@ class TrendExperienceTests(unittest.TestCase):
         self.assertEqual(agents["research_count"], 60)
         self.assertEqual(agents["change_percent"], 50.0)
         self.assertEqual(result["source"]["posting_sample_size"], 2)
+        self.assertEqual(result["source"]["posting_snapshots_saved"], 1)
         self.assertEqual(next(item for item in result["searchable_skills"] if item["name"] == "Python programming")["posting_mentions"], 1)
         self.assertIn("cannot establish", result["method"])
 

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from src.data.sample_profiles import get_sample_profiles
 from src.data.skills_taxonomy import find_skill_by_label, search_skills
-from src.services.employment_service import get_employment_dashboard
+from src.services.employment_service import get_employment_dashboard, get_employment_history_summary
 from src.services.profile_service import get_profile
 from src.services.radar_brief import PRACTICES
 from src.services.trend_service import SKILL_TOPIC_MAP, get_dashboard
@@ -51,6 +51,7 @@ def get_trend_experience(sample_id: str | None = None, profile_id: str | None = 
         return None
     research = get_dashboard()
     employment = get_employment_dashboard()
+    employment_history = get_employment_history_summary()
     linked: dict[str, list[str]] = {}
     for skill in profile["skills"]:
         for topic_id in SKILL_TOPIC_MAP.get(skill["id"] or "", {}):
@@ -125,6 +126,8 @@ def get_trend_experience(sample_id: str | None = None, profile_id: str | None = 
             "posting_feed_updated_at": employment.source_feed_updated_at,
             "posting_sample_size": employment.posting_count,
             "posting_url": employment.source["url"],
+            "posting_snapshots_saved": employment_history["snapshots"],
+            "posting_history_started_at": employment_history["first_collected_at"],
         },
         "method": (
             "Research direction compares adjacent complete publication years for quoted OpenAlex Works searches. "
@@ -133,6 +136,7 @@ def get_trend_experience(sample_id: str | None = None, profile_id: str | None = 
             "at least 10 records. Remote OK counts are mentions in one bounded feed snapshot, not a trend. "
             "Profile links use explicit skill-to-topic rules; linked topics are ordered by observed research "
             "percentage change, not a combined market score. These sources cannot establish that a skill "
-            "is declining in employment or will be replaced by AI."
+            "is declining in employment or will be replaced by AI. Successful posting snapshots are now retained "
+            "for later deduplicated comparisons; overlapping feed snapshots alone are not a demand trend."
         ),
     }

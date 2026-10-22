@@ -16,7 +16,8 @@ type Experience = {
   profile: { id: string; label: string; occupation: string; field_of_study: string; years_experience: number; interests: string[]; aspiration: string; skills: { id: string | null; name: string }[]; develop: string[]; synthetic: boolean };
   samples: { id: string; label: string }[]; signals: Signal[]; searchable_skills: Skill[];
   source: { research_retrieved_at: string | null; research_status: string; posting_retrieved_at: string | null;
-    posting_feed_updated_at: string | null; posting_sample_size: number; posting_url: string };
+    posting_feed_updated_at: string | null; posting_sample_size: number; posting_url: string;
+    posting_snapshots_saved: number; posting_history_started_at: string | null };
   method: string;
 };
 
@@ -49,6 +50,37 @@ function ResearchChart({ signal }: { signal: Signal }) {
       {points.map(({ x, y, item }) => <g key={item.year}><circle cx={x} cy={y} r="5" className="signal-point"><title>{item.year}: {item.count.toLocaleString()} records</title></circle><text x={x} y={height - 9} textAnchor="middle" className="signal-year">{item.year}</text></g>)}
     </svg>
   </div>;
+}
+
+function ProfileSkillsEvidence({ data, onTopic }: { data: Experience; onTopic: (id: string) => void }) {
+  const skills = data.profile.skills.map((profileSkill) => {
+    const measured = data.searchable_skills.find((item) =>
+      profileSkill.id ? item.id === profileSkill.id : item.name.toLocaleLowerCase() === profileSkill.name.toLocaleLowerCase());
+    return { ...profileSkill, mentions: measured?.posting_mentions ?? null, topics: measured?.related_topic_ids ?? [] };
+  });
+  const sampleSize = data.source.posting_sample_size;
+  const largestShare = sampleSize ? Math.max(0, ...skills.map((skill) => skill.mentions === null ? 0 : skill.mentions / sampleSize * 100)) : 0;
+  const axisMax = [1, 5, 10, 25, 50, 100].find((limit) => largestShare <= limit) ?? 100;
+
+  return <section className="signal-profile-evidence" aria-labelledby="profile-skills-title">
+    <div className="signal-section-head"><div><h2 id="profile-skills-title">The skills you already have</h2><p>How often your listed skills appear in the saved Remote OK sample.</p></div><span>{skills.length} listed skills · {sampleSize} sampled posts</span></div>
+    {skills.length ? <div className="profile-skill-plot">
+      <div className="profile-skill-axis"><span>0</span><span>{axisMax}% of sampled posts</span></div>
+      {skills.map((skill, index) => {
+        const share = skill.mentions !== null && sampleSize ? skill.mentions / sampleSize * 100 : null;
+        return <div className="profile-skill-row" key={`${skill.id ?? skill.name}-${index}`}>
+          <strong>{skill.name}</strong>
+          <div className="profile-skill-track" aria-hidden="true">{share !== null && <span style={{ width: `${Math.min(100, share / axisMax * 100)}%` }} />}</div>
+          <span className="profile-skill-value">{skill.mentions === null ? "Not measured" : `${skill.mentions} / ${sampleSize}`}</span>
+          {skill.topics.length > 0 && <div className="profile-skill-topics">Related research: {skill.topics.map((id) => {
+            const topic = data.signals.find((item) => item.id === id);
+            return topic ? <button type="button" key={id} onClick={() => onTopic(id)}>{topic.name} · {topic.change_percent === null ? "trend unavailable" : `${topic.change_percent > 0 ? "+" : ""}${topic.change_percent.toLocaleString(undefined, { maximumFractionDigits: 1 })}% research`}</button> : null;
+          })}</div>}
+        </div>;
+      })}
+    </div> : <p className="signal-quiet">This profile has no listed skills yet.</p>}
+    <p className="profile-skill-note">This graph shows one posting snapshot, not skill growth or decline. “Not measured” means the skill is outside our tracked posting phrases. Related OpenAlex trends are research activity, not demand for the skill. Source collected {date(data.source.posting_retrieved_at)}.</p>
+  </section>;
 }
 
 export default function SignalsPage() {
@@ -131,12 +163,14 @@ export default function SignalsPage() {
 
       <div className="signal-source-line"><span>OpenAlex collected {date(data.source.research_retrieved_at)}</span><span>Remote OK collected {date(data.source.posting_retrieved_at)}</span><span>These are different measurements, not a combined score.</span></div>
 
+      <ProfileSkillsEvidence data={data} onTopic={(id) => { setFocusId(id); document.getElementById("feature-title")?.scrollIntoView({ behavior: "smooth" }); }} />
+
       <section className="signal-next" aria-labelledby="signal-next-title"><div className="signal-section-head"><div><p className="eyebrow">YOUR NEXT LOOK</p><h2 id="signal-next-title">What stands out for {data.profile.label.toLocaleLowerCase()}</h2></div><span>{personal.length} profile-linked topics</span></div>
         {personal.length ? <div className="signal-card-grid">{personal.slice(0, 3).map((signal) => <button type="button" className={`signal-topic-card ${featured?.id === signal.id ? "active" : ""}`} key={signal.id} onClick={() => setFocusId(signal.id)}><span className="signal-card-label">{signal.direction === "rising" ? "MORE RESEARCH" : signal.direction === "falling" ? "FEWER RESEARCH RECORDS" : "DIRECTION UNAVAILABLE"}</span><strong>{signal.name}</strong><span>{signal.relevance.join(" · ")}</span><em>View evidence ↗</em></button>)}</div> : <p className="signal-quiet">No monitored topic has a direct link to this profile’s listed skills or goals. Search a skill below to see what the available sources cover.</p>}
         {personal.length > 3 && <details className="signal-more"><summary>See {personal.length - 3} more profile-linked topics</summary><div>{personal.slice(3).map((signal) => <button type="button" key={signal.id} onClick={() => { setFocusId(signal.id); document.getElementById("feature-title")?.scrollIntoView({ behavior: "smooth" }); }}>{signal.name} <span>View chart ↗</span></button>)}</div></details>}
       </section>
 
-      <section className="signal-lower"><div className="signal-lower-card"><p className="eyebrow">SKILLS LOSING MOMENTUM?</p><h2>{falling.length ? `${falling.length} topic${falling.length > 1 ? "s" : ""} with fewer research records` : "No measured decline here."}</h2><p>{falling.length ? falling.map((item) => item.name).join(", ") : "None of the monitored research topics fell in the latest comparable years. This does not mean any job skill is safe from change."}</p><p className="signal-caution">These sources do not measure AI replacement of tasks or a falling need for a skill. We will only label that when we have suitable time-series job data and a defensible method.</p></div>
+      <section className="signal-lower"><div className="signal-lower-card"><p className="eyebrow">SKILLS LOSING MOMENTUM?</p><h2>Not measurable yet.</h2><p>{data.source.posting_snapshots_saved} dated job-posting {data.source.posting_snapshots_saved === 1 ? "snapshot is" : "snapshots are"} saved. Even with multiple collections, overlapping posts must be deduplicated and compared across suitable time windows before we can label a skill as declining.</p><p className="signal-caution">{falling.length ? `Separately, ${falling.map((item) => item.name).join(", ")} had fewer OpenAlex research records in the latest comparison. That is not a decline in skill demand or evidence of AI replacement.` : "None of the monitored research topics fell in the latest comparable years. A zero mention in one posting sample also does not prove decline or AI replacement."}</p></div>
         <div className="signal-lower-card signal-action"><p className="eyebrow">ONE USEFUL NEXT STEP</p><h2>Try it in practice.</h2><p>{featured?.action ?? "Choose a topic to explore a grounded next step."}</p><span>Based on your profile link to {featured?.name ?? "the selected topic"}; a learning suggestion, not a forecast.</span></div></section>
 
       <section className="signal-search-section" aria-labelledby="signal-search-title"><div className="signal-section-head"><div><p className="eyebrow">EXPLORE A SKILL</p><h2 id="signal-search-title">Curious about something else?</h2></div></div><label htmlFor="skill-search">Search a skill or topic</label><input id="skill-search" type="search" value={search} onChange={(event) => { setSearch(event.target.value); setSelectedSkill(null); }} placeholder="Try Python, SQL, machine learning…" autoComplete="off" />
