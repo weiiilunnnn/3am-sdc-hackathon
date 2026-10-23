@@ -80,7 +80,8 @@ class HimalayasTests(unittest.TestCase):
         with patch("src.services.connection_model.run_sync") as model, \
              patch("src.services.sources.himalayas.HimalayasSource.fetch_snapshot") as provider:
             page = get_skill_connection_experience("cs-student")
-            self.assertTrue(page["connections"])
+            self.assertEqual(page["connections"], [])  # Separate passages are not a work-task link.
+            self.assertEqual(page["skills"][0]["connection_count"], 0)
             self.assertEqual(page["source_state"]["name"], "Himalayas")
             model.assert_not_called()
             provider.assert_not_called()

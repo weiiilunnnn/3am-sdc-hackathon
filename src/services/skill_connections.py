@@ -15,9 +15,11 @@ from src.data.skills_taxonomy import SKILLS
 from src.services.employment_service import get_signal_employment_dashboard
 from src.services.storage import connection, initialize_database
 
-EXTRACTION_VERSION = "task-evidence-v7"
-CONNECTION_VERSION = "dynamic-connections-v4"
+EXTRACTION_VERSION = "task-evidence-v8"
+CONNECTION_VERSION = "dynamic-connections-v6"
 TASK_VERBS = re.compile(r"\b(?:build(?:ing|s)?|develop(?:ing|s)?|design(?:ing|s)?|evaluat(?:e|ing|es)|test(?:ing|s)?|creat(?:e|ing|es)|implement(?:ing|s)?|integrat(?:e|ing|es)|use|using|apply|manag(?:e|ing|es)|analy[sz](?:e|ing|es)|automat(?:e|ing|es)|improv(?:e|ing|es)|deploy(?:ing|s)?|work(?:ing)? with)\b", re.I)
+ACTION_VERBS = re.compile(r"\b(?:build\w*|develop\w*|design\w*|evaluat\w*|test\w*|creat\w*|implement\w*|integrat\w*|apply|manag\w*|analy[sz]\w*|automat\w*|improv\w*|deploy\w*)\b", re.I)
+QUALIFICATION = re.compile(r"\b(?:experience with|knowledge of|familiarity with|proficiency in)\b", re.I)
 GENERIC_TRANSFERABLE_SKILLS = {"local:teamwork", "local:communication", "local:problem-solving"}
 FORBIDDEN_CLAIMS = re.compile(r"\b(?:replac\w*|forecast\w*|predict\w*|rising|growth|declin\w*|correlat\w*|guarantee\w*)\b|\d+\s*%", re.I)
 
@@ -41,6 +43,10 @@ def _contains(text: str, term: str) -> bool:
 def _sentences(text: str) -> list[str]:
     return [part.strip() for part in re.split(r"(?<=[.!?;])\s+|(?<=:)\s+|\n+", text)
             if 20 <= len(part.strip()) <= 360]
+
+
+def _action_task(quote: str) -> bool:
+    return bool(TASK_VERBS.search(quote) and (not QUALIFICATION.search(quote) or ACTION_VERBS.search(quote)))
 
 
 def _skills_in(quote: str, extra_skills: tuple[tuple[str, str], ...] = ()) -> list[dict]:
@@ -82,7 +88,7 @@ def extract_document(job, extra_skills: tuple[tuple[str, str], ...] = ()) -> dic
     """Exact, same-task extraction; a skill word elsewhere in a posting is insufficient."""
     tasks = []
     for quote in _sentences(job.evidence_text):
-        if not TASK_VERBS.search(quote):
+        if not _action_task(quote):
             continue
         skills, capabilities = _skills_in(quote, extra_skills), _capabilities_in(quote)
         if skills or capabilities:
@@ -106,7 +112,7 @@ def validate_extraction(payload: dict, job) -> dict:
             raise ValueError("Source skill is absent from its quote.")
     for task in payload["tasks"]:
         quote = task.get("quote") if isinstance(task, dict) else None
-        if not isinstance(quote, str) or quote not in job.evidence_text or not TASK_VERBS.search(quote):
+        if not isinstance(quote, str) or quote not in job.evidence_text or not _action_task(quote):
             raise ValueError("Task passage is not supported by the retained source.")
         for field in ("skills", "ai_capabilities"):
             if not isinstance(task.get(field), list) or len(task[field]) > 12:
@@ -160,8 +166,7 @@ def _make_connection(key: tuple[str, str], support: list[tuple], jobs: list,
     evidence = [_evidence(job, task, source_skill) for job, task, source_skill in
                 sorted(distinct.values(), key=lambda pair: pair[0].published_at, reverse=True)[:4]]
     direct = bool(direct_support)
-    verb = TASK_VERBS.search(evidence[0]["ai_quote"])
-    task_label = evidence[0]["ai_quote"][verb.start():verb.end()].capitalize() + " work" if verb else "Work in the cited task"
+    task_label = evidence[0]["ai_quote"][:180]
     explanation = (f"A sampled task names {skill['name']} with {capability['name']}. Check the cited work passage."
                    if direct else
                    f"These sampled roles list {skill['name']} and describe {capability['name']} work; the skill's role in that work is an inference.")

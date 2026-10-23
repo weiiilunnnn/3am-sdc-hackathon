@@ -275,3 +275,60 @@
   .evolution-measure-bars > div > span { grid-column: 1 / -1; }
   .evolution-explore-row { padding: 22px; }
 }
+
+/* AI_TREND_GUIDANCE_V2 — /signals only */
+.evolution-page .evolution-guidance {border:1px solid #4d9a7750;background:linear-gradient(130deg,#153e2e,#102b22);border-radius:20px;padding:clamp(23px,3vw,36px);margin-bottom:20px;}
+.evolution-page .evolution-guidance-heading span,.evolution-page .evolution-support-summary span {display:block;color:#94e1b4;font-weight:750;font-size:12px;letter-spacing:.09em;margin-bottom:14px;}
+.evolution-page .evolution-guidance h3,.evolution-page .evolution-support-summary h3 {font-size:clamp(23px,2.9vw,34px);line-height:1.17;letter-spacing:-.035em;margin:0 0 17px;}
+.evolution-page .evolution-guidance>p {max-width:65ch;font-size:clamp(16px,1.55vw,19px);line-height:1.65;color:#e0f2e6;}
+.evolution-page .evolution-guidance>small {font-size:12px;margin-top:16px;}
+.evolution-page .evolution-support-summary {display:flex;justify-content:space-between;align-items:center;gap:20px;margin:32px 0 18px;padding-bottom:20px;border-bottom:1px solid #6bc19055;}
+.evolution-page .evolution-support-summary p {max-width:62ch;}
+.evolution-page .evolution-support-summary>strong {flex-shrink:0;font:700 clamp(18px,2.2vw,26px)/1.15 "Space Grotesk",sans-serif;color:#a2f2c1;}
+.evolution-page .evolution-limits {margin-top:28px;padding:26px 0 0;}
+.evolution-page .evolution-limits strong {font-size:20px;}
+.evolution-page .evolution-limits p {font-size:14px;line-height:1.6;}
+@media(max-width:650px){.evolution-page .evolution-support-summary{align-items:flex-start;flex-direction:column;}}
+
+/* Keep the user's skill and its cited task visible without a dashboard-sized canvas. */
+.evolution-page .evolution-header { margin: 28px 0 22px; align-items: center; }
+.evolution-page .evolution-header h1 { max-width: 680px; font-size: clamp(30px,3.4vw,46px); line-height: 1.12; }
+.evolution-page .evolution-header p:not(.evolution-kicker) { margin-top: 9px; font-size: 14px; }
+.evolution-page .evolution-profile-line { margin-top: 12px; }
+.evolution-page .evolution-view-tabs { margin-bottom: 16px; }
+.evolution-page .evolution-skills { padding: 17px 20px; gap: 16px; }
+.evolution-page .evolution-results { margin-top: 26px; }
+.evolution-page .evolution-results-title { margin-bottom: 15px; }
+.evolution-page .evolution-results-title h2 { font-size: clamp(23px,2.5vw,30px); }
+.evolution-page .evolution-results-title p { margin-top: 5px; font-size: 13px; }
+.evolution-page .evolution-grid { gap: 14px; }
+.evolution-page .evolution-card { min-height: 230px; padding: 21px; }
+.evolution-page .evolution-pair { margin: 20px 0 12px; }
+.evolution-page .evolution-pair span,.evolution-page .evolution-pair strong { font-size: clamp(18px,1.7vw,23px); }
+.evolution-page .evolution-card-explanation { margin-bottom: 13px; }
+.evolution-page .evolution-card-explanation p { font-size: 14px; line-height: 1.48; }
+.evolution-drawer { width: min(780px,calc(100vw - 32px)); height: min(86dvh,850px); max-height: 86dvh; border-radius: 17px; }
+.evolution-drawer-head { padding: 22px 27px; }
+.evolution-drawer-head h2 { font-size: clamp(25px,3vw,34px); }
+.evolution-drawer-body { padding: 23px 27px 32px; }
+.evolution-drawer-body section { margin-bottom: 23px; }
+.evolution-drawer-body h3 { font-size: 19px; margin-bottom: 8px; }
+.evolution-page .evolution-guidance { padding: 18px 20px; border-radius: 12px; margin-bottom: 23px; }
+.evolution-page .evolution-guidance h3 { font-size: 19px; }
+.evolution-page .evolution-guidance>p { font-size: 15px; line-height: 1.5; }
+.evolution-sources ul { gap: 12px; margin-top: 12px; }
+.evolution-sources li { padding: 15px; }
+.evolution-sources a { font-size: 15px; }
+.evolution-task-quote { margin: 12px 0 0; padding: 13px 15px; border: 1px solid #4e916c77; border-radius: 9px; color: #d6e9db; font-size: 14px; line-height: 1.5; }
+.evolution-research { padding-top: 18px; border-top: 1px solid #70b8914d; }
+.evolution-research-years { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0; }
+.evolution-research-years div { display: grid; gap: 3px; min-width: 82px; padding: 9px 11px; border: 1px solid #6bc19055; border-radius: 8px; background: #123327; }
+.evolution-research-years span { color: #afd1b7; font-size: 11px; }
+.evolution-research-years strong { color: #a1f5be; font-size: 17px; font-variant-numeric: tabular-nums; }
+.evolution-research a { color: #a1f5be; font-size: 13px; }
+@media(max-width:650px) {
+  .evolution-page .evolution-header { margin-top: 20px; }
+  .evolution-page .evolution-header h1 { font-size: 32px; }
+  .evolution-drawer { width: 100vw; height: 94dvh; max-height: 94dvh; border-radius: 15px 15px 0 0; }
+  .evolution-drawer-head,.evolution-drawer-body { padding-inline: 18px; }
+}

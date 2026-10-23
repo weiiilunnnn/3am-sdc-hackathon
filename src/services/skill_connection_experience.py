@@ -10,7 +10,21 @@ from src.services.employment_service import get_signal_employment_dashboard
 from src.services.skill_connections import get_saved_skill_connections
 from src.services.connection_model import get_cached_connection_explanation
 from src.services.connection_jobs import queue_discovery_job
+from src.services.profile_signal_guidance import cached_guidance, queue_guidance
 from src.services.trend_experience import get_active_profile
+from src.services.trend_service import get_dashboard
+
+RESEARCH_TOPIC_FOR_AI = {"ai:agents": "ai_agents", "ai:retrieval": "rag"}
+
+
+def _research_context(ai_skill_id: str, topics: dict) -> dict | None:
+    topic = topics.get(RESEARCH_TOPIC_FOR_AI.get(ai_skill_id))
+    if not topic or not topic.observations:
+        return None
+    observations = sorted(topic.observations, key=lambda row: row.period_year)
+    return {"topic": topic.label, "observations": [{"year": row.period_year, "count": row.value}
+            for row in observations], "source_url": topic.source_url,
+            "measurement": topic.measurement, "limitations": topic.limitations}
 
 
 def _stale(timestamp: str | None) -> bool:
@@ -35,13 +49,14 @@ def get_skill_connection_experience(sample_id: str | None = None, profile_id: st
     if skill_id is not None and skill_id not in {skill["key"] for skill in skills}:
         raise ValueError("Selected skill is not listed in this profile.")
     role, _ = role_family_for_profile(profile)
-    counts = {item["current_skill_id"]: 0 for item in saved}
-    for item in saved:
+    supported = [item for item in saved if item["basis"] == "same_task_passage"]
+    counts = {item["current_skill_id"]: 0 for item in supported}
+    for item in supported:
         if item["current_skill_id"] in known:
             counts[item["current_skill_id"]] += 1
     # Prefer a skill with supported, in-role evidence; retain source profile order for ties.
     def priority(skill: dict) -> tuple[int, int]:
-        matches = [item for item in saved if item["current_skill_id"] == skill["id"]]
+        matches = [item for item in supported if item["current_skill_id"] == skill["id"]]
         return (sum(role in item["role_families"] for item in matches), len(matches))
 
     default = max(skills, key=priority)["key"] if skills else None
@@ -50,16 +65,22 @@ def get_skill_connection_experience(sample_id: str | None = None, profile_id: st
     coverage = (queue_discovery_job(selected_skill["key"], selected_skill["name"], role, evidence_version)
                 if selected_skill and not counts.get(selected_skill["id"], 0) else "supported")
     items = []
-    for item in saved:
+    research_topics = {topic.topic_id: topic for topic in get_dashboard().topics}
+    for item in supported:
         if item["current_skill_id"] != (selected_skill["id"] if selected_skill else None):
             continue
         in_role = bool(role and role in item["role_families"])
         task_overlap = bool(set(word.casefold() for task in profile.get("work_tasks", []) for word in task.split())
                             & set(word.casefold() for word in item["work_task"].split()))
         cached_wording = get_cached_connection_explanation(item)
+        guidance = cached_guidance(profile, item)
+        if guidance is None:
+            queue_guidance(profile, item)
         enriched = {**item, "current_skill_name": selected_skill["name"] if selected_skill else "",
                     "in_occupation_scope": in_role, "stale": _stale(item["source"]["collected_at"]),
                     "cached_model_explanation": cached_wording,
+                    "profile_guidance": guidance,
+                    "research_context": _research_context(item["ai_skill"]["id"], research_topics),
                     "explanation": cached_wording["explanation"] if cached_wording else item["explanation"],
                     "relationship": cached_wording["relationship"] if cached_wording else item["relationship"],
                     "relevance": (
@@ -81,5 +102,5 @@ def get_skill_connection_experience(sample_id: str | None = None, profile_id: st
                          "collected_at": employment.last_successful_refresh,
                          "posting_sample_size": employment.posting_count,
                          "cache_fallback": employment.cache_fallback},
-        "method": "Exact source passages identify skills and AI work. A pair appears only with same-task evidence or repeated independent-employer co-occurrence. Co-occurrence does not prove causation, demand growth, or replacement.",
+        "method": "The main view requires an exact passage naming both the listed skill and an AI task. Research counts are separate context, not employer demand or a forecast.",
     }

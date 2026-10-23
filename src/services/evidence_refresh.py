@@ -13,6 +13,7 @@ from src.services.trend_service import get_dashboard, refresh_trends
 from src.services.signal_findings import process_shared_findings
 from src.services.skill_connections import process_skill_connections
 from src.services.connection_jobs import process_discovery_jobs
+from src.services.profile_signal_guidance import process_guidance_jobs
 
 LOG = logging.getLogger(__name__)
 CHECK_INTERVAL_SECONDS = 6 * 60 * 60
@@ -57,6 +58,10 @@ def refresh_due_sources() -> None:
         process_discovery_jobs()
     except Exception:
         LOG.exception("Queued discovery failed; saved connections remain available")
+    try:
+        process_guidance_jobs()
+    except Exception:
+        LOG.exception("Profile guidance processing failed; source evidence remains available")
 
 
 async def refresh_loop() -> None:

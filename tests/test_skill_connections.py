@@ -12,11 +12,14 @@ from src.services.connection_model import (
     explanation_key, prepare_connection_explanation, prepare_model_extraction,
     validate_connection_wording, _validated_model_document,
 )
+from src.services.profile_signal_guidance import process_guidance_jobs, validate_guidance
 from src.services.employment_service import get_employment_dashboard, refresh_employment
 from src.services.skill_connection_experience import get_skill_connection_experience
 from src.services.skill_connections import (
     extract_document, get_saved_skill_connections, process_skill_connections, validate_extraction,
 )
+from src.services.trend_service import refresh_trends
+from test_trends import FakeSource as FakeResearchSource
 from src.services.sources.remoteok import RemoteOKSource
 from src.services.storage import connection
 
@@ -93,6 +96,15 @@ class SkillConnectionTests(unittest.TestCase):
                                        "source_skills": [], "tasks": [{"quote": "Invented quote", "skills": [],
                                        "ai_capabilities": []}]}, separated, separated.evidence_text)
 
+    def test_research_is_separate_context_for_a_direct_task(self):
+        self.populated()
+        refresh_trends(FakeResearchSource())
+        page = get_skill_connection_experience("data-graduate", skill_id="local:data-analysis")
+        context = page["connections"][0]["research_context"]
+        self.assertEqual(context["topic"], "AI agents")
+        self.assertEqual(context["observations"][-1], {"year": 2025, "count": 60})
+        self.assertIn("api.openalex.org", context["source_url"])
+
     def test_page_reads_saved_data_and_queue_is_deduplicated(self):
         version, saved = self.populated()
         with patch("src.services.connection_model.run_sync") as provider, patch("src.services.sources.remoteok.RemoteOKSource.fetch_snapshot") as source:
@@ -120,6 +132,28 @@ class SkillConnectionTests(unittest.TestCase):
         self.assertEqual((first["coverage"], second["coverage"]), ("queued", "queued"))
         with connection() as db:
             self.assertEqual(db.execute("SELECT COUNT(*) FROM signal_discovery_jobs").fetchone()[0], 1)
+
+    def test_profile_guidance_is_background_cached_and_evidence_bound(self):
+        self.populated()
+        with patch.dict(os.environ, {"EVIDENCE_LLM_ENABLED": "1"}):
+            with patch("src.services.connection_model.run_sync") as paid_call:
+                page = get_skill_connection_experience("data-graduate", skill_id="local:data-analysis")
+                paid_call.assert_not_called()
+            direct = page["connections"][0]
+            self.assertEqual(direct["basis"], "same_task_passage")
+            self.assertIsNone(direct["profile_guidance"])
+            with connection() as db:
+                self.assertEqual(db.execute("SELECT COUNT(*) FROM signal_profile_guidance WHERE status = 'queued'").fetchone()[0], 1)
+            wording = {"status": "supported", "explanation":
+                       "A data analysis graduate could examine AI-agent report outputs using their existing review experience; the cited posting describes this task.",
+                       "evidence_ids": [direct["evidence"][0]["id"]]}
+            with patch("src.services.profile_signal_guidance._run", return_value=("generated", wording)) as model:
+                self.assertEqual(process_guidance_jobs()["processed"], 1)
+                model.assert_called_once()
+            again = get_skill_connection_experience("data-graduate", skill_id="local:data-analysis")
+            self.assertEqual(again["connections"][0]["profile_guidance"]["explanation"], wording["explanation"])
+            with self.assertRaises(ValueError):
+                validate_guidance({**wording, "evidence_ids": ["invented"]}, direct)
 
     def test_model_review_rejects_unsupported_automation_and_caches(self):
         _, saved = self.populated()

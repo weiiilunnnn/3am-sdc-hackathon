@@ -184,6 +184,15 @@ def initialize_database() -> None:
                 created_at TEXT NOT NULL
             );
 
+            CREATE TABLE IF NOT EXISTS signal_profile_guidance (
+                cache_key TEXT PRIMARY KEY,
+                evidence_version TEXT NOT NULL,
+                status TEXT NOT NULL,
+                payload TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+
             CREATE TABLE IF NOT EXISTS signal_discovery_jobs (
                 job_key TEXT PRIMARY KEY,
                 skill_id TEXT NOT NULL,
