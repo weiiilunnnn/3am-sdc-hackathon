@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import math
 import os
 import re
@@ -20,6 +21,7 @@ MAX_EVIDENCE_CHARS = 30_000
 ESCO_RELEASE = "v1.2.1"
 ESCO_SKILL_PREFIX = "http://data.europa.eu/esco/skill/"
 MAX_TAXONOMY_CANDIDATES = 80
+logger = logging.getLogger(__name__)
 _TOKEN_PATTERN = re.compile(r"[a-z0-9]+")
 _STOP_WORDS = frozenset(
     {
@@ -244,9 +246,11 @@ def extract_profile_skill_candidates(
     generated = _parse_model_content(unwrap_llm_output(result))
 
     candidates: dict[str, ExtractedSkill] = {}
+    rejected_count = 0
     for item in generated["skills"]:
         if not isinstance(item, dict):
-            raise RunPodRequestError("RunPod returned an invalid skill candidate.")
+            rejected_count += 1
+            continue
         skill_id = item.get("skill_id")
         evidence_id = item.get("evidence_id")
         quote = item.get("evidence")
@@ -261,11 +265,13 @@ def extract_profile_skill_candidates(
             or not isinstance(reason, str)
             or len(reason) > 500
         ):
-            raise RunPodRequestError("RunPod returned a skill outside the supplied taxonomy or evidence.")
+            rejected_count += 1
+            continue
 
         source = evidence_by_id[evidence_id]
         if not _contains_quote(source.text, quote):
-            raise RunPodRequestError("RunPod returned evidence that does not appear in the supplied profile text.")
+            rejected_count += 1
+            continue
 
         taxonomy_skill = taxonomy_by_id[skill_id]
         candidate = ExtractedSkill(
@@ -282,5 +288,15 @@ def extract_profile_skill_candidates(
         previous = candidates.get(skill_id)
         if previous is None:
             candidates[skill_id] = candidate
+
+    if rejected_count:
+        logger.warning(
+            "RunPod returned %d unverified skill candidate(s); discarded them.",
+            rejected_count,
+        )
+    if generated["skills"] and not candidates:
+        raise RunPodRequestError(
+            "RunPod did not return any skills that could be verified against the supplied ESCO taxonomy and profile evidence."
+        )
 
     return list(candidates.values())[:limit]

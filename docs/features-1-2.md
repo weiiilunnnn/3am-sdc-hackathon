@@ -84,7 +84,9 @@ does not call the ESCO API during search or extraction. Search uses ESCO skill
 concept URIs only. AI extraction retrieves a bounded candidate set locally,
 sends those candidates with fictional profile evidence to RunPod after
 confirmation, validates returned IDs against that set, and verifies each quote
-against its source text. The full taxonomy is never placed in a model request.
+against its source text. Unverifiable suggestions are discarded individually;
+if none of a non-empty response can be verified, extraction reports an error.
+The full taxonomy is never placed in a model request.
 If the full verified snapshot is unavailable, search/extraction reports an
 error rather than falling back to the local prototype vocabulary.
 
