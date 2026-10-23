@@ -9,7 +9,7 @@
 .evolution-profile-line span { padding: 5px 11px; border: 1px solid #60c58d55; border-radius: 100px; background: #11382a; color: #d2f5dd; font-size: 12px; }
 .evolution-profile-line span + span { background: transparent; color: #9fbfab; }
 .evolution-profile-picker { display: grid; flex: 0 1 360px; min-width: min(100%, 320px); gap: 7px; color: #a9c6b5; font-size: 12px; font-weight: 700; }
-.evolution-profile-picker select { width: 100%; min-height: 44px; padding: 9px 12px; border: 1px solid #70bc94; border-radius: 10px; background: #09251d; color: #f3fff6; font: 600 13px "DM Sans",sans-serif; }
+.evolution-profile-picker select { width: 100%; min-height: 48px; padding: 11px 48px 11px 18px; appearance: none; border: 1px solid #70bc94; border-radius: 10px; background: #09251d url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 6 5 5 5-5' fill='none' stroke='%23d2f5dd' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 18px center / 16px; color: #f3fff6; font: 600 13px "DM Sans",sans-serif; }
 .evolution-view-tabs { display: inline-flex; gap: 5px; margin: 0 0 24px; padding: 5px; border: 1px solid #5da77c75; border-radius: 12px; background: #0a241c; }
 .evolution-view-tabs button { min-height: 43px; padding: 8px 18px; border: 0; border-radius: 9px; background: transparent; color: #b8d8c1; font: 700 14px "DM Sans",sans-serif; cursor: pointer; }
 .evolution-view-tabs button:hover { color: #fff; }
