@@ -6,13 +6,28 @@ from src.models.future_role_discovery import DiscoveryRequest, DiscoveryResponse
 from src.services.future_roles.data_repository import get_catalogues, merge_integration_sources
 from src.services.future_roles.future_role_matching import MatchingConfig, match_roles
 from src.services.future_roles.personalized_reskilling import build_pathway
+from src.services.future_roles.resource_discovery import build_discovered_pathway
 from src.services.future_roles.skills_intake import normalize_profile
+from src.services.future_roles.workspace_profile import adapt_workspace_profile
+from src.services.profile_service import get_profile
 from src.services.future_roles.occupation_index import get_occupation_index
 from src.services.future_roles.profile_relevance import discover, RelevanceConfig
 from src.services.future_roles.role_search import search_roles
 from src.services.sources.esco import client as esco_client, EscoError
+from src.models.career_analysis import AnalysisRequest, CareerAnalysis
+from src.services.future_roles.career_analysis import analyse_career
 
 router = APIRouter()
+
+
+@router.post('/api/v2/roles/analysis', response_model=CareerAnalysis)
+def career_analysis(request: AnalysisRequest):
+    try:
+        return analyse_career(request, get_occupation_index())
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Occupation not present in the pinned index") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 def catalogues():
@@ -66,6 +81,14 @@ def source_registry() -> dict:
     return {"schema_version": "1.0", "sources": [s.model_dump(mode="json") for s in catalogues().sources.values()]}
 
 
+@router.get("/api/v2/profiles/{profile_id}", response_model=UserProfile)
+def workspace_matching_profile(profile_id: str) -> UserProfile:
+    saved = get_profile(profile_id)
+    if saved is None:
+        raise HTTPException(status_code=404, detail="Saved profile not found. Open Profile and save it again.")
+    return adapt_workspace_profile(saved, get_occupation_index())
+
+
 @router.post("/api/profiles/normalize", response_model=UserProfile)
 def normalize(request: UserProfile) -> UserProfile:
     return normalize_profile(request, catalogues().occupations)
@@ -102,7 +125,7 @@ def pathway(request: PathwayRequest) -> PathwayResponse:
         selected = next((r for r in matches.results if r.role_id == request.role_id), None)
         if selected is None:
             raise HTTPException(status_code=404, detail="Role unavailable for this profile or evidence catalogue")
-        return build_pathway(profile, selected, bundle.resources, sources)
+        return build_discovered_pathway(profile, selected, bundle.resources, sources, index)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 

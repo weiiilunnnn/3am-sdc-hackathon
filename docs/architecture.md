@@ -58,16 +58,18 @@ The frontend is a standalone npm package at `src/frontend/`, matching main’s p
 ## Additional KW workflow after integration
 
 The sections above describe main's preserved workspace and page families.
-A third root-layout group, `(future-ready)`, now provides `/role-matching`;
-main's `/` redirect and all existing routes remain unchanged. A single workspace
-navigation item links to it. This group's CSS and API helper are independent.
+The nested `(workspace)/(future-ready)` group provides `/role-matching` and its
+details/pathway screens inside the existing workspace AppShell. All public URLs
+and the `/` to `/register` redirect remain unchanged. Role Matching stays active
+for nested screens. Feature CSS is scoped to `.future-role-ui`, preserving other
+workspace pages; its API helper remains independent.
 
 KW endpoints are registered by `src/api/future_roles.py`. Contracts live in
 `src/models/future_roles.py` and `future_role_discovery.py`; services live in
 `src/services/future_roles/`, with the ESCO provider in `services/sources/esco.py`.
 KW-local compatibility exports preserve existing service logic without adding
-exports to main's model package. No saved-profile/local-vocabulary to ESCO
-conversion is performed. Main's synthetic career/scenario outputs, source
+exports to main's model package. A read-only workspace-profile adapter resolves
+claimed skills against ESCO; unknown or ambiguous labels remain unscored. Main's synthetic career/scenario outputs, source
 observations and KW's ESCO relevance retain their different meanings.
 
 The additional ESCO reference data and reviewed learning resources are under

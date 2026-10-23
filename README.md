@@ -20,7 +20,7 @@ Alternatively, run each service in its own terminal:
 
 ```sh
 python -m uvicorn src.main:app --host 127.0.0.1 --port 8080 --reload
-npm --prefix src/frontend run dev
+npm --prefix src/frontend run dev:frontend
 ```
 
 Next.js proxies `/api/*` to `BACKEND_URL` (default `http://127.0.0.1:8080`). FastAPI docs are at http://127.0.0.1:8080/docs. SQLite defaults to `src/data/future_ready.sqlite3`; set `APP_DB_PATH` to change it. Keep local data and credentials out of Git.
@@ -62,7 +62,7 @@ src/
       (workspace)/          SH’s pages and root layout
     lib/                   Frontend API client and helpers
 runpod/handler.py          Optional career inference Serverless handler
-scripts/dev.py            Optional two-service development launcher
+scripts/dev.py            Cross-platform two-service development launcher
 tests/                    Python, frontend logic and component tests
 docs/                     Architecture, data sources and verification
 submission/               Competition documents
@@ -116,7 +116,7 @@ scores and ESCO profile relevance have different meanings and are not combined.
 
 Implementation: `src/api/future_roles.py`, `src/models/future_roles.py`,
 `src/models/future_role_discovery.py`, `src/services/future_roles/`,
-`src/services/sources/esco.py`, and the frontend `(future-ready)` route group.
+`src/services/sources/esco.py`, and the frontend `(workspace)/(future-ready)` route group (shared workspace navigation).
 Main's `lib/api.ts` is unchanged; KW uses `lib/future-role-api.ts`.
 
 Existing ESCO datasets, CSV exports, source registries, resource catalogues and
@@ -132,14 +132,36 @@ existing frontend checks. The browser tests use isolated ports 8100/3100,
 `.next-e2e`, and temporary SQLite/model storage. Install the Playwright Chromium
 browser if the test environment does not already have it.
 
-On Windows, the existing POSIX development launcher is not the supported startup
-path. Use two PowerShell terminals from the repository root:
+On Windows, macOS and Linux, start both development servers from `src/frontend`:
 
-```powershell
-.\.venv\Scripts\python.exe -m uvicorn src.main:app --host 127.0.0.1 --port 8080 --reload
-$env:BACKEND_URL = "http://127.0.0.1:8080"
-npm.cmd --prefix src/frontend run dev
+```sh
+npm run dev
 ```
 
-Main's `.replit`, Linux launcher and Docker/RunPod configuration are preserved;
-this integration does not deploy anything or configure paid services.
+The launcher uses the repository `.venv` automatically (or `PYTHON_EXECUTABLE`),
+starts FastAPI on port 8080 and Next.js on port 3000, and sets the API proxy URL.
+Stop both with Ctrl+C. Stop any previously running servers first. Python and npm
+dependencies must already be installed. Override ports with `API_PORT` and
+`PORT` (or `npm run dev -- --port 3001`). To run only Next.js against a separately
+managed backend, use `npm run dev:frontend` with `BACKEND_URL` set appropriately.
+The Replit `python scripts/dev.py` entry point continues to work.
+
+
+### Future-Role Matching presentation/profile handoff
+
+`/role-matching` now uses compact cards and separate canonical-role details and
+pathway routes. `PathwayView`, backend contracts, scoring and datasets are unchanged.
+Role Matching reads the saved Profile reference already stored by the workspace
+and retrieves `/api/v2/profiles/{profile_id}` on entry and after refresh. This
+read-only adapter preserves the workspace profile contract and resolves claimed
+skills against exact ESCO preferred/alternative labels. Existing local vocabulary
+aliases are used only when saved labels have no exact match. Ambiguous and unknown
+skills remain unresolved and excluded from scoring; no interests or desired skills
+become claimed skills. Duplicate concepts count once. Zero weekly hours become an
+unavailable pathway schedule, preserving the existing positive-hours contract.
+Changes to saved skills invalidate cached recommendations on the next visit.
+The optional `setCurrentFutureRoleProfile` handoff remains available. No CV or
+additional profile contents are persisted in the browser. Without a saved profile,
+the UI requests one; stale references and retrieval failures show retryable errors.
+Development/tests may explicitly use `/role-matching?demo=demo-graduate-a`;
+production never chooses a fixture implicitly.

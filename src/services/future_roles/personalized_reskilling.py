@@ -99,7 +99,9 @@ def build_pathway(profile: UserProfile, selected_career_match: CareerMatch, reso
             preferred = resource.resource_type in preferences.preferred_resource_types
             all_known = all(eligible[n].duration_hours is not None for n in additions)
             hours = sum(eligible[n].duration_hours or 0 for n in additions)
-            options.append(((-len(covered), -int(preferred), not all_known, hours, rid), additions, edges, covered, cost))
+            options.append(((-len(covered), -int(preferred), not all_known,
+                             resource.resource_origin != "web_discovered", resource.discovery_rank or 0,
+                             hours, rid), additions, edges, covered, cost))
         if not options:
             break
         _, additions, edges, covered, cost = min(options, key=lambda option: option[0])

@@ -43,6 +43,8 @@ node_modules
 /connect.lock
 /coverage
 .env
+.env.*
+!.env.example
 src/frontend/next-env.d.ts
 /libpeerconnection.log
 npm-debug.log

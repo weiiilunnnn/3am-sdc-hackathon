@@ -3,6 +3,10 @@
 import os
 from contextlib import asynccontextmanager
 
+from src.environment import load_backend_environment
+
+load_backend_environment()
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 

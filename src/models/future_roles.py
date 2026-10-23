@@ -290,6 +290,16 @@ class Resource(BaseModel):
     planning_scope: Literal["short_unit", "bounded_course", "large_collection", "unreviewed"] = "unreviewed"
     scope_review_note: str | None = None
     time_estimate: TimeEstimate | None = None
+    resource_origin: Literal["web_discovered", "local_catalogue"] = "local_catalogue"
+    retrieval_mode: Literal["fresh_search", "cached_verified", "local_only"] = "local_only"
+    verification_status: str = "reviewed_catalogue"
+    content_verified_at: datetime | None = None
+    prerequisite_status: Literal["unknown", "provider_stated", "reviewed_catalogue"] = "reviewed_catalogue"
+    mapping_evidence: dict[str, str] = Field(default_factory=dict)
+    discovery_query: str | None = None
+    claim_evidence: dict[str, str] = Field(default_factory=dict)
+    discovery_rank: int | None = None
+    original_url: str | None = None
 
     @model_validator(mode="after")
     def consistent(self):
@@ -448,7 +458,29 @@ class PathwayPhase(BaseModel):
     planning_estimate: PlanningEstimate | None = None
 
 
+class CredentialRecommendation(BaseModel):
+    credential_id: str
+    title: str
+    provider: str
+    url: str
+    credential_type: Literal["certification_exam", "assessed_course_certificate", "skill_assessment"]
+    skill_ids: list[str]
+    assessment_format: str | None = None
+    prerequisites: str | None = None
+    exam_fee: Money | None = None
+    certificate_fee: Money | None = None
+    fees_verified_free: bool = False
+    origin: Literal["local_catalogue", "web_discovered"]
+    checked_at: datetime
+    evidence: dict[str, str]
+    source_urls: list[str]
+
+
 class PathwayResponse(Contract):
+    credentials: list[CredentialRecommendation] = Field(default_factory=list)
+    credential_message: str | None = None
+    credential_metrics: dict[str, float] = Field(default_factory=dict)
+    credential_used_cache: bool = False
     profile_id: str
     profile_fingerprint: str
     role_id: str
@@ -469,3 +501,9 @@ class PathwayResponse(Contract):
     coverage_complete: bool = False
     timeline_is_estimated: Literal[True] = True
     planning_estimate: PlanningEstimate | None = None
+    discovery_status: Literal["live_verified", "mixed", "catalogue_fallback", "no_verified_resources", "discovery_unavailable"] | None = None
+    discovery_message: str | None = None
+    discovery_checked_at: datetime | None = None
+    used_cache: bool = False
+    sources: list[Source] = Field(default_factory=list)
+    discovery_metrics: dict[str, float] = Field(default_factory=dict)

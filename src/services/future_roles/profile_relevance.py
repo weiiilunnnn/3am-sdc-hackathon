@@ -17,10 +17,10 @@ class RelevanceConfig:
     method_version: str = 'profile-relevance-idf-v1'
 
 
-def development_areas(role, have, index):
+def development_areas(role, have, index, *, limit=5, include_optional=False):
     groups, ungrouped = defaultdict(list), 0
     for req in role.required_skills:
-        if req.requirement != 'essential' or req.skill_id in have:
+        if (not include_optional and req.requirement != 'essential') or req.skill_id in have:
             continue
         skill = index.skills[req.skill_id]
         parents = [index.skills[p] for p in skill.broader_skill_ids if p in index.skills
@@ -33,13 +33,13 @@ def development_areas(role, have, index):
     for (key, grouped), items in groups.items():
         concept = index.skills[key]
         result.append(DevelopmentArea(area_id=key, title=concept.name,
-            explanation=f'{len(items)} documented essential concept(s) not yet evidenced; verify relevance and experience before planning study.',
+            explanation=f'{len(items)} documented {"" if include_optional else "essential "}concept(s) not yet evidenced; verify relevance and experience before planning study.',
             not_yet_evidenced_count=len(items), supporting_concept_ids=sorted(x.skill_id for x in items),
             source_ids=sorted({sid for x in items for sid in x.source_ids} | set(concept.source_ids) |
                               {sid for x in items for sid in index.skills[x.skill_id].source_ids}),
             mapping_method='esco_broader_skill_single_parent_v1' if grouped else 'source_concept_fallback'))
     result.sort(key=lambda a: (-a.not_yet_evidenced_count, a.title.casefold(), a.area_id))
-    return result[:5], ('Some requirements could not be grouped for display; actual sourced concepts are shown where needed.' if ungrouped else None)
+    return (result if limit is None else result[:limit]), ('Some requirements could not be grouped for display; actual sourced concepts are shown where needed.' if ungrouped else None)
 
 
 def discover(profile, index: OccupationIndex, *, resources=None, config=None, page_size=5, offset=0,
