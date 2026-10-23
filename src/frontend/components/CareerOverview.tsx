@@ -30,6 +30,9 @@ export default function CareerOverview({ role, match, hasProfile, scoring, sourc
       </dl>
     </div>
     <div className="career-overview-assessment"><RadialProfileRelevance value={hasProfile ? match?.score.profile_relevance_pct ?? null : null} /></div>
-    <footer className="overview-pathway-footer">{canExplore ? <Link className="overview-pathway-link" href={pathwayHref}>Explore Pathway <span aria-hidden="true">↗</span></Link> : <span className="overview-pathway-link" role="link" aria-disabled="true">Explore Pathway <span aria-hidden="true">↗</span></span>}</footer>
+    <footer className="overview-pathway-footer">
+      {canExplore ? <Link className="overview-pathway-link" href={pathwayHref}>Explore Pathway <span aria-hidden="true">↗</span></Link> : <span className="overview-pathway-link" role="link" aria-disabled="true">Explore Pathway <span aria-hidden="true">↗</span></span>}
+      <Link className="overview-pathway-link" href="/explorer">Explore SDG <span aria-hidden="true">↗</span></Link>
+    </footer>
   </section>;
 }
