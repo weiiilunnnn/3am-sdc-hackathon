@@ -24,11 +24,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <span>Aiversecity<small>3AM SDC · FUTURE-READY WORKFORCE</small></span>
         </Link>
         <nav className="nav-links" aria-label="Main navigation">
-          {sections.map((item) => (
-            <Link key={item.href} href={item.href} className={`nav-link ${pathname === item.href ? "active" : ""}`} aria-current={pathname === item.href ? "page" : undefined} data-testid={`link-${item.href === "/profile" ? "profile" : item.href.slice(1)}`}>
+          {sections.map((item) => {
+            const active = pathname === item.href || (item.href === "/role-matching" && pathname.startsWith("/role-matching/"));
+            return <Link key={item.href} href={item.href} className={`nav-link ${active ? "active" : ""}`} aria-current={active ? "page" : undefined} data-testid={`link-${item.href === "/profile" ? "profile" : item.href.slice(1)}`}>
               {item.label}
-            </Link>
-          ))}
+            </Link>;
+          })}
         </nav>
         <span className="nav-meta">DEMO WORKSPACE</span>
       </header>

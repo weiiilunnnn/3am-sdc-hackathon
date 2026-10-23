@@ -1,0 +1,70 @@
+import { expect, test } from "@playwright/test";
+import { openDetails, openMatches, titleSearch } from "./role-helpers";
+
+for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
+  test(`overview uses sourced facts and a bottom text pathway link at ${viewport.width}px`, async ({ page }, testInfo) => {
+    test.setTimeout(75_000);
+    await page.setViewportSize(viewport);
+    const matches = await openMatches(page);
+    const detail = await openDetails(page);
+    const card = page.getByTestId("career-overview");
+    await expect(card.getByRole("heading", { level: 1 })).toHaveText(detail.role.title);
+    const description = card.getByTestId("role-description");
+    await expect(description).toHaveCount(1);
+    await expect(description).toHaveText(detail.role.description);
+    await card.getByRole("button", { name: /Read more/ }).click();
+    await expect(description).not.toHaveClass(/description-clamped/);
+    await expect(description).toHaveText(detail.role.description);
+    await card.getByRole("button", { name: /Show less/ }).click();
+    await expect(description).toHaveClass(/description-clamped/);
+    await expect(card.locator(".score strong")).toHaveText(`${matches.results[0].score.profile_relevance_pct!.toFixed(2)}%`);
+    await expect(card.getByRole("progressbar")).toHaveAttribute("aria-valuenow", String(matches.results[0].score.profile_relevance_pct));
+    await expect(card.locator(".overview-fact").filter({ hasText: "Matched Profile Concepts" }).locator("dd")).toHaveText(String(matches.results[0].score.matched_recognised_skill_count));
+    await expect(card.locator(".overview-fact").filter({ hasText: "Essential Concepts Not Evidenced" }).locator("dd")).toHaveText(String(matches.results[0].not_evidenced_essential_count));
+    const source = card.getByRole("link", { name: "View Source ↗" });
+    await expect(source).toHaveCount(1);
+    const sourceHref = await source.getAttribute("href");
+    expect(detail.sources.some((s: { url: string | null }) => s.url === sourceHref) || detail.role.role_id === sourceHref).toBeTruthy();
+    const pathway = card.getByRole("link", { name: /Explore Pathway/ });
+    await expect(pathway).toHaveCount(1);
+    await expect(card.getByRole("button", { name: /Explore Pathway/ })).toHaveCount(0);
+    const href = `/role-matching/roles/${encodeURIComponent(detail.role.role_id)}/pathway`;
+    await expect(pathway).toHaveAttribute("href", href);
+    const [outer, info, assessment, link] = await Promise.all([card.boundingBox(), card.locator(".career-overview-information").boundingBox(), card.locator(".career-overview-assessment").boundingBox(), pathway.boundingBox()]);
+    expect(link!.y).toBeGreaterThanOrEqual(Math.max(info!.y + info!.height, assessment!.y + assessment!.height));
+    expect(Math.abs(link!.x + link!.width / 2 - outer!.x - outer!.width / 2)).toBeLessThan(2);
+    const style = await pathway.evaluate(n => { const s = getComputedStyle(n); return { background: s.backgroundColor, border: s.borderTopWidth }; });
+    expect(style).toEqual({ background: "rgba(0, 0, 0, 0)", border: "0px" });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+    await expect(page.locator(".career-analysis-stack > .career-analysis-card")).toHaveCount(3);
+    await card.screenshot({ path: testInfo.outputPath("overview.png") });
+    const pending = page.waitForResponse(r => r.url().endsWith("/api/pathways"));
+    await pathway.focus(); await pathway.press("Enter");
+    const result = await (await pending).json();
+    expect(result.role_id).toBe(detail.role.role_id);
+    expect(result.profile_fingerprint).toBe(matches.profile_fingerprint);
+    await expect(page).toHaveURL(/\/pathway$/);
+  });
+}
+
+test("changing the role and recognised profile keeps real descriptions, sources and backend scores", async ({ page, request }) => {
+  await openMatches(page);
+  const first = await openDetails(page);
+  await page.getByRole("link", { name: /Back to Future-Role Matching/ }).click();
+  await titleSearch(page, "engineer");
+  const second = await openDetails(page);
+  expect(second.role.role_id).not.toBe(first.role.role_id);
+  expect(second.role.description).not.toBe(first.role.description);
+  await expect(page.getByTestId("role-description")).toHaveText(second.role.description);
+  const boot = await (await request.get("/api/v2/bootstrap")).json();
+  const profile = boot.profiles.find((p: { profile_id: string }) => p.profile_id === "demo-graduate-b");
+  expect(profile).toBeTruthy();
+  const search = await (await request.post("/api/v2.1/roles/search", { data: { schema_version: "2.1", profile, role_query: second.role.title, page_size: 25 } })).json();
+  const expected = search.results.find((r: { role_id: string }) => r.role_id === second.role.role_id);
+  expect(expected).toBeTruthy();
+  await page.goto(`/role-matching/roles/${encodeURIComponent(second.role.role_id)}?demo=${encodeURIComponent(profile.profile_id)}`);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(second.role.title);
+  await expect(page.locator(".score strong")).toHaveText(expected.score.profile_relevance_pct === null ? "Unavailable" : `${expected.score.profile_relevance_pct.toFixed(2)}%`);
+  const source = page.getByTestId("career-overview").getByRole("link", { name: "View Source ↗" });
+  expect(await source.getAttribute("href")).not.toBe(first.role.role_id);
+});

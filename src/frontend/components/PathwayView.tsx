@@ -1,33 +1,35 @@
 import type { Bootstrap, Pathway } from "@/lib/contracts";
-import { duration, planningTime, resourceTime } from "@/lib/future-role-api";
+import { duration, planningTime } from "@/lib/future-role-api";
 import SourceLinks from "./SourceLinks";
+import PathwayIcon from "./PathwayIcon";
+import PathwayResourceCard from "./PathwayResourceCard";
+import CredentialRecommendations from "./CredentialRecommendations";
 
-export default function PathwayView({ pathway: p, data, onBack }: { pathway: Pathway; data: Bootstrap; onBack: () => void }) {
+export default function PathwayView({ pathway: p, data }: { pathway: Pathway; data: Bootstrap }) {
   const name = (id: string) => data.skills.find(s => s.skill_id === id)?.name ?? id;
   const count = p.phases.reduce((n, phase) => n + phase.resources.length, 0);
-  const resourceTitle = (id: string) => p.phases.flatMap(phase => phase.resources).find(r => r.resource_id === id)?.title ?? "Earlier prerequisite material";
+  const resourceTitle = (id: string) => p.phases.flatMap(phase => phase.resources).find(r => r.resource_id === id)?.title;
   const schedule = p.planning_estimate;
-  return <section className="pathway-view" data-testid="pathway-view"><button className="text-button" onClick={onBack}>← Back to matching roles</button>
+  const sources = [...new Map([...data.sources, ...(p.sources ?? [])].map(s => [s.source_id, s])).values()];
+  return <section className="pathway-view" data-testid="pathway-view">
     <div className="pathway-hero"><span className="badge light-badge">PERSONALISED STARTER PATHWAY</span><h2>{p.role_title}</h2>
-      <div className="pathway-metrics"><div><strong>{p.target_skill_ids.length}</strong><span>targeted gaps</span></div><div><strong>{count}</strong><span>reviewed resources</span></div><div><strong>{planningTime(schedule)}</strong><span>selected materials only</span></div></div>
+      <div className="pathway-metrics"><div><strong>{p.target_skill_ids.length}</strong><span>targeted gaps</span></div><div><strong>{count}</strong><span>learning resources</span></div><div><strong>{planningTime(schedule)}</strong><span>selected materials only</span></div></div>
       <p className="small timing-label">Known provider hours: {schedule?.provider_known_hours ? duration(schedule.provider_known_hours) : "none published for selected materials"}{!!schedule?.reviewed_app_hours && ` · Reviewed app hours: ${duration(schedule.reviewed_app_hours)}`}{!!schedule?.fallback_study_days && ` · App fallback: ${schedule.fallback_study_days} study days`}</p>
       <p className="micro">{p.hours_per_week ? `${p.hours_per_week} hours/week` : "Weekly hours not supplied"} · {schedule?.study_days_per_week ?? 5} planned study days/week · Completion does not establish job readiness.</p></div>
-    {!p.coverage_complete && <p className="notice small"><strong>Incomplete</strong> · {p.uncovered_skill_ids.length} gaps still need resources. Timing covers selected materials only.</p>}
+    {p.discovery_message && <p className="notice small" data-testid="discovery-notice">{p.discovery_message}</p>}
     {p.status === "no_documented_gaps" && <p className="notice small">All documented essential concepts are listed. Assessed proficiency and hiring readiness remain unverified.</p>}
-    <div className="phase-list">{p.phases.map(phase => <article className={`phase ${phase.status !== "available" ? "incomplete" : ""}`} key={phase.phase_id}>
+    <div className={`pathway-timeline ${p.phases.some(phase => phase.phase_kind !== "remaining_gaps") ? "" : "no-learning-phases"}`}><div className="phase-list">{p.phases.filter(phase => phase.phase_kind !== "remaining_gaps").map(phase => <article className={`phase ${phase.status !== "available" ? "incomplete" : ""}`} key={phase.phase_id}>
       <div className="phase-number">{String(phase.order).padStart(2, "0")}</div><div className="phase-content">
-        <div className="label-row"><h3>{phase.title}</h3><span className="phase-icon" aria-hidden="true">{phase.phase_kind === "online_courses" ? "▷" : phase.phase_kind === "guided_practice" ? "⌘" : phase.phase_kind === "remaining_gaps" ? "↗" : "▤"}</span></div>
-        <p className="phase-meta">{phase.target_skill_ids.length} {phase.status === "available" ? "supported target gaps" : "uncovered requirements"} · {phase.resources.length} resources{phase.status === "available" && ` · ${planningTime(phase.planning_estimate)}`}</p>
-        {phase.status !== "available" ? <details className="remaining-gaps"><summary>Additional resources needed ({phase.target_skill_ids.length})</summary><p className="small muted">These requirements remain in your skills gap. No eligible reviewed route is currently available.</p><div className="requirement-scroll chips">{phase.target_skill_ids.map(id => <span className="chip" key={id}>{name(id)}</span>)}</div><SourceLinks ids={phase.source_ids} sources={data.sources} label="Required concept evidence" /></details> : <>
-          {phase.resources.map(r => <section className="resource-card" key={r.resource_id}><div className="label-row"><span className="mini-heading">{r.provider} · {r.resource_type === "course" ? "Online course" : r.resource_type}</span><span className="badge">{r.cost_status === "free" ? "FREE CONTENT" : r.cost ? `${r.cost.amount} ${r.cost.currency}` : "Cost unknown"}</span></div>
-            <h4><a href={r.url} target="_blank" rel="noreferrer">{r.title} ↗</a></h4><p className="resource-duration">{resourceTime(r.time_estimate)}</p>
-            {(r.prerequisite_resource_ids.length > 0 || r.prerequisite_notes) && <p className="prerequisite-hint micro">{r.prerequisite_resource_ids.length ? "Complete earlier prerequisites; check setup requirements in Details." : "Check provider prerequisites and access in Details."}</p>}
-            <details className="resource-details"><summary>Details & evidence</summary><p className="small">{r.coverage_note}</p><div className="chips">{r.covers_skill_ids.map(id => <span className="chip" key={id}>{name(id)}</span>)}</div><p className="small muted">Prerequisites: {r.prerequisite_notes}</p>{r.prerequisite_resource_ids.length > 0 && <p className="small muted">Earlier learning: {r.prerequisite_resource_ids.map(resourceTitle).join(", ")}</p>}
-              <p className="micro">{r.time_estimate?.notes} {r.scope_review_note}</p>{r.estimated_hours_method && <p className="micro">Estimate method: {r.estimated_hours_method}</p>}<p className="micro">{r.access_notes} Checked {r.access_verified_at}.</p><SourceLinks ids={r.source_ids} sources={data.sources} label="Content, access & mapping evidence" /></details>
-          </section>)}
-          <details><summary>Phase objectives & evidence</summary><div className="chips">{phase.target_skill_ids.map(id => <span className="chip" key={id}>{name(id)}</span>)}</div>{phase.learning_objectives.map((t, i) => <p className="small" key={i}>{t}</p>)}<SourceLinks ids={phase.source_ids} sources={data.sources} /></details>
+        <div className="pathway-phase-heading"><PathwayIcon kind={phase.phase_kind === "foundations" ? "book" : phase.phase_kind === "online_courses" ? "monitor" : phase.phase_kind === "guided_practice" ? "code" : "book"} /><h3>{phase.phase_kind === "remaining_gaps" ? "Remaining Learning Gaps" : phase.title}</h3></div>
+        <p className="phase-meta">{phase.target_skill_ids.length} {phase.status === "available" ? "supported target gaps" : "uncovered requirements"} · {phase.resources.length} resources{phase.status === "available" && phase.planning_estimate?.scheduled_weeks != null && phase.planning_estimate.scheduled_weeks > 0 && ` · ${planningTime(phase.planning_estimate)}`}</p>
+        {phase.status !== "available" ? <details className="remaining-gaps"><summary>Additional resources needed ({phase.target_skill_ids.length})</summary><p className="small muted">These requirements remain in your skills gap. No eligible reviewed route is currently available.</p><div className="requirement-scroll chips">{phase.target_skill_ids.map(id => <span className="chip" key={id}>{name(id)}</span>)}</div><SourceLinks ids={phase.source_ids} sources={sources} label="Required concept evidence" /></details> : <>
+          {phase.resources.map(r => <PathwayResourceCard key={r.resource_id} resource={r} earlierTitles={r.prerequisite_resource_ids.map(resourceTitle).filter((title): title is string => !!title)} />)}
+          <details><summary>Phase objectives & evidence</summary><div className="chips">{phase.target_skill_ids.map(id => <span className="chip" key={id}>{name(id)}</span>)}</div>{phase.learning_objectives.map((t, i) => <p className="small" key={i}>{t}</p>)}<SourceLinks ids={phase.source_ids} sources={sources} /></details>
         </>}
       </div></article>)}</div>
-    <details className="method-panel scoring-footer"><summary>Pathway method, scheduling & limitations</summary><p className="small">Targets come from missing essential requirements. Selection prioritises additional coverage, preferred format, known shorter effort and stable ID. Dependencies determine phase order; a learning format can recur at later stages.</p><p className="small">{schedule?.notes}</p><p className="small">Provider hours take priority. Reviewed short articles/tutorials without durations receive one planned study day; bounded courses receive one planned study week. Large courses/manuals remain unknown without scope-aware estimates. Fallback days never enter the known-hours subtotal.</p>{p.warnings.map(w => <p className="small muted" key={w}>{w}</p>)}{p.blocked_resource_ids.length > 0 && <p className="micro">Unavailable alternatives: {p.blocked_resource_ids.join(", ")}</p>}<SourceLinks ids={p.source_ids} sources={data.sources} label="All pathway sources" /></details>
+    <CredentialRecommendations pathway={p} skillName={name} /></div>
+    {p.warnings.filter(warning => !/^No eligible verified route for \d+ documented gaps\. This is a starter pathway\.$/.test(warning)).map((warning, i) => <p className="notice small" key={i}>{warning}</p>)}
+    {p.blocked_resource_ids.length > 0 && <p className="notice small">Unavailable alternatives: {p.blocked_resource_ids.join(", ")}</p>}
+
   </section>;
 }
