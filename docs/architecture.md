@@ -9,9 +9,9 @@ This is the 3AM team's Aiversecity Future-Ready Workforce Domain 1 prototype. It
 ```text
 src/
 ├── main.py                 FastAPI app and API entry point
-├── api/                    FastAPI routers for profiles, CV extraction, and trends
+├── api/                    FastAPI routers for profiles, employer view, CV extraction, and trends
 ├── models/                 Pydantic request and response models
-├── services/               Profile, CV extraction, indicator, trend, and storage logic
+├── services/               Profile, employer aggregates, CV extraction, indicator, trend, and storage logic
 │   └── sources/            Separate research/employment contracts and adapters
 ├── data/                   Topic definitions, local skill vocabulary,
 │                           fictional sample profiles, SQLite file
@@ -37,6 +37,10 @@ Keep all application source code under `src/`. Root-level tests, documentation, 
 - Employment GET routes are cache-only; explicit POST refresh is globally limited to one attempt per 24 hours and atomically replaces a validated snapshot. Failures retain the old snapshot and last-success date.
 - Profile data is fictional-only. No authentication or real-person-data workflow is provided.
 - Profile indicators are deterministic content checks. The frontend reads cached signals on page load; it does not refresh OpenAlex or Remote OK when the user browses.
+- The Employer View reads only `synthetic_demo=true` profiles from the shared SQLite profiles table. Department assignments and target skill IDs are stored separately in `employer_departments`, `employer_member_departments`, and `employer_department_skill_targets`. Dashboard coverage is the share of assigned profiles listing each employer-entered taxonomy skill; it is not an independently assessed skill level or a labor-market requirement.
+- Employer navigation is scoped to `/employer` routes and links the dashboard, synthetic-profile directory, and a static fictional Company X IT company profile. The company profile is display-only demo content and is not stored as a registered organization in SQLite.
+- Employer endpoints currently have no HR authentication, tenant boundary, or organization-level access control. They are prototype-only and must not be exposed to real employee data. The login page's Employer View link is a navigation shortcut, not an authenticated HR role.
+- Employer learning plans call the configured RunPod LLM endpoint with only self-reported skill names/proficiency, target-skill names, and learning preferences. Names, profile IDs, summaries, and experience descriptions are not sent. Generated activities are not verified courses or links; outputs are validated against the selected target skill names, and provider/configuration failures are shown instead of replaced with fabricated content.
 
 ## Current data limitations
 

@@ -40,11 +40,12 @@ class DevLauncherTests(unittest.TestCase):
             self.assertEqual(dev.main(), 1)
             stop.assert_called_once_with(api)
 
-    def test_windows_cleanup_uses_process_tree(self):
+    def test_windows_cleanup_gracefully_stops_process_group(self):
         process = Mock(pid=123)
-        with patch.object(dev.os, "name", "nt"), patch.object(dev.subprocess, "run") as run:
+        process.poll.return_value = None
+        with patch.object(dev.os, "name", "nt"):
             dev.stop_process(process)
-            self.assertEqual(run.call_args.args[0], ["taskkill", "/PID", "123", "/T", "/F"])
+            process.send_signal.assert_called_once_with(signal.CTRL_BREAK_EVENT)
             process.wait.assert_called_once_with(timeout=5)
 
 

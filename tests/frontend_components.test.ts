@@ -3,6 +3,7 @@ import { createRequire } from "node:module";
 import test from "node:test";
 import { EmploymentSnapshotView, formatCooldown, type EmploymentSnapshotViewProps } from "../src/frontend/app/(workspace)/radar/EmploymentSnapshot";
 import Home from "../src/frontend/app/(workspace)/profile/page";
+import EmployerProfile from "../src/frontend/app/(workspace)/employer/profile/page";
 import type { EmploymentDashboard } from "../src/frontend/lib/api";
 import RadialProfileRelevance from "../src/frontend/components/RadialProfileRelevance";
 import CareerOverview from "../src/frontend/components/CareerOverview";
@@ -236,6 +237,14 @@ test("profile component exposes the safe handoff loading state before reading br
   assert.match(html, /Opening your completed profile/);
   assert.match(html, /role="status"/);
   assert.doesNotMatch(html, /data-testid="button-save-profile"/);
+});
+
+test("employer own profile is clearly identified as a fictional Company X IT demo", () => {
+  const html = renderToStaticMarkup(createElement(EmployerProfile));
+  assert.match(html, /Company X/);
+  assert.match(html, /Information Technology \(IT\)/);
+  assert.match(html, /fictional IT company/i);
+  assert.match(html, /not an authenticated or registered organization/i);
 });
 
 test("employment component renders attributed records, denominator and escaped text", () => {

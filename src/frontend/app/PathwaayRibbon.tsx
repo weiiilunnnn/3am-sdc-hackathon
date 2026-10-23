@@ -14,6 +14,12 @@ const sections = [
   { href: "/role-matching", label: "Role Matching" },
 ];
 
+const employerSections = [
+  { href: "/employer", label: "Dashboard" },
+  { href: "/employer/directory", label: "Directory" },
+  { href: "/employer/profile", label: "Own Profile" },
+];
+
 export default function PathwaayRibbon() {
   const pathname = usePathname();
   const router = useRouter();
@@ -39,18 +45,29 @@ export default function PathwaayRibbon() {
 
   if (pathname === "/login" || pathname === "/register") return null;
 
+  const employerArea = pathname === "/employer" || pathname.startsWith("/employer/");
+  const navigation = employerArea ? employerSections : sections;
+
   return (
     <header className={`pathwaay-ribbon${scrolled ? " is-scrolled" : ""}`}>
-      <Link className="pathwaay-ribbon-brand" href="/home" aria-label="Pathwaay home">
+      <Link className="pathwaay-ribbon-brand" href={employerArea ? "/employer" : "/home"} aria-label={employerArea ? "Employer dashboard" : "Pathwaay home"}>
         <span className="pathwaay-ribbon-mark" aria-hidden="true">P</span>
         <span className="pathwaay-ribbon-name">Pathwaay</span>
         <span className="pathwaay-ribbon-divider" aria-hidden="true" />
-        <span className="pathwaay-ribbon-caption">CAREER EXPLORER</span>
+        <span className="pathwaay-ribbon-caption">{employerArea ? "EMPLOYER WORKSPACE" : "CAREER EXPLORER"}</span>
       </Link>
-      <nav className="pathwaay-ribbon-links" aria-label="Main navigation">
-        {sections.map((item) => {
-          const active = pathname === item.href || (item.href !== "/home" && pathname.startsWith(`${item.href}/`));
-          return <Link key={item.href} href={item.href} className={`pathwaay-ribbon-link${active ? " active" : ""}`} aria-current={active ? "page" : undefined} data-testid={`link-${item.href === "/profile" ? "profile" : item.href.slice(1)}`}>{item.label}</Link>;
+      <nav className="pathwaay-ribbon-links" aria-label={employerArea ? "Employer navigation" : "Main navigation"}>
+        {navigation.map((item) => {
+          const active = pathname === item.href || (item.href !== "/home" && item.href !== "/employer" && pathname.startsWith(`${item.href}/`));
+          return <Link
+            key={item.href}
+            href={item.href}
+            className={`pathwaay-ribbon-link${active ? " active" : ""}`}
+            aria-current={active ? "page" : undefined}
+            data-testid={`link-${item.href === "/profile" ? "profile" : item.href.slice(1).replaceAll("/", "-")}`}
+          >
+            {item.label}
+          </Link>;
         })}
       </nav>
       <div className="pathwaay-ribbon-actions">
