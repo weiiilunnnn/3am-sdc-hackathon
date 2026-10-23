@@ -6,15 +6,7 @@ import { type FormEvent, useEffect, useState } from "react";
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
-  const [hasScrolled, setHasScrolled] = useState(false);
   const [showRegisterIntro, setShowRegisterIntro] = useState(true);
-
-  useEffect(() => {
-    const updateScrollState = () => setHasScrolled(window.scrollY > 8);
-    updateScrollState();
-    window.addEventListener("scroll", updateScrollState, { passive: true });
-    return () => window.removeEventListener("scroll", updateScrollState);
-  }, []);
 
   useEffect(() => {
     const introTimer = window.setTimeout(() => setShowRegisterIntro(false), 1600);
@@ -29,10 +21,6 @@ export default function LoginPage() {
   return (
     <main className="login-page">
       <div className="ambient-layer" aria-hidden="true" />
-      <header className={`login-topbar ${hasScrolled ? "is-scrolled" : ""}`}>
-        <Link className="brand" href="/" aria-label="Pathwaay home"><span className="brand-mark">P</span> Pathwaay <span className="brand-note">CAREER EXPLORER</span></Link>
-        <Link className="login-back-link" href="/explorer">Return to explorer <span aria-hidden="true">↗</span></Link>
-      </header>
       {showRegisterIntro && <div className="register-intro" aria-hidden="true"><span className="register-intro-mark">P</span><span className="register-intro-word">Pathwaay.</span></div>}
 
       <section className="login-layout" aria-labelledby="login-title">

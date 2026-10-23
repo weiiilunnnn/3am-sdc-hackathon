@@ -13,7 +13,7 @@ class ContractTests(unittest.TestCase):
 
     def test_profile_validation(self):
         p, _, _ = fixture()
-        for change in [{"schema_version": "2.0"}, {"is_synthetic": False}, {"skills": [p.skills[0], p.skills[0]]},
+        for change in [{"schema_version": "2.0"}, {"skills": [p.skills[0], p.skills[0]]},
                        {"learning_preferences": {"hours_per_week": 0}}, {"learning_preferences": {"hours_per_week": float('nan')}},
                        {"learning_preferences": {"budget": {"amount": -1, "currency": "MYR"}}}]:
             with self.assertRaises(ValidationError):

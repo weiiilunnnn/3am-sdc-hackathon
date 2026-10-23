@@ -13,7 +13,7 @@ from urllib.parse import urlsplit
 from src.models.future_roles import CredentialRecommendation, Money
 from src.services.sources import tavily_api
 from . import pathway_llm
-from .resource_verification import provider_url, clean
+from .resource_verification import provider_url, clean, PROVIDERS
 
 CATALOGUE = Path(__file__).resolve().parents[2] / "data/credentials/catalogue.json"
 _cache = OrderedDict()
@@ -108,7 +108,7 @@ def local_credentials(skills, budget):
     return items
 
 
-def recommend_credentials(profile, match, index):
+def recommend_credentials(profile, match, index, *, deadline=None):
     # Both existing strengths and missing requirements matter for future assessment.
     requirements = [*match.missing_skills, *match.matched_skills]
     skills = {r.skill_id: index.skills[r.skill_id] for r in requirements if r.skill_id in index.skills}
@@ -126,7 +126,7 @@ def recommend_credentials(profile, match, index):
         metrics = {"searches": 0, "extracts": 0, "runpod_calls": 0, "rejected": 0}
         items = local_credentials(skills, profile.learning_preferences.budget)
         if skills and os.getenv("TAVILY_API_KEY") and os.getenv("FEATURE4_DYNAMIC_DISCOVERY_ENABLED", "true").lower() in {"true", "1"}:
-            deadline = time.monotonic()+12
+            deadline = min(time.monotonic()+12, deadline) if deadline is not None else time.monotonic()+12
             def timeout():
                 left = deadline-time.monotonic()
                 if left < .25:
@@ -135,16 +135,18 @@ def recommend_credentials(profile, match, index):
             query = f'{match.role_title[:100]} certification exam skill assessment official'
             if os.getenv("RUNPOD_API_KEY"):
                 try:
+                    call_timeout = timeout()
                     metrics["runpod_calls"] += 1
-                    planned = pathway_llm.invoke(payload, 'Return JSON with only query: a search query for official certification exams or assessed certificates relevant to supplied skills. No URLs or invented credential names.', timeout=timeout(), max_tokens=180)
+                    planned = pathway_llm.invoke(payload, 'Return JSON with only query: a search query for official certification exams or assessed certificates relevant to supplied skills. No URLs or invented credential names.', timeout=call_timeout, max_tokens=180)
                     candidate = planned.get("query")
                     if isinstance(candidate, str) and 5 <= len(candidate) <= 240 and not any(x in candidate.lower() for x in ("http", "www.", "@")):
                         query = candidate
                 except Exception:
                     pass  # Deterministic query remains valid without the LLM.
             try:
+                call_timeout = timeout()
                 metrics["searches"] += 1
-                hits = tavily_api.search(query, timeout=timeout()).get("results", [])[:4]
+                hits = tavily_api.search(query, timeout=call_timeout, include_domains=PROVIDERS).get("results", [])[:4]
                 known = {}
                 for hit in hits:
                     try:
@@ -152,8 +154,9 @@ def recommend_credentials(profile, match, index):
                     except (ValueError, KeyError, TypeError):
                         metrics["rejected"] += 1
                 if known:
+                    call_timeout = timeout()
                     metrics["extracts"] += 1
-                    pages = tavily_api.extract(list(known), timeout=timeout()).get("results", [])[:4]
+                    pages = tavily_api.extract(list(known), timeout=call_timeout).get("results", [])[:4]
                     for page in pages:
                         try:
                             url = provider_url(page["url"])
@@ -163,9 +166,10 @@ def recommend_credentials(profile, match, index):
                 online = [i for i in items if i.origin == "web_discovered"]
                 if online and os.getenv("RUNPOD_API_KEY"):
                     try:
+                        call_timeout = timeout()
                         metrics["runpod_calls"] += 1
                         order = pathway_llm.evaluate([{"resource_id": i.credential_id, "title": i.title,
-                            "target_skill_ids": i.skill_ids, "evidence": "\n".join(i.evidence.values())} for i in online], timeout())
+                            "target_skill_ids": i.skill_ids, "evidence": "\n".join(i.evidence.values())} for i in online], call_timeout)
                         items.sort(key=lambda i: order.index(i.credential_id) if i.credential_id in order else len(order))
                     except Exception:
                         pass  # Server verification is authoritative, even if evaluation fails.

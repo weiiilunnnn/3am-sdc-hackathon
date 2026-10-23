@@ -8,9 +8,10 @@ import logging
 import os
 import threading
 import time
+from urllib.parse import urlsplit
 from src.services.sources import tavily_api
 from . import pathway_llm
-from .resource_verification import provider_url, verify
+from .resource_verification import provider_url, verify, PROVIDERS
 
 log = logging.getLogger(__name__)
 _lock = threading.Lock()
@@ -33,14 +34,15 @@ class Discovery:
     used_cache: bool = False
     checked_at: datetime | None = None
     metrics: dict = field(default_factory=lambda: {"searches": 0, "extracts": 0, "runpod_calls": 0,
-        "verified": 0, "rejected": 0, "cached": 0, "tavily_credits": 0})
+        "verified": 0, "rejected": 0, "cached": 0, "tavily_credits": 0,
+        "candidate_urls": 0, "extracted_pages": 0, "evaluations": 0, "evaluation_valid": 0})
     reasons: list[str] = field(default_factory=list)
 
 
 def cached_copy(data):
     return Discovery(resources=[r.model_copy(deep=True, update={"retrieval_mode": "cached_verified"}) for r in data.resources],
         sources={k: s.model_copy(deep=True) for k, s in data.sources.items()}, used_cache=True, checked_at=data.checked_at,
-        metrics={**data.metrics, "searches": 0, "extracts": 0, "runpod_calls": 0, "tavily_credits": 0,
+        metrics={**data.metrics, "searches": 0, "extracts": 0, "runpod_calls": 0, "tavily_credits": 0, "evaluations": 0,
                  "cached": len(data.resources)}, reasons=list(data.reasons))
 
 
@@ -112,11 +114,13 @@ def _retrieve(payload, gaps, query_cap, url_cap, deadline, ttl):
     try:
         topics = None
         if os.getenv("RUNPOD_API_KEY"):
+            stage_started, call_timeout = time.monotonic(), 0.0
             try:
-                call_timeout = timeout(5)
+                call_timeout = timeout(12)
                 data.metrics["runpod_calls"] += 1
                 topics = pathway_llm.plan(payload, query_cap, call_timeout)
-            except Exception:
+            except Exception as exc:
+                pathway_llm.report_failure("course_planning", exc, stage_started, call_timeout)
                 data.reasons.append("planning_unavailable_deterministic_queries")
         else:
             data.reasons.append("runpod_unconfigured_deterministic_queries")
@@ -129,18 +133,30 @@ def _retrieve(payload, gaps, query_cap, url_cap, deadline, ttl):
             try:
                 call_timeout = timeout(3)
                 data.metrics["searches"] += 1
-                result = tavily_api.search(topic.query, timeout=call_timeout)
+                result = tavily_api.search(topic.query, timeout=call_timeout, include_domains=PROVIDERS)
                 usage(result)
                 for hit in result.get("results", [])[:4]:
                     try:
                         url = provider_url(hit["url"])
                         if len(hits) < url_cap:
                             hits.setdefault(url, ({**hit, "original_url": hit["url"], "url": url}, topic.query))
-                    except (ValueError, KeyError, TypeError):
+                    except (ValueError, KeyError, TypeError) as exc:
                         data.metrics["rejected"] += 1
+                        value = str(hit.get("url", "")) if isinstance(hit, dict) else ""
+                        try:
+                            host = urlsplit(value).hostname or "invalid"
+                        except ValueError:
+                            host = "invalid"
+                        # Host/hash only: never log query strings, user data, or provider bodies.
+                        host = "".join(c for c in host if c.isascii() and (c.isalnum() or c in ".-"))[:150]
+                        reason = str(exc) if str(exc) in {"Provider outside reviewed discovery scope", "Not a specific learning page", "Unsafe provider URL", "Non-public provider URL"} else "invalid_candidate_url_or_schema"
+                        log.info("course_candidate host=%s url_hash=%s reason=%s", host,
+                                 hashlib.sha256(value.encode()).hexdigest()[:12],
+                                 reason)
             except Exception:
                 data.reasons.append("search_unavailable")
                 break
+        data.metrics["candidate_urls"] = len(hits)
         waiting, candidates = [], []
         for url, (hit, query) in hits.items():
             with _lock:
@@ -160,6 +176,7 @@ def _retrieve(payload, gaps, query_cap, url_cap, deadline, ttl):
                 data.metrics["extracts"] += 1
                 extracted = tavily_api.extract(waiting, timeout=call_timeout)
                 usage(extracted)
+                data.metrics["extracted_pages"] = len(extracted.get("results", []))
                 for page in extracted.get("results", [])[:url_cap]:
                     try:
                         url = provider_url(page["url"])
@@ -172,22 +189,28 @@ def _retrieve(payload, gaps, query_cap, url_cap, deadline, ttl):
                             _pages[url] = (time.monotonic()+ttl, *verified)
                             while len(_pages) > 128:
                                 _pages.popitem(last=False)
-                    except (ValueError, KeyError, TypeError):
+                    except (ValueError, KeyError, TypeError) as exc:
                         data.metrics["rejected"] += 1
+                        safe_reasons = {"Extraction identity mismatch", "Provider title/content unavailable", "Search/provider title contradiction", "No specific learning content", "Content inaccessible", "No literal curriculum support for allowed ESCO concepts", "Provider prerequisites need reviewed canonical mapping", "Unknown extraction URL"}
+                        log.info("course_verification reason=%s", str(exc) if str(exc) in safe_reasons else "invalid_source_or_schema")
             except Exception:
                 data.reasons.append("extraction_unavailable")
         # Duplicate provider results may not duplicate resources/totals.
         candidates = list({r.resource_id: (r, s, evidence) for r, s, evidence in candidates}.values())
         ranking = []
         if candidates and os.getenv("RUNPOD_API_KEY"):
+            stage_started, call_timeout = time.monotonic(), 0.0
             try:
                 call_timeout = timeout(5)
                 data.metrics["runpod_calls"] += 1
+                data.metrics["evaluations"] += 1
                 ranking = pathway_llm.evaluate([{"resource_id": r.resource_id, "title": r.title,
                     "provider": r.provider, "target_skill_ids": r.covers_skill_ids, "evidence": evidence,
                     "cost_status": r.cost_status, "duration_hours": r.duration_hours,
                     "prerequisite_status": r.prerequisite_status} for r, _, evidence in candidates], call_timeout)
-            except Exception:
+                data.metrics["evaluation_valid"] = 1
+            except Exception as exc:
+                pathway_llm.report_failure("course_evaluation", exc, stage_started, call_timeout)
                 data.reasons.append("evaluation_unavailable_deterministic_ranking")
         for resource, source, _ in candidates:
             resource = resource.model_copy(deep=True, update={"discovery_rank": ranking.index(resource.resource_id)
@@ -204,6 +227,9 @@ def _retrieve(payload, gaps, query_cap, url_cap, deadline, ttl):
 
 
 def build_discovered_pathway(profile, match, catalogue, sources, index):
+    # The frontend's existing rewrite proxy times out at 30s. Share one bounded
+    # online budget instead of adding a separate 12s certification budget after discovery.
+    request_deadline = time.monotonic() + 27
     from .personalized_reskilling import build_pathway
     discovery = discover_resources(profile, match, index)
     # Keep reviewed local IDs/prerequisite references intact when a discovered
@@ -230,7 +256,7 @@ def build_discovered_pathway(profile, match, catalogue, sources, index):
         message = "No documented essential gaps require learning resources. Proficiency remains unassessed."
     ids = set(result.source_ids) | {sid for p in result.phases for sid in p.source_ids}
     from .credentials import recommend_credentials
-    credentials, credential_metrics, credential_cached = recommend_credentials(profile, match, index)
+    credentials, credential_metrics, credential_cached = recommend_credentials(profile, match, index, deadline=request_deadline)
     return result.model_copy(update={"discovery_status": status, "discovery_message": message,
         "credentials": credentials, "credential_metrics": credential_metrics, "credential_used_cache": credential_cached,
         "credential_message": "Relevant credentials to consider after preparation; eligibility and proficiency are not assessed." if credentials else

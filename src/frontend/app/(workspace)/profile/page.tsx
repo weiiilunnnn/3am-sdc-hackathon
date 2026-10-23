@@ -1,4 +1,5 @@
 "use client";
+import { restoreHybridProfile, saveHybridProfile } from "@/lib/hybrid-profile";
 
 import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -7,6 +8,8 @@ import {
   type ProfileItem, type Proficiency, type SampleProfile, type SkillOption, type StoredProfile,
 } from "@/lib/api";
 import { splitCommaList, validateProfileDraft } from "@/lib/profile-validation";
+import { PATHWAAY_PROFILE_HANDOFF_KEY, readPathwaayRegistrationProfile, type PathwaayRegistrationProfile } from "@/lib/pathwaay-profile";
+import CompletedProfile from "./CompletedProfile";
 
 const PROFILE_KEY = "aiversecity.synthetic-profile-id";
 const statusOptions: [ProfileStatus, string][] = [["student", "Student"], ["fresh_graduate", "Fresh graduate"], ["employed", "Employed"], ["career_switcher", "Career switcher"], ["other", "Other"]];
@@ -37,7 +40,7 @@ function draftFromProfile(profile: StoredProfile | SampleProfile): ProfileDraft 
     projects: profile.projects.map((item) => ({ ...item, skill_ids: [...item.skill_ids] })),
     certifications: profile.certifications.map((item) => ({ ...item, skill_ids: [...item.skill_ids] })),
     achievements: profile.achievements.map((item) => ({ ...item, skill_ids: [...item.skill_ids] })),
-    learning_preferences: { ...profile.learning_preferences }, synthetic_demo: true,
+    learning_preferences: { ...profile.learning_preferences }, synthetic_demo: profile.synthetic_demo, registration_profile: profile.registration_profile,
   };
 }
 
@@ -73,6 +76,9 @@ function newRecord(): ProfileItem {
 }
 
 export default function Home() {
+  const [recoveryError, setRecoveryError] = useState("");
+  const [profileHandoffLoaded, setProfileHandoffLoaded] = useState(false);
+  const [registrationProfile, setRegistrationProfile] = useState<PathwaayRegistrationProfile | null>(null);
   const [draft, setDraft] = useState<ProfileDraft>(emptyDraft);
   const [listInputs, setListInputs] = useState(() => listTexts(emptyDraft));
   const [samples, setSamples] = useState<SampleProfile[]>([]);
@@ -101,6 +107,22 @@ export default function Home() {
   const [unratedSkills, setUnratedSkills] = useState<string[]>([]);
   const [cvNotice, setCvNotice] = useState("");
   const [cvError, setCvError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    void restoreHybridProfile().then(p => { if (active) setRegistrationProfile(p); }).catch(e => { if (active) setRecoveryError(e instanceof Error ? e.message : "Saved profile unavailable."); }).finally(() => { if (active) setProfileHandoffLoaded(true); });
+    const syncRegistrationProfile = (event: Event) => {
+      const next = (event as CustomEvent<PathwaayRegistrationProfile>).detail;
+      if (next && typeof next.firstName === "string") setRegistrationProfile(next);
+    };
+    window.addEventListener("pathwaay-profile-updated", syncRegistrationProfile);
+    return () => { active = false; window.removeEventListener("pathwaay-profile-updated", syncRegistrationProfile); };
+  }, []);
+
+  const updateRegistrationProfile = useCallback(async (next: PathwaayRegistrationProfile) => {
+    const saved = await saveHybridProfile(next);
+    setRegistrationProfile(saved);
+  }, []);
 
   const applyDraft = useCallback((next: ProfileDraft) => {
     setDraft(next);
@@ -139,6 +161,7 @@ export default function Home() {
   }, [applyDraft]);
 
   useEffect(() => {
+    if (!profileHandoffLoaded || registrationProfile || recoveryError) return;
     let active = true;
     void getSampleProfiles().then((result) => {
       if (active) setSamples(result.profiles);
@@ -155,7 +178,7 @@ export default function Home() {
       setMessageKind("error");
     }
     return () => { active = false; };
-  }, [restoreProfile]);
+  }, [restoreProfile, profileHandoffLoaded, registrationProfile, recoveryError]);
 
   useEffect(() => {
     let active = true;
@@ -361,6 +384,10 @@ export default function Home() {
     setDraft((current) => ({ ...current, [key]: splitCommaList(text) }));
   };
 
+  if (!profileHandoffLoaded) return <main className="page-wrap"><div className="message info" role="status">Opening your completed profile…</div></main>;
+  if (recoveryError) return <main className="page-wrap"><p role="alert">{recoveryError} Reload to retry. Your profile reference has been retained.</p></main>;
+  if (registrationProfile) return <CompletedProfile profile={registrationProfile} onProfileChange={updateRegistrationProfile} />;
+
   return (
     <main className="page-wrap">
       <div className="page-kicker"><span className="kicker-dot" /> YOUR WORKSPACE <span>·</span> PROFILE & EVIDENCE</div>
@@ -396,7 +423,7 @@ export default function Home() {
               <FormField label="Education level"><select aria-label="Education level" value={draft.education_level} onChange={(e) => setDraft({ ...draft, education_level: e.target.value as EducationLevel })} data-testid="select-education">{educationOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></FormField>
               <FormField label="Field of study" error={errors.field_of_study}><input aria-label="Field of study" value={draft.field_of_study} onChange={(e) => setDraft({ ...draft, field_of_study: e.target.value })} placeholder="e.g. information systems" data-testid="input-field-of-study" /></FormField>
               <FormField label="Current occupation" hint="Optional; use a fictional or general description." error={errors.current_occupation}><input aria-label="Current occupation" value={draft.current_occupation ?? ""} onChange={(e) => setDraft({ ...draft, current_occupation: e.target.value })} placeholder="e.g. retail assistant" data-testid="input-occupation" /></FormField>
-              <FormField label="Years of experience" error={errors.years_experience}><input type="number" min="0" max="70" step="1" aria-label="Years of experience" value={draft.years_experience} onChange={(e) => setDraft({ ...draft, years_experience: Number(e.target.value) })} data-testid="input-experience" /></FormField>
+              <FormField label="Years of experience" error={errors.years_experience}><input type="number" min="0" max="70" step="1" aria-label="Years of experience" value={draft.years_experience ?? ""} onChange={(e) => setDraft({ ...draft, years_experience: Number(e.target.value) })} data-testid="input-experience" /></FormField>
               <FormField label="Professional summary" hint="A short, factual introduction. No identifying details." full><textarea aria-label="Professional summary" value={draft.professional_summary} onChange={(e) => setDraft({ ...draft, professional_summary: e.target.value })} placeholder="Describe your focus, experience or the kinds of work you enjoy." data-testid="input-professional-summary" /></FormField>
             </div>
           </section>

@@ -15,12 +15,49 @@ import CredentialRecommendations from "../src/frontend/components/CredentialReco
 import PathwayResourceCard from "../src/frontend/components/PathwayResourceCard";
 import { resourceAppearance } from "../src/frontend/components/PathwayIcon";
 import PathwayView from "../src/frontend/components/PathwayView";
+import { registrationToDraft } from "../src/frontend/lib/hybrid-profile";
+import type { PathwaayRegistrationProfile } from "../src/frontend/lib/pathwaay-profile";
+import type { StoredProfile, SkillOption } from "../src/frontend/lib/api";
 import type { Bootstrap, Pathway, Resource, Source } from "../src/frontend/lib/contracts";
 
 // Resolve the app's own React version, with the standalone frontend package.
 const requireFrontend = createRequire(new URL("../src/frontend/package.json", import.meta.url));
 const { createElement } = requireFrontend("react");
 const { renderToStaticMarkup } = requireFrontend("react-dom/server");
+
+const registrationFixture = (): PathwaayRegistrationProfile => ({firstName:"Fixture",lastName:"Learner",educationLevel:"Bachelor’s degree",university:"",major:"Computing",cgpa:"3.5",schoolAwards:"",experiences:[],skills:["Python","SQL","Data Analysis"],educationRecord:"",volunteering:"",projects:"",certifications:"",achievements:"",interests:"",workActivities:"",strengths:"",skillsToDevelop:"",aspiration:"",profileSummary:"",weeklyHours:"",learningBudget:"",learningMode:""});
+
+test("hybrid conversion keeps genuine unknowns and exact Main snapshot without inventing ESCO IDs", () => {
+  const main = registrationFixture();
+  const draft = registrationToDraft(main);
+  assert.equal(draft.synthetic_demo, false);
+  assert.equal(draft.years_experience, null);
+  assert.equal(draft.status, "unknown");
+  assert.equal(draft.education_level, "bachelor");
+  assert.equal(draft.registration_profile?.cgpa, "3.5");
+  assert.ok(draft.skills.every(s => s.proficiency === "unknown" && s.skill_id === null));
+  assert.deepEqual(main, registrationFixture());
+  main.weeklyHours = "0"; main.learningBudget = "0";
+  assert.equal(registrationToDraft(main).learning_preferences.weekly_hours, 0);
+  main.learningBudget = "not a number";
+  assert.throws(() => registrationToDraft(main), /non-negative/);
+});
+
+test("hybrid updates retain existing evidence, proficiency and unrelated records", () => {
+  const main = registrationFixture();
+  const draft = registrationToDraft(main);
+  const record = {id:"existing-project", title:"User project", organization:null,period:null,description:"Provided by the user",skill_ids:[]};
+  const saved = {...draft,id:"saved",created_at:"2026-10-23",updated_at:"2026-10-23",projects:[record],skills:[{skill_id:"local:python-programming",display_name:"Python programming",input_names:["Python"],proficiency:"advanced",taxonomy_source:"Local prototype vocabulary",is_custom:false,evidence_record_ids:[record.id]}]} as StoredProfile;
+  const vocabulary = [{id:"local:python-programming",name:"Python programming",aliases:["Python"]}] as SkillOption[];
+  const result = registrationToDraft(main, saved, vocabulary);
+  assert.equal(result.skills[0].proficiency, "advanced");
+  assert.deepEqual(result.skills[0].evidence_record_ids, [record.id]);
+  assert.deepEqual(result.projects, [record]);
+  assert.equal(result.skills.length, 3);
+  assert.equal(result.years_experience, null);
+  main.skills = ["SQL"];
+  assert.equal(registrationToDraft(main,saved,vocabulary).skills.some(s => s.skill_id === "local:python-programming"), false);
+});
 
 test("occupation title presentation preserves acronyms, brands and punctuation", () => {
   for (const [input, expected] of [
@@ -76,7 +113,10 @@ test("pathway origins, response-local evidence and unknowns remain truthful", ()
   for (const text of ["Discovered online", "Provider details checked 2026-10-22", source.title, "Fictional skill"])
     assert.ok(html.includes(text), text);
   assert.doesNotMatch(html, /Evidence unavailable for test-online|Cost unknown|Not confirmed|Pathway method, scheduling/);
-  assert.doesNotMatch(html, /Incomplete|Remaining Learning Gaps|No eligible verified route for|Back to matching roles|Details &amp; evidence|resource-details/);
+  assert.doesNotMatch(html, /Incomplete|<summary>Remaining Learning Gaps|No eligible verified route for|Back to matching roles|Details &amp; evidence|resource-details/);
+  assert.ok(html.includes("1 gaps still need learning resources"));
+  pathway.uncovered_skill_ids = [];
+  assert.doesNotMatch(render(), /gaps still need learning resources/);
   assert.ok(html.includes("Review provider prerequisites."));
   assert.ok(html.includes(`href="${resource.url}"`));
   resource.retrieval_mode = "cached_verified";
@@ -145,12 +185,10 @@ function render(overrides: Partial<EmploymentSnapshotViewProps> = {}) {
   }));
 }
 
-test("profile component exposes fictional-only boundary, fields and visible loading state", () => {
+test("profile recovery exposes an initial loading state before choosing the existing profile UI", () => {
   const html = renderToStaticMarkup(createElement(Home));
-  assert.match(html, /Fictional demo profiles only/);
-  assert.match(html, /data-testid="loading-profile-message"/);
-  assert.match(html, /data-testid="input-interests"/);
-  assert.match(html, /disabled="" data-testid="button-save-profile"/);
+  assert.match(html, /role="status"/);
+  assert.match(html, /Opening your completed profile/);
 });
 
 test("employment component renders attributed records, denominator and escaped text", () => {

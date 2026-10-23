@@ -96,5 +96,5 @@ def build_profile_insights(profile: ProfileRecord) -> ProfileInsights:
         profile_id=profile.id,
         indicators=indicators,
         suggestions=suggestions[:4],
-        notice="These are transparent profile-content checks based only on your saved fictional demo profile. They do not predict career outcomes.",
+        notice="These are transparent profile-content checks based only on your saved profile. They do not predict career outcomes.",
     )

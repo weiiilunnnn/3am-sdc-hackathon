@@ -38,7 +38,7 @@ class APITests(unittest.TestCase):
         self.assertEqual(self.client.post('/api/matches', json={**payload, 'trend_snapshot_id': 'unknown'}).status_code, 422)
         self.assertEqual(self.client.post('/api/pathways', json={**payload, 'role_id': 'invented'}).status_code, 404)
         payload['profile'] = {**payload['profile'], 'is_synthetic': False}
-        self.assertEqual(self.client.post('/api/matches', json=payload).status_code, 422)
+        self.assertEqual(self.client.post('/api/matches', json=payload).status_code, 200)
 
     def test_missing_snapshot_empty_and_unknown_skills(self):
         profile = {**self.bootstrap['profiles'][0], 'skills': []}

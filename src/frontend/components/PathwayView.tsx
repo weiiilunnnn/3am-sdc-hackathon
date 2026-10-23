@@ -27,6 +27,7 @@ export default function PathwayView({ pathway: p, data }: { pathway: Pathway; da
           <details><summary>Phase objectives & evidence</summary><div className="chips">{phase.target_skill_ids.map(id => <span className="chip" key={id}>{name(id)}</span>)}</div>{phase.learning_objectives.map((t, i) => <p className="small" key={i}>{t}</p>)}<SourceLinks ids={phase.source_ids} sources={sources} /></details>
         </>}
       </div></article>)}</div>
+    {p.uncovered_skill_ids.length > 0 && <section className="remaining-gaps" aria-label="Remaining Learning Gaps"><p className="small muted">{p.uncovered_skill_ids.length} gaps still need learning resources</p></section>}
     <CredentialRecommendations pathway={p} skillName={name} /></div>
     {p.warnings.filter(warning => !/^No eligible verified route for \d+ documented gaps\. This is a starter pathway\.$/.test(warning)).map((warning, i) => <p className="notice small" key={i}>{warning}</p>)}
     {p.blocked_resource_ids.length > 0 && <p className="notice small">Unavailable alternatives: {p.blocked_resource_ids.join(", ")}</p>}

@@ -89,7 +89,7 @@ class ApiIntegrationTests(unittest.TestCase):
         self.assertIn("not a measure of employability", insights["indicators"][0]["limitation"])
         self.assertEqual(request("GET", "/api/profiles/missing/insights")[0], 404)
         draft["synthetic_demo"] = False
-        self.assertEqual(request("POST", "/api/profiles", draft)[0], 422)
+        self.assertEqual(request("POST", "/api/profiles", draft)[0], 201)
         draft["synthetic_demo"] = True
         draft["skills"][0]["skill_id"] = "not-a-real-id"
         self.assertEqual(request("POST", "/api/profiles", draft)[0], 422)

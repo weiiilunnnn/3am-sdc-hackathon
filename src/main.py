@@ -1,7 +1,13 @@
 """FastAPI backend for the hackathon project."""
 
 import os
+import sys
 from contextlib import asynccontextmanager
+from pathlib import Path
+
+# Support both `python -m src.main` and `python src/main.py` from the repo root.
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.environment import load_backend_environment
 

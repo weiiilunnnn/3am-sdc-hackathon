@@ -23,7 +23,7 @@ test("role screens share workspace navigation and preserve client navigation", a
   for (let step = 0; step < 2; step++) {
     await expect(page.getByRole("banner")).toHaveCount(1);
     await expect(page.getByRole("contentinfo")).toHaveCount(1);
-    await expect(page.getByRole("link", { name: "Aiversecity home", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Pathwaay home", exact: true })).toBeVisible();
     await expect(page.getByTestId("link-role-matching")).toHaveAttribute("aria-current", "page");
     if (step === 0) await page.getByRole("link", { name: /Explore Pathway/ }).click();
   }
@@ -46,7 +46,7 @@ test("main redirect and every existing page remain available alongside KW", asyn
     const response = await request.get(route);
     expect(response.status(), route).toBe(200);
   }
-  await page.getByRole("link", { name: "Skills workspace", exact: true }).click();
+  await page.getByRole("link", { name: "Pathwaay home", exact: true }).click();
   await expect(page).toHaveURL(/\/home$/);
   await page.getByTestId("link-profile").click();
   await expect(page).toHaveURL(/\/profile$/);

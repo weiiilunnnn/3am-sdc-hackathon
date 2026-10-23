@@ -53,9 +53,12 @@ def _post(kind: str, payload: dict, timeout: float) -> dict:
         raise TavilyError("search_or_extract_unavailable") from exc
 
 
-def search(query: str, *, timeout: float) -> dict:
-    return _post("search", {"query": query, "search_depth": "basic", "topic": "general", "max_results": 4,
-                           "include_answer": False, "include_raw_content": False, "include_usage": True}, timeout)
+def search(query: str, *, timeout: float, include_domains: tuple[str, ...] | None = None) -> dict:
+    payload = {"query": query, "search_depth": "basic", "topic": "general", "max_results": 4,
+               "include_answer": False, "include_raw_content": False, "include_usage": True}
+    if include_domains:
+        payload["include_domains"] = list(include_domains)
+    return _post("search", payload, timeout)
 
 
 def extract(urls: list[str], *, timeout: float) -> dict:

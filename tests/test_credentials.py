@@ -111,5 +111,12 @@ class CredentialTests(unittest.TestCase):
         self.assertTrue(validated.target_skill_ids)
         self.assertNotIn(validated.credentials[0].credential_id, [r.resource_id for p in validated.phases for r in p.resources])
 
+    def test_expired_shared_request_deadline_does_not_start_provider_calls(self):
+        import time
+        _, metrics, _ = c.recommend_credentials(self.profile,self.match,self.index,deadline=time.monotonic()-1)
+        self.search.assert_not_called()
+        self.extract.assert_not_called()
+        self.assertEqual(metrics["searches"],0)
+
 
 if __name__ == "__main__": unittest.main()

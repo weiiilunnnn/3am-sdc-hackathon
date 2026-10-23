@@ -58,8 +58,7 @@ class ProfileTests(unittest.TestCase):
 
         sample = deepcopy(get_sample_profiles()[0])
         sample["synthetic_demo"] = False
-        with self.assertRaises(ValidationError):
-            profile_input(sample)
+        self.assertFalse(profile_input(sample).synthetic_demo)
 
     def test_alias_resolves_and_unknown_skill_remains_custom(self) -> None:
         result = normalize_skills(

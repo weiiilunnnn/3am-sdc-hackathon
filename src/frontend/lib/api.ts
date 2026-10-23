@@ -1,9 +1,11 @@
+import type { PathwaayRegistrationProfile } from "./pathwaay-profile";
 export type ProfileStatus =
   | "student"
   | "fresh_graduate"
   | "employed"
   | "career_switcher"
-  | "other";
+  | "other"
+  | "unknown";
 export type EducationLevel =
   | "secondary"
   | "certificate"
@@ -11,7 +13,7 @@ export type EducationLevel =
   | "bachelor"
   | "postgraduate"
   | "other";
-export type Proficiency = "beginner" | "intermediate" | "advanced";
+export type Proficiency = "beginner" | "intermediate" | "advanced" | "unknown";
 export type LearningMode = "self_paced" | "instructor_led" | "peer_learning" | "mixed";
 
 export type SkillInput = {
@@ -37,7 +39,7 @@ export type ProfileDraft = {
   field_of_study: string;
   professional_summary: string;
   current_occupation: string | null;
-  years_experience: number;
+  years_experience: number | null;
   skills: SkillInput[];
   interests: string[];
   work_activities: string[];
@@ -54,7 +56,8 @@ export type ProfileDraft = {
     budget_myr: number | null;
     mode: LearningMode | null;
   };
-  synthetic_demo: true;
+  synthetic_demo: boolean;
+  registration_profile?: PathwaayRegistrationProfile | null;
 };
 
 export type NormalizedSkill = {
@@ -230,7 +233,7 @@ export type ProfileInsights = {
 };
 
 export type CVExtraction = {
-  synthetic_demo: true;
+  synthetic_demo: boolean;
   filename: string;
   summary: string | null;
   sections: Record<"experience" | "education" | "projects" | "certifications" | "achievements" | "skills", string[]>;
@@ -301,10 +304,11 @@ export function getSampleProfiles() {
   return request<{ synthetic: true; profiles: SampleProfile[] }>("/api/profiles/samples");
 }
 
-export function createProfile(profile: ProfileDraft) {
+export function createProfile(profile: ProfileDraft, creationKey?: string) {
   return request<StoredProfile>("/api/profiles", {
     method: "POST",
     body: JSON.stringify(profile),
+    ...(creationKey ? { headers: { "Idempotency-Key": creationKey } } : {}),
   });
 }
 
@@ -316,10 +320,11 @@ export function getProfileInsights(profileId: string) {
   return request<ProfileInsights>(`/api/profiles/${encodeURIComponent(profileId)}/insights`);
 }
 
-export function updateProfile(profileId: string, profile: ProfileDraft) {
+export function updateProfile(profileId: string, profile: ProfileDraft, revision?: string) {
   return request<StoredProfile>(`/api/profiles/${encodeURIComponent(profileId)}`, {
     method: "PUT",
     body: JSON.stringify(profile),
+    ...(revision ? { headers: { "If-Match": revision } } : {}),
   });
 }
 

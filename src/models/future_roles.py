@@ -53,7 +53,7 @@ class ProfileSkill(BaseModel):
 
 class UserProfile(Contract):
     profile_id: str = Field(min_length=1, max_length=100)
-    is_synthetic: Literal[True]
+    is_synthetic: bool
     education: str | None = None
     experience_years: Nonnegative | None = None
     skills: list[ProfileSkill] = Field(max_length=500)

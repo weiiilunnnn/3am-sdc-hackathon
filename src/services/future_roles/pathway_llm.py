@@ -1,9 +1,28 @@
 """Feature 4 prompts/validation only; reuse the team's shared GLM transport."""
 import json
 import os
+import time
+import logging
 from pydantic import BaseModel, ConfigDict, Field
 from src.services.sources import runpod_api
 from src.services.sdg_text import LLM_ENDPOINT_ID
+
+log = logging.getLogger(__name__)
+
+
+class LLMResponseError(ValueError):
+    def __init__(self, category):
+        super().__init__("Invalid language-model response.")
+        self.category = category
+
+
+def failure_category(exc):
+    return getattr(exc, "category", "timeout" if isinstance(exc, TimeoutError) else "validation" if isinstance(exc, ValueError) else type(exc).__name__)
+
+
+def report_failure(stage, exc, started, deadline):
+    log.warning("llm_stage=%s category=%s http_status=%s elapsed=%.3f deadline=%.2f",
+                stage, failure_category(exc), getattr(exc, "http_status", None), time.monotonic()-started, deadline)
 
 
 class StrictOutput(BaseModel):
@@ -42,10 +61,19 @@ def invoke(payload: dict, instructions: str, *, timeout: float, max_tokens: int)
              "Use only supplied IDs and evidence. Do not invent courses, URLs, prices, durations or skills. " + instructions},
             {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}]}}, timeout=timeout)
     output = runpod_api.unwrap_llm_output(result)
-    content = output["choices"][0]["message"]["content"]
+    try:
+        choice = output["choices"][0]
+        if choice.get("finish_reason") == "length":
+            raise LLMResponseError("model_truncated")
+        content = choice["message"]["content"]
+    except (KeyError, IndexError, TypeError) as exc:
+        raise LLMResponseError("response_schema") from exc
     if not isinstance(content, str) or len(content) > 20000:
         raise ValueError("Invalid LLM output")
-    return json.loads(content)
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError as exc:
+        raise LLMResponseError("model_json") from exc
 
 
 def plan(payload: dict, limit: int, timeout: float) -> list[Topic]:

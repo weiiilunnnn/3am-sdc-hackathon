@@ -1,10 +1,18 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useRef, useState } from "react";
+import { getSkills, type SkillOption } from "@/lib/api";
+import { PATHWAAY_PROFILE_HANDOFF_KEY, type PathwaayRegistrationProfile } from "@/lib/pathwaay-profile";
 
-const interestOptions = ["Data & analytics", "Artificial intelligence", "Product & business", "Sustainability"];
-const experienceOptions = ["Just getting started", "Coursework", "Personal projects", "Internship or work"];
+import { saveHybridProfile } from "@/lib/hybrid-profile";
+
+const educationOptions = ["Secondary", "Certificate", "Diploma", "Bachelor’s degree", "Postgraduate", "Other"];
+const learningModes = ["Self-paced", "Instructor-led", "Peer learning", "A mix of formats"];
+const recommendedSkillNames = ["Python programming", "Data analysis", "Machine learning", "Communication", "Problem solving", "Critical thinking"];
+
+type ChosenSkill = { id: string; name: string; source: string };
+type JobExperience = { id: string; title: string; timeframe: string; company: string; description: string };
 
 function ParticleWave() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -90,25 +98,48 @@ function ParticleWave() {
 }
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [activeStep, setActiveStep] = useState<number | null>(null);
   const [journeyTransition, setJourneyTransition] = useState(false);
   const [showRegisterIntro, setShowRegisterIntro] = useState(true);
-  const [hasScrolled, setHasScrolled] = useState(false);
-  const [name, setName] = useState("");
+  const [backendSaving, setBackendSaving] = useState(false);
+  const [backendError, setBackendError] = useState("");
+  const saveInFlight = useRef(false);
+  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
+  const [creationPhase, setCreationPhase] = useState(0);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [major, setMajor] = useState("");
-  const [interest, setInterest] = useState("");
-  const [experience, setExperience] = useState("");
+  const [university, setUniversity] = useState("");
+  const [cgpa, setCgpa] = useState("");
+  const [schoolAwards, setSchoolAwards] = useState("");
+  const [otherInterests, setOtherInterests] = useState("");
+  const [educationLevel, setEducationLevel] = useState("Bachelor’s degree");
+  const [jobExperiences, setJobExperiences] = useState<JobExperience[]>([{ id: "job-1", title: "", timeframe: "", company: "", description: "" }]);
+  const [skillQuery, setSkillQuery] = useState("");
+  const [skillOptions, setSkillOptions] = useState<SkillOption[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<ChosenSkill[]>([]);
+  const [skillLoading, setSkillLoading] = useState(false);
+  const [skillLoadError, setSkillLoadError] = useState("");
+  const [educationRecord, setEducationRecord] = useState("");
+  const [workExperience, setWorkExperience] = useState("");
+  const [projects, setProjects] = useState("");
+  const [certifications, setCertifications] = useState("");
+  const [achievements, setAchievements] = useState("");
+  const [workActivities, setWorkActivities] = useState("");
+  const [strengths, setStrengths] = useState("");
+  const [skillsToDevelop, setSkillsToDevelop] = useState("");
+  const [aspiration, setAspiration] = useState("");
+  const [profileSummary, setProfileSummary] = useState("");
+  const [weeklyHours, setWeeklyHours] = useState("");
+  const [learningBudget, setLearningBudget] = useState("");
+  const [learningMode, setLearningMode] = useState("");
   const [message, setMessage] = useState("");
   const nameInputRef = useRef<HTMLInputElement>(null);
   const majorInputRef = useRef<HTMLInputElement>(null);
-  const lastStep = 3;
-
-  useEffect(() => {
-    const updateScrollState = () => setHasScrolled(window.scrollY > 8);
-    updateScrollState();
-    window.addEventListener("scroll", updateScrollState, { passive: true });
-    return () => window.removeEventListener("scroll", updateScrollState);
-  }, []);
+  const skillSearchRef = useRef<HTMLInputElement>(null);
+  const experienceListRef = useRef<HTMLDivElement>(null);
+  const lastStep = 7;
 
   useEffect(() => {
     const introTimer = window.setTimeout(() => setShowRegisterIntro(false), 1600);
@@ -116,15 +147,70 @@ export default function RegisterPage() {
   }, []);
 
   useEffect(() => {
+    if (!isCreatingProfile) return;
+    const readyTimer = window.setTimeout(() => setCreationPhase(1), 3100);
+    const finishTimer = window.setTimeout(() => router.replace("/profile"), 3900);
+    return () => {
+      window.clearTimeout(readyTimer);
+      window.clearTimeout(finishTimer);
+    };
+  }, [isCreatingProfile, router]);
+
+  useEffect(() => {
     if (activeStep === 0) nameInputRef.current?.focus();
     if (activeStep === 1) majorInputRef.current?.focus();
+    if (activeStep === 2) skillSearchRef.current?.focus();
   }, [activeStep]);
 
-  function handleNext(event: FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    if (activeStep !== 3 || jobExperiences.length < 2) return;
+    const list = experienceListRef.current;
+    if (!list) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    list.scrollTo({ top: list.scrollHeight, behavior: reducedMotion ? "auto" : "smooth" });
+  }, [activeStep, jobExperiences.length]);
+
+  useEffect(() => {
+    if (activeStep !== 2) return;
+    let active = true;
+    setSkillLoading(true);
+    const timer = window.setTimeout(() => {
+      getSkills(skillQuery).then((result) => {
+        if (active) {
+          setSkillOptions(result.skills);
+          setSkillLoadError("");
+        }
+      }).catch(() => {
+        if (active) {
+          setSkillOptions([]);
+          setSkillLoadError("The skill list is unavailable. You can still add a custom skill.");
+        }
+      }).finally(() => { if (active) setSkillLoading(false); });
+    }, 180);
+    return () => { active = false; window.clearTimeout(timer); };
+  }, [activeStep, skillQuery]);
+
+  async function handleNext(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (activeStep === null) return;
+    if (activeStep === null || saveInFlight.current) return;
     if (activeStep < lastStep) setActiveStep(activeStep + 1);
-    else setActiveStep(lastStep + 1);
+    else {
+      const completedProfile: PathwaayRegistrationProfile = {
+        firstName, lastName, educationLevel, university, major, cgpa, schoolAwards,
+        experiences: jobExperiences,
+        skills: selectedSkills.map((skill) => skill.name),
+        educationRecord, volunteering: workExperience, projects, certifications, achievements,
+        interests: otherInterests, workActivities, strengths, skillsToDevelop, aspiration, profileSummary,
+        weeklyHours, learningBudget, learningMode,
+      };
+      saveInFlight.current = true; setBackendSaving(true); setBackendError("");
+      try { await saveHybridProfile(completedProfile); }
+      catch (error) { setBackendError(error instanceof Error ? error.message : "Could not save your profile. Please retry."); return; }
+      finally { saveInFlight.current = false; setBackendSaving(false); }
+      setCreationPhase(0);
+      setIsCreatingProfile(true);
+      setActiveStep(lastStep + 1);
+    }
   }
 
   function startJourney() {
@@ -134,19 +220,40 @@ export default function RegisterPage() {
     window.setTimeout(() => setJourneyTransition(false), 900);
   }
 
-  const canContinue = activeStep === 0 ? name.trim().length > 0
+  function addSkill(skill: ChosenSkill) {
+    setSelectedSkills((current) => current.some((item) => item.id === skill.id) ? current : [...current, skill]);
+    setSkillQuery("");
+  }
+
+  function addCustomSkill() {
+    const name = skillQuery.trim();
+    if (!name) return;
+    addSkill({ id: `custom:${name.toLocaleLowerCase()}`, name, source: "Custom skill" });
+  }
+
+  function updateJobExperience(id: string, field: keyof Omit<JobExperience, "id">, value: string) {
+    setJobExperiences((entries) => entries.map((entry) => entry.id === id ? { ...entry, [field]: value } : entry));
+  }
+
+  function addJobExperience() {
+    const id = `job-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    setJobExperiences((entries) => [...entries, { id, title: "", timeframe: "", company: "", description: "" }]);
+  }
+
+  function removeJobExperience(id: string) {
+    setJobExperiences((entries) => entries.filter((entry) => entry.id !== id));
+  }
+
+  const recommendedSkills = skillOptions.filter((skill) => recommendedSkillNames.includes(skill.name));
+
+  const canContinue = activeStep === 0 ? firstName.trim().length > 0 && lastName.trim().length > 0
     : activeStep === 1 ? major.trim().length > 0
-      : activeStep === 2 ? interest.length > 0
-        : activeStep === 3 ? experience.length > 0
-          : true;
+    : activeStep === 2 ? selectedSkills.length > 0
+        : true;
 
   return (
     <main className={`login-page register-page ${activeStep === null ? "is-welcome" : "is-onboarding"}`}>
       <div className="ambient-layer" aria-hidden="true" />
-      <header className={`login-topbar ${hasScrolled ? "is-scrolled" : ""}`}>
-        <Link className="brand" href="/" aria-label="Pathwaay home"><span className="brand-mark">P</span> Pathwaay <span className="brand-note">CAREER EXPLORER</span></Link>
-        <nav className="entry-links" aria-label="Demo navigation"><Link className="login-back-link" href="/home">Skills workspace <span aria-hidden="true">↗</span></Link><Link className="login-back-link" href="/login">Log in</Link></nav>
-      </header>
       <div className={`journey-transition ${journeyTransition ? "is-active" : ""}`} aria-hidden="true"><span /><span /><span /></div>
       {showRegisterIntro && <div className="register-intro" aria-hidden="true"><span className="register-intro-mark">P</span><span className="register-intro-word">Pathwaay.</span></div>}
 
@@ -171,60 +278,141 @@ export default function RegisterPage() {
         <div className="onboarding-orbit" aria-hidden="true"><span /><i /><i /><i /></div>
         <ParticleWave />
         <div className="onboarding-scene">
-          <div className="onboarding-topline"><button type="button" className="onboarding-back" onClick={() => setActiveStep(activeStep === 0 ? null : activeStep - 1)}>← <span>{activeStep === 0 ? "Welcome" : "Back"}</span></button><span className="onboarding-count">0{activeStep + 1} <i>/</i> 04</span></div>
-          <div className="onboarding-progress" role="progressbar" aria-label="Profile setup progress" aria-valuemin={1} aria-valuemax={4} aria-valuenow={activeStep + 1}><span style={{ width: `${((activeStep + 1) / 4) * 100}%` }} /></div>
-          <p className="completion-note">Fictional demo details only. Your answers stay in this preview and are not saved.</p>
+          <div className="onboarding-topline"><button type="button" className="onboarding-back" onClick={() => setActiveStep(activeStep === 0 ? null : activeStep - 1)}>← <span>{activeStep === 0 ? "Welcome" : "Back"}</span></button><span className="onboarding-count">{String(activeStep + 1).padStart(2, "0")} <i>/</i> 08</span></div>
+          <div className="onboarding-progress" role="progressbar" aria-label="Profile setup progress" aria-valuemin={1} aria-valuemax={8} aria-valuenow={activeStep + 1}><span style={{ width: `${((activeStep + 1) / 8) * 100}%` }} /></div>
           <form key={activeStep} className="onboarding-form onboarding-content" onSubmit={handleNext}>
             {activeStep === 0 && <div className="onboarding-question">
               <span className="onboarding-step-tag">FIRST, THE HUMAN BEHIND THE PATH</span>
               <h1>What should<br />we call you?</h1>
               <p>We’ll use your name to make this journey feel like yours.</p>
-              <label className="onboarding-label" htmlFor="journey-name">Your name</label>
-              <div className="login-input-wrap onboarding-input"><span aria-hidden="true">◎</span><input ref={nameInputRef} id="journey-name" name="pathwaay-display-name" value={name} onChange={(event) => setName(event.target.value)} autoComplete="off" placeholder="Type your name" required /></div>
+              <div className="onboarding-name-fields">
+                <label className="onboarding-label" htmlFor="journey-first-name">First name</label>
+                <div className="login-input-wrap onboarding-input"><span aria-hidden="true">◎</span><input ref={nameInputRef} id="journey-first-name" name="given-name" value={firstName} onChange={(event) => setFirstName(event.target.value)} autoComplete="given-name" placeholder="Your first name" required /></div>
+                <label className="onboarding-label" htmlFor="journey-last-name">Last name</label>
+                <div className="login-input-wrap onboarding-input"><span aria-hidden="true">◎</span><input id="journey-last-name" name="family-name" value={lastName} onChange={(event) => setLastName(event.target.value)} autoComplete="family-name" placeholder="Your last name" required /></div>
+              </div>
             </div>}
 
             {activeStep === 1 && <div className="onboarding-question">
-              <span className="onboarding-step-tag">YOUR STARTING POINT</span>
-              <h1>What’s your<br />major or field?</h1>
-              <p>Tell us what you’re studying, working in, or curious about.</p>
-              <label className="onboarding-label" htmlFor="journey-major">Major or field of study</label>
-              <div className="login-input-wrap onboarding-input"><span aria-hidden="true">⌘</span><input ref={majorInputRef} id="journey-major" value={major} onChange={(event) => setMajor(event.target.value)} autoComplete="off" placeholder="e.g. Data Science" required /></div>
+              <span className="onboarding-step-tag">YOUR UNIVERSITY JOURNEY</span>
+              <h1>Where are you<br />studying?</h1>
+              <p>Tell us about your school, university, or course of study.</p>
+              <div className="onboarding-field-grid">
+                <label className="onboarding-label">Education level<select className="onboarding-select" value={educationLevel} onChange={(event) => setEducationLevel(event.target.value)}>{educationOptions.map((item) => <option key={item}>{item}</option>)}</select></label>
+                <label className="onboarding-label">University or school<input className="onboarding-control" value={university} onChange={(event) => setUniversity(event.target.value)} placeholder="Your university or school" /></label>
+                <label className="onboarding-label">Major or field of study<input ref={majorInputRef} className="onboarding-control" value={major} onChange={(event) => setMajor(event.target.value)} autoComplete="off" placeholder="e.g. Data Science" required /></label>
+                <label className="onboarding-label">Overall CGPA<input className="onboarding-control" type="number" min="0" max="4" step="0.01" value={cgpa} onChange={(event) => setCgpa(event.target.value)} placeholder="Optional · out of 4.00" /></label>
+                <label className="onboarding-label">School honours and awards<textarea className="onboarding-textarea onboarding-textarea-short" value={schoolAwards} onChange={(event) => setSchoolAwards(event.target.value)} placeholder="Optional academic honours or awards" /></label>
+              </div>
               <div className="onboarding-suggestions"><span>TRY</span>{["Data Science", "Computer Science", "Business", "Still exploring"].map((item) => <button type="button" key={item} onClick={() => setMajor(item)}>{item}</button>)}</div>
             </div>}
 
             {activeStep === 2 && <div className="onboarding-question">
-              <span className="onboarding-step-tag">FOLLOW YOUR CURIOSITY</span>
-              <h1>What kind of work<br />pulls you in?</h1>
-              <p>Choose the area you’d most like to explore first.</p>
-              <div className="onboarding-options" role="group" aria-label="Choose an area of interest">
-                {interestOptions.map((item, index) => <button type="button" aria-pressed={interest === item} className={`onboarding-option ${interest === item ? "selected" : ""}`} key={item} onClick={() => setInterest(item)}><span className="option-index">0{index + 1}</span><span>{item}</span><span className="option-radio" /></button>)}
+              <span className="onboarding-step-tag">BUILD YOUR SKILL PROFILE</span>
+              <h1>Add your skills</h1>
+              <p>Search the skill list or start with a few suggestions. Select all that apply.</p>
+              <div className="skill-picker">
+                <label className="onboarding-label" htmlFor="journey-skill-search">Search skills</label>
+                <input ref={skillSearchRef} id="journey-skill-search" className="onboarding-control" type="search" value={skillQuery} onChange={(event) => setSkillQuery(event.target.value)} placeholder="Try Python, data analysis, communication…" autoComplete="off" />
+                {skillQuery.trim() && <div className="onboarding-skill-results" role="listbox" aria-label="Skill search results">
+                  {skillLoading && <span className="onboarding-skill-message" role="status">Searching skills…</span>}
+                  {!skillLoading && skillOptions.slice(0, 5).map((skill) => <button className="onboarding-skill-result" type="button" key={skill.id} role="option" aria-selected={selectedSkills.some((item) => item.id === skill.id)} onClick={() => addSkill({ id: skill.id, name: skill.name, source: skill.taxonomy_source })}><span>{skill.name}</span><small>{selectedSkills.some((item) => item.id === skill.id) ? "Added" : "Add skill"}</small></button>)}
+                  {!skillLoading && skillOptions.length === 0 && <span className="onboarding-skill-message">{skillLoadError || "No matching skills found."}</span>}
+                  {!skillLoading && skillOptions.length === 0 && <button className="onboarding-skill-result custom" type="button" onClick={addCustomSkill}><span>Add “{skillQuery.trim()}” as a custom skill</span><small>Add</small></button>}
+                </div>}
+                {skillLoadError && !skillQuery.trim() && <span className="onboarding-field-hint" role="status">{skillLoadError}</span>}
+                <div className="onboarding-recommendations" aria-label="Suggested skills">
+                  <span className="onboarding-recommendation-label">SUGGESTED SKILLS</span>
+                  {recommendedSkills.map((skill) => {
+                    const selected = selectedSkills.some((item) => item.id === skill.id);
+                    return <button type="button" className={`onboarding-skill-chip ${selected ? "selected" : ""}`} key={skill.id} aria-pressed={selected} onClick={() => addSkill({ id: skill.id, name: skill.name, source: skill.taxonomy_source })}>{skill.name}{selected && <span aria-hidden="true"> ✓</span>}</button>;
+                  })}
+                </div>
+                {selectedSkills.length > 0 && <div className="onboarding-selected-skills" aria-label="Selected skills">
+                  <span className="onboarding-recommendation-label">YOUR SKILLS · {selectedSkills.length}</span>
+                  {selectedSkills.map((skill) => <span className="onboarding-selected-skill" key={skill.id}>{skill.name}<button type="button" aria-label={`Remove ${skill.name}`} onClick={() => setSelectedSkills((current) => current.filter((item) => item.id !== skill.id))}>×</button></span>)}
+                </div>}
               </div>
             </div>}
 
-            {activeStep === 3 && <div className="onboarding-question">
-              <span className="onboarding-step-tag">EVERY PATH HAS A FIRST STEP</span>
-              <h1>What have you<br />tried so far?</h1>
-              <p>There’s no wrong answer. This helps set a useful starting point.</p>
-              <div className="onboarding-options" role="group" aria-label="Choose your experience level">
-                {experienceOptions.map((item, index) => <button type="button" aria-pressed={experience === item} className={`onboarding-option ${experience === item ? "selected" : ""}`} key={item} onClick={() => setExperience(item)}><span className="option-index">0{index + 1}</span><span>{item}</span><span className="option-radio" /></button>)}
+            {activeStep === 3 && <div className="onboarding-question experience-question">
+              <span className="onboarding-step-tag">YOUR EXPERIENCE SO FAR</span>
+              <h1>What’s your experience<br />so far?</h1>
+              <p>Add a role or placement. You can include more than one, and every field is optional.</p>
+              <div ref={experienceListRef} className={`experience-list-scroll ${jobExperiences.length > 1 ? "has-multiple" : ""}`}>
+                {jobExperiences.map((entry, index) => <section className="experience-entry" key={entry.id} aria-label={`Experience ${index + 1}`}>
+                  <div className="experience-entry-header"><span>EXPERIENCE {String(index + 1).padStart(2, "0")}</span>{jobExperiences.length > 1 && <button type="button" className="experience-remove" onClick={() => removeJobExperience(entry.id)} aria-label={`Remove experience ${index + 1}`}>Remove</button>}</div>
+                  <div className="onboarding-field-grid experience-fields">
+                    <label className="onboarding-label">Job title<input className="onboarding-control" value={entry.title} onChange={(event) => updateJobExperience(entry.id, "title", event.target.value)} placeholder="e.g. Data intern" /></label>
+                    <label className="onboarding-label">Timeframe<input className="onboarding-control" value={entry.timeframe} onChange={(event) => updateJobExperience(entry.id, "timeframe", event.target.value)} placeholder="e.g. Jun 2024 to Aug 2024" /></label>
+                    <label className="onboarding-label experience-company">Company or organisation<input className="onboarding-control" value={entry.company} onChange={(event) => updateJobExperience(entry.id, "company", event.target.value)} placeholder="Company, organisation, or client" /></label>
+                    <label className="onboarding-label experience-description">Description<textarea className="onboarding-textarea" value={entry.description} onChange={(event) => updateJobExperience(entry.id, "description", event.target.value)} placeholder="What did you work on or contribute?" /></label>
+                  </div>
+                </section>)}
+                <button type="button" className="experience-add" onClick={addJobExperience}><span aria-hidden="true">+</span> Add another job</button>
               </div>
             </div>}
 
-            <div className="onboarding-actions"><span className="onboarding-note">YOUR CHOICES STAY IN THIS SESSION</span><button className="login-submit onboarding-next" type="submit" disabled={!canContinue}><span>{activeStep === lastStep ? "Shape my pathway" : "Continue"}</span><span aria-hidden="true">→</span></button></div>
+            {activeStep === 4 && <div className="onboarding-question">
+              <span className="onboarding-step-tag">LEARNING AND EXPERIENCE</span>
+              <h1>What have you<br />done so far?</h1>
+              <p>Coursework, volunteering, jobs, or any learning that feels relevant. Brief notes are enough.</p>
+              <div className="onboarding-field-grid">
+                <label className="onboarding-label">Learning or education record<textarea className="onboarding-textarea" value={educationRecord} onChange={(event) => setEducationRecord(event.target.value)} placeholder="Course, subject, or learning experience" /></label>
+                <label className="onboarding-label">Work or volunteering<textarea className="onboarding-textarea" value={workExperience} onChange={(event) => setWorkExperience(event.target.value)} placeholder="Role, activity, or contribution" /></label>
+              </div>
+            </div>}
+
+            {activeStep === 5 && <div className="onboarding-question">
+              <span className="onboarding-step-tag">SMALL PROOF POINTS COUNT</span>
+              <h1>Anything else<br />you’ve built?</h1>
+              <p>Add optional examples that show what you’ve learned. Fictional or general descriptions only.</p>
+              <div className="onboarding-field-grid">
+                <label className="onboarding-label">Projects<textarea className="onboarding-textarea" value={projects} onChange={(event) => setProjects(event.target.value)} placeholder="A project, contribution, or piece of work" /></label>
+                <label className="onboarding-label">Certifications or training<textarea className="onboarding-textarea" value={certifications} onChange={(event) => setCertifications(event.target.value)} placeholder="Completed courses or training" /></label>
+                <label className="onboarding-label">Achievements<textarea className="onboarding-textarea" value={achievements} onChange={(event) => setAchievements(event.target.value)} placeholder="Recognition, milestones, or results" /></label>
+              </div>
+            </div>}
+
+            {activeStep === 6 && <div className="onboarding-question">
+              <span className="onboarding-step-tag">WHAT GIVES YOUR WORK SHAPE</span>
+              <h1>What would you<br />like to move toward?</h1>
+              <p>Share the kinds of work you enjoy and the skills you hope to build next.</p>
+              <div className="onboarding-field-grid">
+                <label className="onboarding-label">Interests or topics<textarea className="onboarding-textarea" value={otherInterests} onChange={(event) => setOtherInterests(event.target.value)} placeholder="e.g. sustainability, design, education" /></label>
+                <label className="onboarding-label">Work activities<textarea className="onboarding-textarea" value={workActivities} onChange={(event) => setWorkActivities(event.target.value)} placeholder="e.g. analysing, designing, helping people" /></label>
+                <label className="onboarding-label">Transferable strengths<textarea className="onboarding-textarea" value={strengths} onChange={(event) => setStrengths(event.target.value)} placeholder="e.g. clear communication, curiosity" /></label>
+                <label className="onboarding-label">Skills to develop<textarea className="onboarding-textarea" value={skillsToDevelop} onChange={(event) => setSkillsToDevelop(event.target.value)} placeholder="e.g. data visualisation, facilitation" /></label>
+                <label className="onboarding-label">Career aspiration<textarea className="onboarding-textarea" value={aspiration} onChange={(event) => setAspiration(event.target.value)} placeholder="A kind of work or contribution you want to explore" /></label>
+                <label className="onboarding-label">Short profile introduction<textarea className="onboarding-textarea" value={profileSummary} onChange={(event) => setProfileSummary(event.target.value)} placeholder="A few words about what you bring or care about" /></label>
+              </div>
+            </div>}
+
+            {activeStep === 7 && <div className="onboarding-question">
+              <span className="onboarding-step-tag">MAKE LEARNING REALISTIC</span>
+              <h1>What could fit<br />your week?</h1>
+              <p>These preferences help you think about a practical learning pathway. Every answer is optional.</p>
+              <div className="onboarding-field-grid">
+                <label className="onboarding-label">Hours available per week<input className="onboarding-control" type="number" min="0" max="168" value={weeklyHours} onChange={(event) => setWeeklyHours(event.target.value)} placeholder="Not sure yet" /></label>
+                <label className="onboarding-label">Learning budget (MYR)<input className="onboarding-control" type="number" min="0" max="100000" step="10" value={learningBudget} onChange={(event) => setLearningBudget(event.target.value)} placeholder="Not sure yet" /></label>
+                <label className="onboarding-label">Preferred learning format<select className="onboarding-select" value={learningMode} onChange={(event) => setLearningMode(event.target.value)}><option value="">Choose later</option>{learningModes.map((item) => <option key={item}>{item}</option>)}</select></label>
+              </div>
+            </div>}
+
+            {backendError && <p role="alert">{backendError}</p>}{backendSaving && <p role="status">Saving your profile...</p>}
+            <div className="onboarding-actions"><span className="onboarding-note">YOUR CHOICES STAY IN THIS SESSION</span><button className="login-submit onboarding-next" type="submit" disabled={!canContinue || backendSaving}><span>{activeStep === lastStep ? "Shape my pathway" : "Continue"}</span><span aria-hidden="true">→</span></button></div>
           </form>
         </div>
-      </section> : <section className="onboarding-stage" aria-live="polite">
+      </section> : <section className="onboarding-stage" aria-label="Creating your profile">
         <div className="onboarding-orbit" aria-hidden="true"><span /><i /><i /><i /></div>
         <ParticleWave />
-        <div className="onboarding-scene onboarding-complete">
-          <div className="welcome-live-dot" />
-          <p className="eyebrow">YOUR FIRST COORDINATES ARE IN</p>
-          <h1>Welcome to<br /><span>Pathwaay, {name}.</span></h1>
-          <p>You’re exploring <strong>{interest.toLowerCase()}</strong> from a starting point in <strong>{major}</strong>. Your next step is yours to choose.</p>
-          <div className="completion-summary"><span>{experience}</span><span>{interest}</span><span>{major}</span></div>
-          <Link className="welcome-cta" href="/explorer"><span>Explore career pathways</span><span className="welcome-cta-icon" aria-hidden="true">↗</span></Link>
-          <Link className="login-explore-link" href="/profile">Build a saved fictional profile ↗</Link>
-          <p className="completion-note">This onboarding preview does not save your answers. Use fictional details only.</p>
+        <div className="onboarding-scene onboarding-processing" role="status" aria-live="polite" aria-atomic="true">
+          <div className="processing-orbit" aria-hidden="true"><span className="processing-orbit-core">P</span><i /><i /><i /></div>
+          <p className="eyebrow processing-phase">{creationPhase === 0 ? "BUILDING YOUR PROFILE" : "PROFILE READY"}</p>
+          <h1>{creationPhase === 0 ? <>Building<br /><span>your profile</span></> : <>Done<span>.</span></>}</h1>
+          <p className="processing-caption">{creationPhase === 0 ? "Bringing your skills, interests, and experience together." : "Opening My Profile…"}</p>
+          <div className="processing-meter" aria-hidden="true"><span className={creationPhase === 1 ? "is-ready" : ""} /></div>
+          <p className="processing-preview-note">Your answers stay in this session</p>
         </div>
       </section>}
 

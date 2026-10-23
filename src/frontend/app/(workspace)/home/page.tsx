@@ -45,10 +45,10 @@ export default function HomePage() {
   useEffect(() => { void loadEmployment(); }, [loadEmployment]);
 
   return <main className="page-wrap">
-    <PageIntro kicker="YOUR WORKSPACE · OVERVIEW" title={<>A small next step<br />is still progress.</>} description="A practical home for your saved fictional profile, the evidence behind it, and a few useful places to continue." index="LEARNER WORKSPACE / 00" />
+    <PageIntro kicker="YOUR WORKSPACE · OVERVIEW" title={<>A small next step<br />is still progress.</>} description="A practical home for your saved profile, the evidence behind it, and a few useful places to continue." index="LEARNER WORKSPACE / 00" />
     {loading || error || !profile ? <ProfileGate loading={loading} error={error} onRetry={() => void reload()} /> : <>
       <section className="home-welcome panel">
-        <div><span className="topic-tag">SAVED FICTIONAL PROFILE</span><h2>{profile.field_of_study || "Your profile"}</h2><p>{profile.professional_summary || "A profile is a living draft. Add a short summary when you are ready to describe your focus in your own words."}</p><div className="welcome-meta"><span>{profile.skills.length} skills named</span><span>{profile.experience.length + profile.projects.length + profile.education.length + profile.certifications.length + profile.achievements.length} records added</span><span>Updated {new Date(profile.updated_at).toLocaleDateString(undefined, { dateStyle: "medium" })}</span></div></div>
+        <div><span className="topic-tag">SAVED PROFILE</span><h2>{profile.field_of_study || "Your profile"}</h2><p>{profile.professional_summary || "A profile is a living draft. Add a short summary when you are ready to describe your focus in your own words."}</p><div className="welcome-meta"><span>{profile.skills.length} skills named</span><span>{profile.experience.length + profile.projects.length + profile.education.length + profile.certifications.length + profile.achievements.length} records added</span><span>Updated {new Date(profile.updated_at).toLocaleDateString(undefined, { dateStyle: "medium" })}</span></div></div>
         <Link className="button" href="/profile">Continue profile <span aria-hidden="true">→</span></Link>
       </section>
 

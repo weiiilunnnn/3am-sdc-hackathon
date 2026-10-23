@@ -34,6 +34,10 @@ def verify(hit: dict, page: dict, gaps: dict, query: str):
     if not heading or len(text) < 100:
         raise ValueError("Provider title/content unavailable")
     title = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", heading[1]).strip()
+    if urlsplit(url).hostname == "developers.google.com":
+        # Google appends this collection-control text to extracted H1 headings.
+        # Remove only that observed UI suffix; keep the existing title-match threshold.
+        title = re.split(r"\s+Stay organized with collections\b", title, maxsplit=1)[0]
     title_words = set(re.findall(r"[a-z0-9]+", title.lower())) - {"the", "a", "to", "and", "of"}
     hit_words = set(re.findall(r"[a-z0-9]+", str(hit.get("title", "")).lower()))
     if not title_words or len(title_words & hit_words) / len(title_words) < .6:

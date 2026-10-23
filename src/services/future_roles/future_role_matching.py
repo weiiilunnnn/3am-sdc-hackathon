@@ -110,6 +110,6 @@ def match_roles(profile: UserProfile, occupation_catalog: OccupationCatalog,
         occupation_dataset_id=occupation_catalog.dataset_id, dataset_version=occupation_catalog.dataset_version,
         snapshot_id=trend_snapshot.snapshot_id if trend_snapshot else None,
         scenario_id=scenario_config.scenario_id if scenario_config else None, scenario_context=scenario_config,
-        is_synthetic=True, results=results[:config.top_k], unmatched_user_skills=profile.unresolved_skills,
+        is_synthetic=profile.is_synthetic or occupation_catalog.is_synthetic or bool(trend_snapshot and trend_snapshot.is_synthetic), results=results[:config.top_k], unmatched_user_skills=profile.unresolved_skills,
         warnings=warnings, excluded_roles=excluded, candidate_role_count=len(occupation_catalog.occupations),
         scored_role_count=sum(r.personal_fit_score_pct is not None for r in results))

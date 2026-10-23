@@ -183,7 +183,7 @@ def build_pathway(profile: UserProfile, selected_career_match: CareerMatch, reso
         schedule = schedule.model_copy(update={"scheduled_weeks": None, "scheduled_study_days": None,
                                                "estimate_basis": "unknown"})
     return PathwayResponse(schema_version="1.1", profile_id=profile.profile_id, profile_fingerprint=profile_fingerprint(profile),
-        role_id=match.role_id, role_title=match.role_title, dataset_version=match.dataset_version, is_synthetic=True,
+        role_id=match.role_id, role_title=match.role_title, dataset_version=match.dataset_version, is_synthetic=profile.is_synthetic,
         target_skill_ids=sorted(targets), hours_per_week=hours, phases=phases, total_known_hours=round(known, 4),
         all_phase_durations_known=all_known, estimated_weeks=ceil(known / hours) if all_known and hours else None,
         uncovered_skill_ids=uncovered, blocked_resource_ids=sorted(blocked),

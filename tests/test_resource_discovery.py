@@ -73,6 +73,34 @@ class ResourceDiscoveryTests(unittest.TestCase):
         self.assertTrue(set(resources[0].source_ids) <= {s.source_id for s in plan.sources})
         self.assertEqual(self.local.resources[0].resource_origin, "local_catalogue")
 
+    def test_scoped_search_and_separate_verification_checkpoints(self):
+        from src.services.future_roles.resource_verification import PROVIDERS
+        result = self.build()
+        self.assertEqual(self.search.call_args.kwargs["include_domains"], PROVIDERS)
+        self.assertEqual(result.discovery_metrics["candidate_urls"], 1)
+        self.assertEqual(result.discovery_metrics["extracted_pages"], 1)
+        self.assertEqual(result.discovery_metrics["evaluations"], 1)
+        self.assertEqual(result.discovery_metrics["evaluation_valid"], 1)
+
+    def test_google_collection_controls_are_not_course_title_evidence(self):
+        url = "https://developers.google.com/machine-learning/crash-course/numerical-data/normalization"
+        heading = "Numerical data: Normalization Stay organized with collections Save and categorize content based on your preferences."
+        page = {"url":url, "raw_content":TEXT.replace("Visualization tutorial",heading)}
+        hit = {"url":url,"title":"Numerical data: Normalization | Google for Developers"}
+        resource, _, _ = verify(hit,page,self.index.skills,"fictional test")
+        self.assertEqual(resource.title,"Numerical data: Normalization")
+        with self.assertRaisesRegex(ValueError,"title contradiction"):
+            verify({**hit,"title":"Unrelated cooking course"},page,self.index.skills,"fictional test")
+
+    def test_planning_and_evaluation_timeouts_are_safe_and_categorised(self):
+        self.llm.side_effect = runpod_api.RunPodRequestError("Safe error", category="timeout")
+        with self.assertLogs("src.services.future_roles.pathway_llm", level="WARNING") as logs:
+            result = self.build()
+        self.assertEqual(result.discovery_status, "live_verified")
+        self.assertTrue(any("course_planning category=timeout" in line for line in logs.output))
+        self.assertTrue(any("course_evaluation category=timeout" in line for line in logs.output))
+        self.assertEqual(result.discovery_metrics["evaluation_valid"], 0)
+
     def test_missing_keys_preserve_local_fallback(self):
         os.environ["TAVILY_API_KEY"] = ""
         plan = self.build()
@@ -145,6 +173,28 @@ class ResourceDiscoveryTests(unittest.TestCase):
         self.assertIsNone(result.estimated_weeks)
         self.assertFalse(result.all_phase_durations_known)
         self.assertIsNone(result.planning_estimate.scheduled_weeks)
+
+    def test_free_referenced_curriculum_is_not_free_course_access(self):
+        # Official Microsoft page retrieved 2026-10-23; a linked curriculum's
+        # licensing does not establish this video course's access conditions.
+        text = ("# Machine Learning for Beginners\n"
+                "Welcome to this course on classical machine learning for beginners! "
+                "This course is based on the free, open-source, 26-lesson "
+                "[ML For Beginners](https://aka.ms/ml-beginners) curriculum from Microsoft.")
+        from types import SimpleNamespace
+        url = "https://learn.microsoft.com/en-us/shows/machine-learning-for-beginners"
+        resource, source, _ = verify({"url":url,"title":"Machine Learning for Beginners"},
+            {"url":url,"raw_content":text},
+            {"test:ml":SimpleNamespace(name="machine learning",aliases=[])},"machine learning")
+        self.assertEqual(resource.cost_status,"unknown")
+        self.assertNotIn("free_access",source.supported_claims)
+        self.assertIsNone(resource.duration_hours)
+
+    def test_documentation_is_not_relabelled_as_a_course(self):
+        self.hit["title"] = "Visualization documentation"
+        page = {"url":URL,"raw_content":TEXT.replace("Visualization tutorial","Visualization documentation")}
+        resource, _, _ = verify(self.hit,page,self.index.skills,"fictional test")
+        self.assertEqual(resource.resource_type,"documentation")
 
     def test_partial_online_and_local_resources_are_combined(self):
         self.profile.skills = self.profile.skills[:1]

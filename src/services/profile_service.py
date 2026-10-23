@@ -12,15 +12,19 @@ from src.data.skills_taxonomy import find_skill_by_id, find_skill_by_label, taxo
 from src.models.profiles import NormalizedSkill, ProfileInput, ProfileRecord
 from src.services.storage import connection, initialize_database
 
-_PROFICIENCY_RANK = {"beginner": 0, "intermediate": 1, "advanced": 2}
+_PROFICIENCY_RANK = {"unknown": -1, "beginner": 0, "intermediate": 1, "advanced": 2}
 
 
 class UnknownSkillIdError(ValueError):
     """Raised when a submitted taxonomy identifier is not in the supported snapshot."""
 
 
+class ProfileConflictError(ValueError):
+    """A newer profile must be loaded before saving again."""
+
+
 def utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    return datetime.now(timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
 
 
 def _key(value: str) -> str:
@@ -85,20 +89,22 @@ def _record_from_row(row: Any) -> ProfileRecord:
     return ProfileRecord.model_validate(payload)
 
 
-def create_profile(profile: ProfileInput) -> ProfileRecord:
+def create_profile(profile: ProfileInput, creation_key: str | None = None) -> ProfileRecord:
     initialize_database()
     normalized = normalize_skills(profile.skills)
     now = utc_now()
-    profile_id = uuid.uuid4().hex
+    profile_id = uuid.uuid5(uuid.NAMESPACE_URL, f"hybrid-profile:{creation_key}").hex if creation_key else uuid.uuid4().hex
     payload = profile.model_dump(mode="json")
     payload["skills"] = [skill.model_dump(mode="json") for skill in normalized]
 
     with connection() as db:
         db.execute(
-            "INSERT INTO profiles (id, payload, created_at, updated_at) VALUES (?, ?, ?, ?)",
+            "INSERT OR IGNORE INTO profiles (id, payload, created_at, updated_at) VALUES (?, ?, ?, ?)",
             (profile_id, json.dumps(payload, ensure_ascii=False), now, now),
         )
-    return ProfileRecord.model_validate({**payload, "id": profile_id, "created_at": now, "updated_at": now})
+        row = db.execute("SELECT * FROM profiles WHERE id = ?", (profile_id,)).fetchone()
+    # A retried creation recovers the original row; it never overwrites it.
+    return _record_from_row(row)
 
 
 def get_profile(profile_id: str) -> ProfileRecord | None:
@@ -108,20 +114,31 @@ def get_profile(profile_id: str) -> ProfileRecord | None:
     return _record_from_row(row) if row else None
 
 
-def update_profile(profile_id: str, profile: ProfileInput) -> ProfileRecord | None:
+def update_profile(profile_id: str, profile: ProfileInput, expected_updated_at: str | None = None) -> ProfileRecord | None:
     initialize_database()
     normalized = normalize_skills(profile.skills)
     with connection() as db:
-        existing = db.execute("SELECT created_at FROM profiles WHERE id = ?", (profile_id,)).fetchone()
+        existing = db.execute("SELECT created_at, updated_at, payload FROM profiles WHERE id = ?", (profile_id,)).fetchone()
         if not existing:
             return None
+        if expected_updated_at is not None and existing["updated_at"] != expected_updated_at:
+            raise ProfileConflictError("Profile changed elsewhere. Reload it before saving again.")
+        old_skills = json.loads(existing["payload"])["skills"]
+        for skill in normalized:
+            previous = next((s for s in old_skills if
+                (skill.skill_id is not None and s["skill_id"] == skill.skill_id) or
+                (skill.skill_id is None and s["skill_id"] is None and _key(s["display_name"]) == _key(skill.display_name))), None)
+            if previous:
+                skill.input_names = list(dict.fromkeys([*previous["input_names"], *skill.input_names]))
         now = utc_now()
         payload = profile.model_dump(mode="json")
         payload["skills"] = [skill.model_dump(mode="json") for skill in normalized]
-        db.execute(
-            "UPDATE profiles SET payload = ?, updated_at = ? WHERE id = ?",
-            (json.dumps(payload, ensure_ascii=False), now, profile_id),
+        changed = db.execute(
+            "UPDATE profiles SET payload = ?, updated_at = ? WHERE id = ? AND updated_at = ?",
+            (json.dumps(payload, ensure_ascii=False), now, profile_id, existing["updated_at"]),
         )
+        if changed.rowcount != 1:
+            raise ProfileConflictError("Profile changed elsewhere. Reload it before saving again.")
         created_at = existing["created_at"]
     return ProfileRecord.model_validate(
         {**payload, "id": profile_id, "created_at": created_at, "updated_at": now}

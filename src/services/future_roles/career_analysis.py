@@ -12,7 +12,7 @@ from src.models.career_analysis import (AnalysisEvidence, CapabilityGroup, Caree
     GapInterpretation, SkillBridge)
 from .data_repository import supported
 from .profile_relevance import development_areas
-from .pathway_llm import invoke
+from .pathway_llm import invoke, report_failure
 
 PROMPT_VERSION = "career-details-esco-v1"
 _cache = OrderedDict()
@@ -146,6 +146,8 @@ def validate_analysis(raw, result, payload, group_evidence, matched_evidence):
 
 
 def analyse_career(request, index):
+    # Optional AI completes after the immediate ESCO response; stay below Next's 30s proxy limit.
+    ai_timeout = 25
     result, payload, group_evidence, matched_evidence, verified = prepare_analysis(request, index)
     if not request.generate_ai:
         return result
@@ -166,12 +168,13 @@ def analyse_career(request, index):
             leader = False
     if not leader:
         if event:
-            event.wait(9)
+            event.wait(ai_timeout + 1)
         with _lock:
             old = _cache.get(key)
             if old and old[0] > time.monotonic():
                 return old[1].model_copy(deep=True, update={"used_cache": True})
         return result.model_copy(update={"message": "AI analysis is busy; ESCO evidence remains available."})
+    started = time.monotonic()
     try:
         try:
             raw = invoke(payload,
@@ -183,9 +186,10 @@ def analyse_career(request, index):
                 "Each bridge must cite evidence for every source skill and at least one target concept. "
                 "Decline unsupported links with an empty bridges list. No URLs in prose, scores, numbers, proficiency, "
                 "courses, credentials, workplace facts or impact tiers. These are AI inferences, not official skill relations.",
-                timeout=8, max_tokens=1500)
+                timeout=ai_timeout, max_tokens=1500)
             result = validate_analysis(raw, result, payload, group_evidence, matched_evidence)
-        except Exception:
+        except Exception as exc:
+            report_failure("career_analysis", exc, started, ai_timeout)
             # Never expose raw model/provider bodies, prompts or authentication errors.
             result = result.model_copy(update={"message": "AI analysis unavailable or could not be grounded. ESCO evidence remains available."})
         with _lock:

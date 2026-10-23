@@ -81,7 +81,7 @@ class CareerAnalysisTests(unittest.TestCase):
         self.invoke.assert_called_once()
         payload = self.invoke.call_args.args[0]
         self.assertNotIn("profile_id", json.dumps(payload))
-        self.assertLessEqual(self.invoke.call_args.kwargs["timeout"], 8)
+        self.assertLessEqual(self.invoke.call_args.kwargs["timeout"], 25)
 
     def test_profiles_and_evidence_versions_do_not_mix(self):
         first = service.analyse_career(self.request, self.index)

@@ -49,7 +49,7 @@ test("profile validation rejects blank required data, negative experience, and n
   profile.years_experience = -1;
   profile.skills = [];
   profile.career_aspirations = "";
-  profile.synthetic_demo = false;
+  profile.synthetic_demo = "invalid";
   const result = validateProfileDraft(profile);
   assert.equal(result.valid, false);
   assert.ok(result.errors.field_of_study);

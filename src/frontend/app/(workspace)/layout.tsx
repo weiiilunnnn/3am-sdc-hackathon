@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "../pathwaay-ribbon.css";
 import AppShell from "./AppShell";
+import PathwaayRibbon from "../PathwaayRibbon";
 
 export const metadata: Metadata = {
-  title: "Aiversecity — Future-ready workforce",
-  description: "A practical skills profile and research signals workspace for Malaysian learners.",
+  title: "Pathwaay — Career Explorer",
+  description: "Build your skills profile and explore pathways into meaningful work.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
-      <body><AppShell>{children}</AppShell></body>
+      <body><AppShell><PathwaayRibbon />{children}</AppShell></body>
     </html>
   );
 }
