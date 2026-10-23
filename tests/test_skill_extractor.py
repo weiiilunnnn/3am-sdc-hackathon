@@ -99,7 +99,29 @@ class SkillExtractorTests(unittest.TestCase):
             with self.assertRaisesRegex(RunPodRequestError, "not valid JSON"):
                 extract_profile_skill_candidates([SkillEvidence("e0", None, "Project", "Used Python.")])
 
-    def test_rejects_model_skill_ids_outside_taxonomy(self):
+    def test_discards_out_of_taxonomy_skills_without_losing_valid_candidates(self):
+        evidence = [SkillEvidence("e0", None, "Summary", "Used Python in a project.")]
+        response = self.model_response([
+            {
+                "skill_id": "http://data.europa.eu/esco/skill/invented",
+                "evidence_id": "e0",
+                "evidence": "Python",
+                "reason": "Invalid mapping",
+            },
+            {
+                "skill_id": ESCO_PYTHON_ID,
+                "evidence_id": "e0",
+                "evidence": "Used Python",
+                "reason": "The profile explicitly states Python was used.",
+            }
+        ])
+
+        with patch("src.services.skill_extractor.run_sync", return_value=response):
+            candidates = extract_profile_skill_candidates(evidence)
+
+        self.assertEqual([candidate.skill_id for candidate in candidates], [ESCO_PYTHON_ID])
+
+    def test_rejects_when_no_model_candidates_can_be_verified(self):
         evidence = [SkillEvidence("e0", None, "Summary", "Used a made-up tool.")]
         response = self.model_response([
             {
@@ -111,10 +133,10 @@ class SkillExtractorTests(unittest.TestCase):
         ])
 
         with patch("src.services.skill_extractor.run_sync", return_value=response):
-            with self.assertRaises(RunPodRequestError):
+            with self.assertRaisesRegex(RunPodRequestError, "could be verified"):
                 extract_profile_skill_candidates(evidence)
 
-    def test_rejects_model_evidence_that_is_not_in_the_profile_text(self):
+    def test_rejects_when_model_evidence_is_not_in_the_profile_text(self):
         evidence = [SkillEvidence("e0", None, "Summary", "Used Python on a fictional project.")]
         response = self.model_response([
             {

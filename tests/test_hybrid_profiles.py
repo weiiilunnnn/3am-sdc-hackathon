@@ -82,9 +82,11 @@ class HybridProfileTests(unittest.TestCase):
 
     def test_reviewed_ai_skill_uses_same_profile_and_esco_adapter(self):
         import json
-        response = {'output':{'choices':[{'message':{'content':json.dumps({'skills':[{
-            'skill_id':'http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d','evidence_id':'e0',
-            'evidence':'using Python','reason':'Explicit activity in the fictional project.'}]})}}]}}
+        response = {'output':{'choices':[{'message':{'content':json.dumps({'skills':[
+            {'skill_id':'http://data.europa.eu/esco/skill/not-in-taxonomy','evidence_id':'e0',
+             'evidence':'using Python','reason':'Invalid taxonomy result.'},
+            {'skill_id':'http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d','evidence_id':'e0',
+             'evidence':'using Python','reason':'Explicit activity in the fictional project.'}]})}}]}}
         with patch('src.services.skill_extractor.run_sync',return_value=response):
             started = self.client.post('/api/profiles/extract-profile-skills',
                 headers={'X-Synthetic-Demo-Confirmed':'true'},json={'evidence':[{
