@@ -332,3 +332,38 @@
   .evolution-drawer { width: 100vw; height: 94dvh; max-height: 94dvh; border-radius: 15px 15px 0 0; }
   .evolution-drawer-head,.evolution-drawer-body { padding-inline: 18px; }
 }
+
+/* AI Trend Signal research comparison and spacing. */
+.evolution-page .evolution-header { margin-bottom: 30px; }
+.evolution-page .evolution-skills { padding: 24px 28px; gap: 24px; }
+.evolution-page .evolution-skills h2 { font-size: 18px; }
+.evolution-page .evolution-results { margin-top: 36px; }
+.evolution-page .evolution-results-title { align-items: baseline; gap: 18px; }
+.evolution-page .evolution-card { padding: 28px; }
+.evolution-page .evolution-card-explanation { margin-block: 18px 24px; }
+.evolution-page .evolution-card-explanation p { margin-top: 8px; }
+.evolution-drawer-body section { margin-bottom: 30px; }
+.evolution-drawer-body .evolution-sources li { padding: 21px; }
+.evolution-page .evolution-guidance { padding: 24px; }
+.evolution-page .evolution-research { border: 0; padding-top: 0; }
+.evolution-research-chart { display: grid; gap: 14px; padding: clamp(22px,3vw,42px); border: 1px solid #6bc4944d; border-radius: 20px; background: #102c23; }
+.evolution-research-row { padding: 12px 0 18px; border-bottom: 1px solid #6bc49436; }
+.evolution-research-row:last-child { border-bottom: 0; padding-bottom: 4px; }
+.evolution-research-heading,.evolution-research-detail { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.evolution-research-heading h3 { margin: 0; font: 650 clamp(19px,2vw,26px)/1.2 "Space Grotesk",sans-serif; letter-spacing: -.025em; }
+.evolution-research-heading strong { color: #94f2b5; font: 700 clamp(25px,3vw,38px)/1 "Space Grotesk",sans-serif; font-variant-numeric: tabular-nums; }
+.evolution-research-track { height: 13px; margin: 13px 0 11px; overflow: hidden; border-radius: 99px; background: #29533e; }
+.evolution-research-track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#2fbf80,#95f3b5); }
+.evolution-research-detail { color: #b4d1bd; font-size: 13px; line-height: 1.4; font-variant-numeric: tabular-nums; }
+.evolution-research-detail a { flex: none; color: #a1f5be; text-underline-offset: 3px; }
+.evolution-research-footer { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; padding: 18px 3px 0; color: #a6c3ae; font-size: 12px; }
+.evolution-research-footer p { max-width: 65ch; margin: 0; line-height: 1.5; }
+@media (max-width: 700px) {
+  .evolution-page .evolution-skills { padding: 21px; }
+  .evolution-page .evolution-results-title { align-items: start; }
+  .evolution-research-chart { padding: 20px; }
+  .evolution-research-heading h3 { font-size: 18px; }
+  .evolution-research-heading strong { font-size: 26px; }
+  .evolution-research-detail,.evolution-research-footer { align-items: start; flex-direction: column; gap: 6px; }
+  .evolution-drawer-body .evolution-sources li { padding: 17px; }
+}
