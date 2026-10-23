@@ -87,6 +87,7 @@ export default function SignalsPage() {
   const [useSaved, setUseSaved] = useState(false), [samples, setSamples] = useState<{ id: string; label: string }[]>([]);
   const [data, setData] = useState<Experience | null>(null), [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true), [error, setError] = useState(""), [opened, setOpened] = useState<Connection | null>(null);
+  const [showAllSkills, setShowAllSkills] = useState(false);
   const [view, setView] = useState<"personal" | "explore">("personal");
   const [explore, setExplore] = useState<ResearchDashboard | null>(null), [exploreLoading, setExploreLoading] = useState(false);
   const [exploreError, setExploreError] = useState("");
@@ -144,6 +145,7 @@ export default function SignalsPage() {
   }
   function changeProfile(choice: string) {
     dialogRef.current?.close(); requestRef.current?.abort(); setData(null); setOpened(null); setSelectedSkillId(null);
+    setShowAllSkills(false);
     setUseSaved(choice === "saved"); if (choice !== "saved") setSampleId(choice);
     try { localStorage.setItem("pathwaay.profile-mode", choice === "saved" ? "saved" : "sample"); if (choice !== "saved") localStorage.setItem("pathwaay.sample-id", choice); } catch { /* Selection remains active. */ }
   }
@@ -152,6 +154,8 @@ export default function SignalsPage() {
   function closeEvidence() { setOpened(null); openerRef.current?.focus(); }
   function chooseView(next: "personal" | "explore") { dialogRef.current?.close(); setOpened(null); setView(next); }
   const activeSkill = data?.skills.find((skill) => skill.key === selectedSkillId);
+  const orderedSkills = [...(data?.skills || [])].sort((a, b) => b.connection_count - a.connection_count);
+  const visibleSkills = showAllSkills ? orderedSkills : orderedSkills.filter((skill, index) => index < 6 || skill.key === selectedSkillId);
   const showConnections = !loading && data?.selected_skill_id === selectedSkillId;
   const rankedResearch = rankResearch(explore);
   const maxGrowth = Math.max(1, ...rankedResearch.map((row) => Math.max(row.growth, 0)));
@@ -159,7 +163,7 @@ export default function SignalsPage() {
     <header className="evolution-header"><div><p className="evolution-kicker">AI TREND SIGNALS</p><h1>{view === "personal" ? "Your skills in the AI era" : "Explore AI research"}</h1><p>{view === "personal" ? "See how a skill you know connects to AI work." : "See which tracked topics gained research attention."}</p>{view === "personal" && data && <div className="evolution-profile-line"><span>{data.profile.occupation}</span><span>{data.profile.synthetic ? "Fictional demo profile" : "Saved profile"}</span></div>}</div>{view === "personal" && <label className="evolution-profile-picker" htmlFor="evolution-profile">Demo profile<select id="evolution-profile" value={useSaved ? "saved" : sampleId} onChange={(event) => changeProfile(event.target.value)}>{savedId && <option value="saved">My saved demo profile</option>}{(samples.length ? samples : [{ id: "cs-student", label: "Computer science student" }]).map((sample) => <option key={sample.id} value={sample.id}>{sample.label}</option>)}</select></label>}</header>
     <div className="evolution-view-tabs" role="tablist" aria-label="AI trend signal views"><button type="button" role="tab" aria-controls="personal-signals" aria-selected={view === "personal"} className={view === "personal" ? "active" : ""} onClick={() => chooseView("personal")}>For your skills</button><button type="button" role="tab" aria-controls="explore-signals" aria-selected={view === "explore"} className={view === "explore" ? "active" : ""} onClick={() => chooseView("explore")}>Explore AI skills</button></div>
     <div id="personal-signals" role="tabpanel" hidden={view !== "personal"}>
-      {data && <section className="evolution-skills" aria-labelledby="evolution-skill-title"><h2 id="evolution-skill-title">Choose your skill</h2><div className="evolution-chips">{data.skills.map((skill) => <button type="button" key={skill.key} aria-pressed={selectedSkillId === skill.key} className={selectedSkillId === skill.key ? "active" : ""} onClick={() => chooseSkill(skill.key)}>{skill.name}{skill.connection_count > 0 && <span aria-label={`${skill.connection_count} supported connections`}>{skill.connection_count}</span>}</button>)}</div></section>}
+      {data && <section className="evolution-skills" aria-labelledby="evolution-skill-title"><h2 id="evolution-skill-title">Choose your skill</h2><div className="evolution-skill-options"><div className="evolution-chips" id="evolution-skill-list">{visibleSkills.map((skill) => <button type="button" key={skill.key} aria-pressed={selectedSkillId === skill.key} className={selectedSkillId === skill.key ? "active" : ""} onClick={() => chooseSkill(skill.key)}>{skill.name}{skill.connection_count > 0 && <span aria-label={`${skill.connection_count} supported connections`}>{skill.connection_count}</span>}</button>)}</div>{orderedSkills.length > 6 && <button type="button" className="evolution-skill-toggle" aria-expanded={showAllSkills} aria-controls="evolution-skill-list" onClick={() => setShowAllSkills((current) => !current)}>{showAllSkills ? "Show fewer skills" : `Show all ${orderedSkills.length} skills`}</button>}</div></section>}
       {loading && <div className="evolution-loading" role="status" aria-label="Loading supported connections"><span /><span /></div>}
       {error && <div className="evolution-error" role="alert"><strong>Connections are unavailable.</strong><p>{error}</p>{!data && <button type="button" onClick={() => changeProfile("cs-student")}>Use computer science sample</button>}</div>}
       {showConnections && data && <section className="evolution-results" aria-labelledby="evolution-results-title"><div className="evolution-results-title"><h2 id="evolution-results-title">{activeSkill ? `Where ${activeSkill.name} connects` : "Your skill connections"}</h2><span>{data.connections.length} {data.connections.length === 1 ? "connection" : "connections"}</span></div>

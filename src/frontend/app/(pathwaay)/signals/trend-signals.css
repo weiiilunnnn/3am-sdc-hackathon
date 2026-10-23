@@ -338,6 +338,9 @@
 .evolution-page .evolution-header { margin-bottom: 30px; }
 .evolution-page .evolution-skills { padding: 24px 28px; gap: 24px; }
 .evolution-page .evolution-skills h2 { font-size: 18px; }
+.evolution-skill-options { display: grid; justify-items: start; gap: 12px; min-width: 0; }
+.evolution-skill-toggle { min-height: 40px; padding: 4px 0; border: 0; background: transparent; color: #a1f5be; font: 700 13px "DM Sans",sans-serif; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.evolution-skill-toggle:hover { color: #e9fff0; }
 .evolution-page .evolution-results { margin-top: 36px; }
 .evolution-page .evolution-results-title { align-items: baseline; gap: 18px; }
 .evolution-page .evolution-card { padding: 28px; }
