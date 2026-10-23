@@ -1,12 +1,13 @@
 """Skills vocabulary and synthetic profile endpoints."""
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Header
 
 from src.data.skills_taxonomy import search_skills, taxonomy_metadata
 from src.models.insights import ProfileInsights
 from src.models.profiles import ProfileInput, ProfileRecord
 from src.services.profile_service import (
     UnknownSkillIdError,
+    ProfileConflictError,
     create_profile,
     get_profile,
     list_sample_profiles,
@@ -36,9 +37,9 @@ def profile_insights_endpoint(profile_id: str) -> ProfileInsights:
 
 
 @router.post("/profiles", response_model=ProfileRecord, status_code=201)
-def create_profile_endpoint(profile: ProfileInput) -> ProfileRecord:
+def create_profile_endpoint(profile: ProfileInput, idempotency_key: str | None = Header(default=None, min_length=16, max_length=100, pattern=r"^[A-Za-z0-9_-]+$")) -> ProfileRecord:
     try:
-        return create_profile(profile)
+        return create_profile(profile, idempotency_key)
     except UnknownSkillIdError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
@@ -52,9 +53,11 @@ def get_profile_endpoint(profile_id: str) -> ProfileRecord:
 
 
 @router.put("/profiles/{profile_id}", response_model=ProfileRecord)
-def update_profile_endpoint(profile_id: str, profile: ProfileInput) -> ProfileRecord:
+def update_profile_endpoint(profile_id: str, profile: ProfileInput, if_match: str | None = Header(default=None, max_length=100)) -> ProfileRecord:
     try:
-        updated = update_profile(profile_id, profile)
+        updated = update_profile(profile_id, profile, if_match)
+    except ProfileConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     except UnknownSkillIdError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     if updated is None:

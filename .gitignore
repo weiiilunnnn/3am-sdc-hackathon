@@ -6,6 +6,7 @@ tmp
 out-tsc
 *.tsbuildinfo
 .next/
+.next-merge-check/
 out/
 .expo
 .expo-shared
@@ -43,6 +44,8 @@ node_modules
 /connect.lock
 /coverage
 .env
+.env.*
+!.env.example
 src/frontend/next-env.d.ts
 /libpeerconnection.log
 npm-debug.log
@@ -64,3 +67,10 @@ Thumbs.db
 # Local agent attachments and preserved migration backups
 /attached_assets/
 .migration-backup/ported-vite-express/
+
+# KW isolated browser tests and local frontend environment
+src/frontend/test-results/
+src/frontend/playwright-report/
+src/frontend/.next-e2e/
+src/frontend/.playwright/
+src/frontend/.env.local

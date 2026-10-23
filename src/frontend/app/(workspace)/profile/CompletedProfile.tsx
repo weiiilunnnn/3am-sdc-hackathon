@@ -68,12 +68,13 @@ function compressPhoto(file: File): Promise<string> {
 
 export default function CompletedProfile({ profile, onProfileChange, editPage = false }: {
   profile: PathwaayRegistrationProfile;
-  onProfileChange: (profile: PathwaayRegistrationProfile) => void;
+  onProfileChange: (profile: PathwaayRegistrationProfile) => void | Promise<void>;
   editPage?: boolean;
 }) {
   const [draft, setDraft] = useState(profile);
   const [activeEditor, setActiveEditor] = useState<EditableSection | null>(null);
   const [photoMessage, setPhotoMessage] = useState("");
+  const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const router = useRouter();
   const editorDialogRef = useRef<HTMLDialogElement>(null);
@@ -90,14 +91,16 @@ export default function CompletedProfile({ profile, onProfileChange, editPage = 
     if (!activeEditor && dialog?.open) dialog.close();
   }, [activeEditor]);
 
-  function saveEdit() {
+  async function saveEdit() {
+    if (saving) return;
+    setSaving(true);
     try {
-      onProfileChange(draft);
+      await onProfileChange(draft);
       setSaveError("");
       if (editPage) router.push("/profile");
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : "Your changes could not be saved.");
-    }
+    } finally { setSaving(false); }
   }
 
   function updateSkillNames(value: string) {
@@ -244,7 +247,7 @@ export default function CompletedProfile({ profile, onProfileChange, editPage = 
       <div className="completed-hero-actions">
         {editPage ? (
           <>
-            <button className="button small" type="button" onClick={saveEdit}>Save changes <span aria-hidden="true">→</span></button>
+            <button className="button small" type="button" onClick={saveEdit} disabled={saving}>Save changes <span aria-hidden="true">→</span></button>
             <Link className="button secondary small" href="/profile">Cancel</Link>
           </>
         ) : (
@@ -252,6 +255,7 @@ export default function CompletedProfile({ profile, onProfileChange, editPage = 
         )}
       </div>
     </div>
+    {editPage && saving && <p role="status">Saving your profile...</p>}
     {editPage && saveError && <p className="completed-save-error" role="alert">{saveError}</p>}
 
     <div className="completed-profile-grid">

@@ -1,0 +1,797 @@
+{
+  "$defs": {
+    "LearningPreferences": {
+      "properties": {
+        "hours_per_week": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Hours Per Week"
+        },
+        "study_days_per_week": {
+          "default": 5,
+          "maximum": 7,
+          "minimum": 1,
+          "title": "Study Days Per Week",
+          "type": "integer"
+        },
+        "budget": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Money"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "preferred_resource_types": {
+          "items": {
+            "enum": [
+              "course",
+              "article",
+              "tutorial",
+              "documentation"
+            ],
+            "type": "string"
+          },
+          "title": "Preferred Resource Types",
+          "type": "array"
+        }
+      },
+      "title": "LearningPreferences",
+      "type": "object"
+    },
+    "Money": {
+      "properties": {
+        "amount": {
+          "minimum": 0,
+          "title": "Amount",
+          "type": "number"
+        },
+        "currency": {
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "title": "Money",
+      "type": "object"
+    },
+    "ObservationPeriod": {
+      "properties": {
+        "start": {
+          "format": "date",
+          "title": "Start",
+          "type": "string"
+        },
+        "end": {
+          "format": "date",
+          "title": "End",
+          "type": "string"
+        },
+        "value": {
+          "minimum": 0,
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "start",
+        "end",
+        "value"
+      ],
+      "title": "ObservationPeriod",
+      "type": "object"
+    },
+    "ProfileSkill": {
+      "properties": {
+        "skill_id": {
+          "minLength": 1,
+          "title": "Skill Id",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "proficiency": {
+          "default": "unknown",
+          "enum": [
+            "beginner",
+            "intermediate",
+            "advanced",
+            "unknown"
+          ],
+          "title": "Proficiency",
+          "type": "string"
+        },
+        "self_reported": {
+          "const": true,
+          "default": true,
+          "title": "Self Reported",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "skill_id",
+        "name"
+      ],
+      "title": "ProfileSkill",
+      "type": "object"
+    },
+    "SDGMapping": {
+      "properties": {
+        "sdg_number": {
+          "maximum": 17,
+          "minimum": 1,
+          "title": "Sdg Number",
+          "type": "integer"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "mapping_owner": {
+          "minLength": 1,
+          "title": "Mapping Owner",
+          "type": "string"
+        },
+        "mapping_status": {
+          "enum": [
+            "verified",
+            "proposed",
+            "unknown"
+          ],
+          "title": "Mapping Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sdg_number",
+        "reason",
+        "source_ids",
+        "mapping_owner",
+        "mapping_status"
+      ],
+      "title": "SDGMapping",
+      "type": "object"
+    },
+    "SDGMappingSnapshot": {
+      "properties": {
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "role_sdg_mappings": {
+          "additionalProperties": {
+            "items": {
+              "$ref": "#/$defs/SDGMapping"
+            },
+            "type": "array"
+          },
+          "title": "Role Sdg Mappings",
+          "type": "object"
+        },
+        "skill_sdg_mappings": {
+          "additionalProperties": {
+            "items": {
+              "$ref": "#/$defs/SDGMapping"
+            },
+            "type": "array"
+          },
+          "title": "Skill Sdg Mappings",
+          "type": "object"
+        }
+      },
+      "required": [
+        "schema_version",
+        "snapshot_id"
+      ],
+      "title": "SDGMappingSnapshot",
+      "type": "object"
+    },
+    "ScenarioConfig": {
+      "properties": {
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "scenario_id": {
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        },
+        "is_synthetic": {
+          "title": "Is Synthetic",
+          "type": "boolean"
+        },
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "model_method": {
+          "title": "Model Method",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "disclaimer": {
+          "title": "Disclaimer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "scenario_id",
+        "version",
+        "is_synthetic",
+        "display_label",
+        "assumptions",
+        "model_method",
+        "source_ids",
+        "disclaimer"
+      ],
+      "title": "ScenarioConfig",
+      "type": "object"
+    },
+    "Source": {
+      "properties": {
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "evidence_status": {
+          "enum": [
+            "verified",
+            "partially_verified",
+            "unverified",
+            "synthetic"
+          ],
+          "title": "Evidence Status",
+          "type": "string"
+        },
+        "source_type": {
+          "title": "Source Type",
+          "type": "string"
+        },
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "publisher": {
+          "minLength": 1,
+          "title": "Publisher",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "license": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "License"
+        },
+        "license_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "License Url"
+        },
+        "dataset_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dataset Version"
+        },
+        "native_record_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Native Record Id"
+        },
+        "published_at": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Published At"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observed At"
+        },
+        "accessed_at": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessed At"
+        },
+        "region": {
+          "title": "Region",
+          "type": "string"
+        },
+        "supported_claims": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Supported Claims",
+          "type": "array"
+        },
+        "redistribution_notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Redistribution Notes"
+        },
+        "transformations": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transformations"
+        }
+      },
+      "required": [
+        "source_id",
+        "evidence_status",
+        "source_type",
+        "title",
+        "publisher",
+        "region",
+        "supported_claims"
+      ],
+      "title": "Source",
+      "type": "object"
+    },
+    "TrendSignal": {
+      "properties": {
+        "signal_id": {
+          "title": "Signal Id",
+          "type": "string"
+        },
+        "scope": {
+          "enum": [
+            "role",
+            "skill"
+          ],
+          "title": "Scope",
+          "type": "string"
+        },
+        "role_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role Id"
+        },
+        "skill_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Skill Id"
+        },
+        "region": {
+          "title": "Region",
+          "type": "string"
+        },
+        "metric": {
+          "minLength": 1,
+          "title": "Metric",
+          "type": "string"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "period_previous": {
+          "$ref": "#/$defs/ObservationPeriod"
+        },
+        "period_current": {
+          "$ref": "#/$defs/ObservationPeriod"
+        },
+        "direction": {
+          "enum": [
+            "rising",
+            "stable",
+            "declining",
+            "unknown"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "direction_origin": {
+          "default": "source",
+          "enum": [
+            "source",
+            "calculated"
+          ],
+          "title": "Direction Origin",
+          "type": "string"
+        },
+        "derivation_rule": {
+          "minLength": 1,
+          "title": "Derivation Rule",
+          "type": "string"
+        },
+        "comparison_method": {
+          "default": "owner_defined",
+          "title": "Comparison Method",
+          "type": "string"
+        },
+        "comparability_confirmed": {
+          "default": false,
+          "title": "Comparability Confirmed",
+          "type": "boolean"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "signal_id",
+        "scope",
+        "region",
+        "metric",
+        "unit",
+        "period_previous",
+        "period_current",
+        "direction",
+        "derivation_rule",
+        "source_ids"
+      ],
+      "title": "TrendSignal",
+      "type": "object"
+    },
+    "TrendSnapshot": {
+      "properties": {
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "is_synthetic": {
+          "title": "Is Synthetic",
+          "type": "boolean"
+        },
+        "collected_at": {
+          "format": "date-time",
+          "title": "Collected At",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "signals": {
+          "items": {
+            "$ref": "#/$defs/TrendSignal"
+          },
+          "title": "Signals",
+          "type": "array"
+        },
+        "refresh_method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Refresh Method"
+        },
+        "valid_until": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until"
+        }
+      },
+      "required": [
+        "schema_version",
+        "snapshot_id",
+        "is_synthetic",
+        "collected_at",
+        "source_ids",
+        "signals"
+      ],
+      "title": "TrendSnapshot",
+      "type": "object"
+    },
+    "UserProfile": {
+      "properties": {
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "profile_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "is_synthetic": {
+          "const": true,
+          "title": "Is Synthetic",
+          "type": "boolean"
+        },
+        "education": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Education"
+        },
+        "experience_years": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Experience Years"
+        },
+        "skills": {
+          "items": {
+            "$ref": "#/$defs/ProfileSkill"
+          },
+          "maxItems": 500,
+          "title": "Skills",
+          "type": "array"
+        },
+        "interests": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Interests",
+          "type": "array"
+        },
+        "learning_preferences": {
+          "$ref": "#/$defs/LearningPreferences"
+        },
+        "unresolved_skills": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unresolved Skills",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "profile_id",
+        "is_synthetic",
+        "skills"
+      ],
+      "title": "UserProfile",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "profile": {
+      "$ref": "#/$defs/UserProfile"
+    },
+    "top_k": {
+      "default": 5,
+      "exclusiveMinimum": 0,
+      "maximum": 100,
+      "title": "Top K",
+      "type": "integer"
+    },
+    "trend_snapshot_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Trend Snapshot Id"
+    },
+    "trend_snapshot": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TrendSnapshot"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "scenario_config": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ScenarioConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "sdg_mappings": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SDGMappingSnapshot"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "integration_sources": {
+      "items": {
+        "$ref": "#/$defs/Source"
+      },
+      "title": "Integration Sources",
+      "type": "array"
+    },
+    "role_id": {
+      "title": "Role Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "profile",
+    "role_id"
+  ],
+  "title": "PathwayRequest",
+  "type": "object"
+}

@@ -1,0 +1,17 @@
+{
+  "checked_date": "2026-10-21",
+  "documentation_url": "https://esco.ec.europa.eu/en/use-esco/use-esco-services-api/esco-web-service-api",
+  "documented_versions": [
+    "v1.0.9",
+    "v1.1.2",
+    "v1.2.0"
+  ],
+  "live_probes": {
+    "v1.2.0": 200,
+    "v1.2.1": 200,
+    "v99.99.99": 500
+  },
+  "invalid_version_message": "storeEscoVersion.selectedVersion: Invalid ESCO version",
+  "returned_version": null,
+  "notes": "Recorded from executed pre-import probes. The API accepts explicit v1.2.1 but does not emit a returned-version field. Full import matches all 15 existing relationship anchors. No cross-version relationship merge."
+}

@@ -55,7 +55,7 @@ Use this checklist when a request changes an interactive user journey and browse
 7. Check empty/error/loading states when they are part of the change; do not trigger a live refresh unless the task requires it.
 8. Test `/home` shortcuts, profile record CRUD/evidence links, and saved-profile retry.
 9. Upload only fictional PDF/DOCX files to `/profile`, review/edit extracted sections and skill aliases, then explicitly apply and save.
-10. In the 01–09 registration wizard, verify its editable fictional sample and email, confirm AI-assisted skill review is a separate step, opt in to RunPod analysis, verify the select-all control, themed accessible skip dialog, Continue gating until selected suggestions are added, add-button placement beside extraction, disabled “Added to my profile” state, responsive candidate grid and full card boundary, quoted evidence and taxonomy IDs. On the experience step, confirm “Add another job” is at the top-left above the experience cards and still adds a new entry. The sample targets up to ten supported local skills; outputs may be fewer. Do not submit a live model request in ordinary tests.
+10. In the 01–09 registration wizard, verify its editable fictional sample and email, confirm AI-assisted skill review is a separate step, opt in to RunPod analysis, verify the select-all control, themed accessible skip dialog, Continue gating until selected suggestions are added, add-button placement beside extraction, disabled “Added to my profile” state, responsive candidate grid and full card boundary, quoted evidence and ESCO taxonomy IDs. On the experience step, confirm “Add another job” is at the top-left above the experience cards and still adds a new entry. The sample targets up to ten supported ESCO skills; outputs may be fewer. Do not submit a live model request in ordinary tests.
 11. Preview both saved-profile CV templates, print or Save as PDF, and inspect page breaks.
 12. In `/explore`, combine search with profile, interest, market and research views; verify unsupported filters remain disabled and details show provenance.
 13. Inspect desktop and narrow mobile layouts and keyboard focus. A static screenshot is not an interaction test.
@@ -66,3 +66,29 @@ Use this checklist when a request changes an interactive user journey and browse
 ## Build and data safety
 
 `next build` writes `.next`; tests may use temporary databases. Keep generated outputs and local SQLite files out of commits. Ordinary tests must not require network access, credentials, a paid service, or RunPod.
+
+
+## Combined main/KW verification
+
+Main's commands and tests above remain available. The integrated repository also
+contains KW's committed Playwright suite plus cross-branch browser checks:
+
+```sh
+python -m pip install -r requirements-dev.txt
+python -m unittest discover -s tests
+npm --prefix src/frontend run test:e2e
+```
+
+Install Playwright Chromium once if missing. `PLAYWRIGHT_BROWSERS_PATH` may select
+an existing local browser installation. Browser servers use isolated ports
+8100/3100, `.next-e2e`, temporary SQLite/model storage, and empty RunPod credentials.
+The original statement about an uncommitted browser session describes the
+pre-integration main verification; automated browser journeys are now included.
+
+KW's page is `/role-matching`; `/` still follows main's `/register` redirect.
+Main's API tests remain `tests/test_api.py`; KW's are `test_future_roles_api.py`.
+New integration tests cover all route families, local synthetic inference,
+optional inference error contracts, SDG reference guards, and saved profiles
+surviving cross-group navigation. Generated types from an older checkout may
+need regeneration (`next typegen`) after the route relocation. See the merge
+report for commands actually executed and remaining coverage limits.

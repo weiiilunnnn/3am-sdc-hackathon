@@ -36,7 +36,8 @@ export function profileToDraft(profile: StoredProfile): ProfileDraft {
     certifications: profile.certifications.map((item) => ({ ...item, skill_ids: [...item.skill_ids] })),
     achievements: profile.achievements.map((item) => ({ ...item, skill_ids: [...item.skill_ids] })),
     learning_preferences: { ...profile.learning_preferences },
-    synthetic_demo: true,
+    synthetic_demo: profile.synthetic_demo,
+    registration_profile: profile.registration_profile,
   };
 }
 
@@ -69,9 +70,8 @@ export function useSavedProfile() {
     } catch (reason) {
       setProfile(null);
       if (reason instanceof ApiError && reason.status === 404) {
-        try { localStorage.removeItem(PROFILE_KEY); } catch { /* keep the retrieval message useful */ }
         setProfileId("");
-        setError("The saved profile reference no longer exists. Open Profile to start or save a fictional profile.");
+        setError("The saved profile reference no longer exists. Its reference has been retained; open Profile to review it.");
       } else {
         setError(reason instanceof Error ? reason.message : "The saved profile could not be loaded.");
       }

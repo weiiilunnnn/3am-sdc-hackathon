@@ -1,0 +1,14 @@
+{
+  "occupation_count": 15,
+  "skill_count": 485,
+  "dataset_version": "v1.2.1",
+  "files": {
+    "src/personalized_reskilling.py": "9c3f4d36e4022ab9c40c655e3b74e411bdb1946b3131058b62f462434335e3fb",
+    "src/learning_time.py": "9b9926547f07a4cc6b77db38d9c7f7091bd29391f395d173c975c361519a3327",
+    "src/frontend/components/PathwayView.tsx": "5ef08785a886b37c26924fd1eab27f5b6ce2d67652dd1e7720e668b9cfa8922b",
+    "data/resources/catalog_v1.json": "cb633f173d3882dc722be7be73b9e9dbf288af57faabc76e5074e4974add989d",
+    "data/sources/learning_sources.json": "97070eb226ea679561b73124f7463f64c9bd1c2bda00dc036e00277c3503d8b5"
+  },
+  "backend_baseline_tests": 50,
+  "browser_baseline_tests": 9
+}

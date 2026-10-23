@@ -1,0 +1,36 @@
+"""Provider pages reviewed on 2026-10-21; editorial mappings are partial.
+
+Tuple: id, actual title, provider, canonical URL, type, ESCO labels,
+published minutes, prerequisite resource IDs, prerequisite skill labels,
+mapping rationale, access/prerequisite caveats. No content is mirrored.
+"""
+ADDITIONS = [
+    ("google-numerical-data", "Working with numerical data", "Google", "https://developers.google.com/machine-learning/crash-course/numerical-data", "course", ["normalise data", "perform data cleansing"], 85, ["google-intro-ml"], [],
+     "Feature scaling, outliers and binning support introductory normalisation and cleansing of numerical ML inputs.", "Complete introductory ML and review MLCC mathematics/programming prework before exercises."),
+    ("google-categorical-data", "Working with categorical data", "Google", "https://developers.google.com/machine-learning/crash-course/categorical-data", "course", ["information categorisation", "use data processing techniques"], 50, ["google-intro-ml", "google-numerical-data"], [],
+     "Categorical representations, one-hot encoding and feature crosses support partial categorisation and data processing.", "Provider requires introductory ML and numerical data."),
+    ("google-overfitting", "Datasets, generalization, and overfitting", "Google", "https://developers.google.com/machine-learning/crash-course/overfitting", "course", ["create data sets", "implement data quality processes"], 105, ["google-intro-ml", "google-linear-regression", "google-numerical-data", "google-categorical-data"], [],
+     "Dataset reliability, missing values and train/validation/test splits support partial dataset creation and quality processes.", "Provider requires introductory ML, linear regression, numerical and categorical data."),
+    ("google-neural-networks", "Neural networks", "Google", "https://developers.google.com/machine-learning/crash-course/neural-networks", "course", ["artificial neural networks"], 75, ["google-intro-ml", "google-linear-regression", "google-logistic-regression", "google-classification", "google-numerical-data", "google-categorical-data", "google-overfitting"], [],
+     "Nodes, layers, activation, inference and backpropagation introduce neural-network knowledge, not implementation mastery.", "Provider lists all seven preceding MLCC modules as prerequisites."),
+    ("mdn-html-syntax", "Basic HTML syntax", "MDN Web Docs", "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax", "tutorial", ["use markup languages"], None, [], [],
+     "Element syntax, attributes, document structure and interactive challenges introduce HTML markup use.", "Requires basic software installation and working with files."),
+    ("mdn-css-intro", "What is CSS?", "MDN Web Docs", "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/What_is_CSS", "article", ["CSS", "style sheet languages"], None, ["mdn-html-syntax"], [],
+     "CSS syntax and applying styles to HTML introduce style-sheet languages.", "Provider expects HTML familiarity; included introductory HTML is a starting prerequisite, not full HTML mastery."),
+    ("mdn-js-intro", "What is JavaScript?", "MDN Web Docs", "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/What_is_JavaScript", "article", ["JavaScript", "web programming"], None, ["mdn-html-syntax", "mdn-css-intro"], [],
+     "Adding scripts to pages introduces JavaScript and browser-side web programming.", "Provider requires HTML/CSS fundamentals; confirm familiarity beyond the introductory units."),
+    ("mdn-responsive", "Responsive web design", "MDN Web Docs", "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Responsive_Design", "tutorial", ["implement front-end website design"], None, ["mdn-html-syntax", "mdn-css-intro"], [],
+     "Flexible layout, media queries and viewport settings support partial responsive front-end implementation.", "Provider expects HTML, CSS styling, text/font styling and CSS layout. Confirm layout knowledge beyond the introductory CSS unit."),
+    ("postgres-sql", "The SQL Language", "PostgreSQL Global Development Group", "https://www.postgresql.org/docs/17/tutorial-sql.html", "tutorial", ["SQL", "query languages", "use databases"], None, [], [],
+     "Tutorial chapter covers tables, queries, joins, aggregates, updates and deletions; partial PostgreSQL database use.", "Requires PostgreSQL setup/access described in tutorial chapter 1; arrange a suitable local environment."),
+    ("postgres-backup", "SQL Dump", "PostgreSQL Global Development Group", "https://www.postgresql.org/docs/17/backup-dump.html", "documentation", ["perform backups", "use back-up and recovery tools"], None, ["postgres-sql"], [],
+     "pg_dump and restore instructions support introductory logical database backup and recovery practice.", "Requires PostgreSQL and appropriate permissions. Practise on disposable sample data."),
+    ("git-version-control", "About Version Control", "Pro Git", "https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control", "article", ["tools for software configuration management"], None, [], [],
+     "Local, centralised and distributed version-control concepts introduce configuration-management tools.", "Basic file-management familiarity; no prior Git assumed for this conceptual reading."),
+    ("git-recording", "Recording Changes to the Repository", "Pro Git", "https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository", "tutorial", ["tools for software configuration management"], None, ["git-version-control"], [],
+     "Tracking, staging, diffing and committing provide introductory configuration-management practice with Git.", "Requires installed/configured Git and a repository, as explained in earlier sections; confirm setup before commands."),
+    ("cs50-sql", "CS50's Introduction to Databases with SQL", "Harvard CS50", "https://cs50.harvard.edu/sql/", "course", ["SQL", "query languages", "use databases", "create data models", "design database scheme"], None, [], [],
+     "Relational querying, entities, tables, keys, constraints and normalisation support partial database design and use.", "Study before/during/after CS50x. OpenCourseWare is free; submission/feedback requires an edX account. Seven curriculum weeks plus final project; no total study hours asserted."),
+    ("cs50-python", "CS50's Introduction to Programming with Python", "Harvard CS50", "https://cs50.harvard.edu/python/", "course", ["Python (computer programming)", "computer programming", "debug software", "execute software tests", "use software libraries"], None, [], [],
+     "Functions, loops, exceptions, libraries, debugging and unit tests support partial programming and testing development.", "Designed with or without programming experience. Public OpenCourseWare is free; submissions/certificates have separate conditions. Ten curriculum units plus final project; no total hours asserted."),
+]

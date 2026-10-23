@@ -1,0 +1,181 @@
+{
+  "schema_version": "1.0",
+  "checked_at": "2026-10-21T07:00:08.897042+00:00",
+  "method": "GET first 1024 bytes; confirms transport availability only, not syllabus correctness",
+  "checks": [
+    {
+      "source_id": "learning:google-intro-ml",
+      "url": "https://developers.google.com/machine-learning/intro-to-ml",
+      "status": 200,
+      "final_url": "https://developers.google.com/machine-learning/intro-to-ml"
+    },
+    {
+      "source_id": "access:Google",
+      "url": "https://blog.google/innovation-and-ai/technology/developers-tools/machine-learning-crash-course/",
+      "status": 200,
+      "final_url": "https://blog.google/innovation-and-ai/technology/developers-tools/machine-learning-crash-course/"
+    },
+    {
+      "source_id": "learning:google-linear-regression",
+      "url": "https://developers.google.com/machine-learning/crash-course/linear-regression",
+      "status": 200,
+      "final_url": "https://developers.google.com/machine-learning/crash-course/linear-regression"
+    },
+    {
+      "source_id": "learning:google-logistic-regression",
+      "url": "https://developers.google.com/machine-learning/crash-course/logistic-regression",
+      "status": 200,
+      "final_url": "https://developers.google.com/machine-learning/crash-course/logistic-regression"
+    },
+    {
+      "source_id": "learning:google-classification",
+      "url": "https://developers.google.com/machine-learning/crash-course/classification",
+      "status": 200,
+      "final_url": "https://developers.google.com/machine-learning/crash-course/classification"
+    },
+    {
+      "source_id": "learning:microsoft-explore-sql",
+      "url": "https://learn.microsoft.com/en-us/training/modules/explore-relational-data-offerings/4-query-with-sql",
+      "status": 200,
+      "final_url": "https://learn.microsoft.com/en-us/training/modules/explore-relational-data-offerings/4-query-with-sql"
+    },
+    {
+      "source_id": "access:Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/training/support/faq",
+      "status": 200,
+      "final_url": "https://learn.microsoft.com/en-us/training/support/faq"
+    },
+    {
+      "source_id": "learning:python-tutorial",
+      "url": "https://docs.python.org/3.13/tutorial/",
+      "status": 200,
+      "final_url": "https://docs.python.org/3.13/tutorial/"
+    },
+    {
+      "source_id": "access:Python Software Foundation",
+      "url": "https://docs.python.org/3.13/copyright.html",
+      "status": 200,
+      "final_url": "https://docs.python.org/3.13/copyright.html"
+    },
+    {
+      "source_id": "learning:python-debugger",
+      "url": "https://docs.python.org/3.13/library/pdb.html",
+      "status": 200,
+      "final_url": "https://docs.python.org/3.13/library/pdb.html"
+    },
+    {
+      "source_id": "learning:mdn-js-debugging",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/What_went_wrong",
+      "status": 200,
+      "final_url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/What_went_wrong"
+    },
+    {
+      "source_id": "access:MDN Web Docs",
+      "url": "https://developer.mozilla.org/en-US/curriculum/",
+      "status": 200,
+      "final_url": "https://developer.mozilla.org/en-US/curriculum/"
+    },
+    {
+      "source_id": "learning:google-numerical-data",
+      "url": "https://developers.google.com/machine-learning/crash-course/numerical-data",
+      "status": 200,
+      "final_url": "https://developers.google.com/machine-learning/crash-course/numerical-data"
+    },
+    {
+      "source_id": "learning:google-categorical-data",
+      "url": "https://developers.google.com/machine-learning/crash-course/categorical-data",
+      "status": 200,
+      "final_url": "https://developers.google.com/machine-learning/crash-course/categorical-data"
+    },
+    {
+      "source_id": "learning:google-overfitting",
+      "url": "https://developers.google.com/machine-learning/crash-course/overfitting",
+      "status": 200,
+      "final_url": "https://developers.google.com/machine-learning/crash-course/overfitting"
+    },
+    {
+      "source_id": "learning:google-neural-networks",
+      "url": "https://developers.google.com/machine-learning/crash-course/neural-networks",
+      "status": 200,
+      "final_url": "https://developers.google.com/machine-learning/crash-course/neural-networks"
+    },
+    {
+      "source_id": "learning:mdn-html-syntax",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax",
+      "status": 200,
+      "final_url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax"
+    },
+    {
+      "source_id": "learning:mdn-css-intro",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/What_is_CSS",
+      "status": 200,
+      "final_url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/What_is_CSS"
+    },
+    {
+      "source_id": "learning:mdn-js-intro",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/What_is_JavaScript",
+      "status": 200,
+      "final_url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/What_is_JavaScript"
+    },
+    {
+      "source_id": "learning:mdn-responsive",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Responsive_Design",
+      "status": 200,
+      "final_url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Responsive_Design"
+    },
+    {
+      "source_id": "learning:postgres-sql",
+      "url": "https://www.postgresql.org/docs/17/tutorial-sql.html",
+      "status": 200,
+      "final_url": "https://www.postgresql.org/docs/17/tutorial-sql.html"
+    },
+    {
+      "source_id": "access:PostgreSQL Global Development Group",
+      "url": "https://www.postgresql.org/about/licence/",
+      "status": 200,
+      "final_url": "https://www.postgresql.org/about/licence/"
+    },
+    {
+      "source_id": "learning:postgres-backup",
+      "url": "https://www.postgresql.org/docs/17/backup-dump.html",
+      "status": 200,
+      "final_url": "https://www.postgresql.org/docs/17/backup-dump.html"
+    },
+    {
+      "source_id": "learning:git-version-control",
+      "url": "https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control",
+      "status": 200,
+      "final_url": "https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control"
+    },
+    {
+      "source_id": "access:Pro Git",
+      "url": "https://git-scm.com/book/en/v2",
+      "status": 200,
+      "final_url": "https://git-scm.com/book/en/v2"
+    },
+    {
+      "source_id": "learning:git-recording",
+      "url": "https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository",
+      "status": 200,
+      "final_url": "https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository"
+    },
+    {
+      "source_id": "learning:cs50-sql",
+      "url": "https://cs50.harvard.edu/sql/",
+      "status": 200,
+      "final_url": "https://cs50.harvard.edu/sql/"
+    },
+    {
+      "source_id": "access:Harvard CS50",
+      "url": "https://cs50.harvard.edu/sql/",
+      "status": 200,
+      "final_url": "https://cs50.harvard.edu/sql/"
+    },
+    {
+      "source_id": "learning:cs50-python",
+      "url": "https://cs50.harvard.edu/python/",
+      "status": 200,
+      "final_url": "https://cs50.harvard.edu/python/"
+    }
+  ]
+}

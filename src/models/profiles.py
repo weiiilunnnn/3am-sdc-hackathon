@@ -7,8 +7,8 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_vali
 
 ProfileListEntry = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=120)]
 
-Status = Literal["student", "fresh_graduate", "employed", "career_switcher", "other"]
-Proficiency = Literal["beginner", "intermediate", "advanced"]
+Status = Literal["student", "fresh_graduate", "employed", "career_switcher", "other", "unknown"]
+Proficiency = Literal["beginner", "intermediate", "advanced", "unknown"]
 LearningMode = Literal["self_paced", "instructor_led", "peer_learning", "mixed"]
 
 
@@ -49,20 +49,67 @@ class ProfileItem(BaseModel):
         return self
 
 
+class RegistrationExperience(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    id: str = Field(max_length=80)
+    title: str = Field(default="", max_length=160)
+    timeframe: str = Field(default="", max_length=80)
+    company: str = Field(default="", max_length=160)
+    description: str = Field(default="", max_length=2000)
+
+
+class RegistrationSkillLink(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    name: str = Field(min_length=1, max_length=100)
+    skill_id: str | None = Field(default=None, max_length=100)
+    taxonomy_source: str = Field(max_length=200)
+
+
+class RegistrationProfile(BaseModel):
+    """Lossless, bounded snapshot of Main's UI, in the existing profile row."""
+    model_config = ConfigDict(extra="forbid")
+    firstName: str = Field(max_length=120)
+    lastName: str = Field(max_length=120)
+    email: str = Field(default="", max_length=320)
+    skillLinks: list[RegistrationSkillLink] = Field(default_factory=list, max_length=40)
+    educationLevel: str = Field(max_length=120)
+    university: str = Field(default="", max_length=160)
+    major: str = Field(min_length=1, max_length=120)
+    cgpa: str = Field(default="", max_length=40)
+    schoolAwards: str = Field(default="", max_length=3000)
+    experiences: list[RegistrationExperience] = Field(default_factory=list, max_length=20)
+    skills: list[Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)]] = Field(min_length=1, max_length=40)
+    educationRecord: str = Field(default="", max_length=3000)
+    volunteering: str = Field(default="", max_length=3000)
+    projects: str = Field(default="", max_length=3000)
+    certifications: str = Field(default="", max_length=3000)
+    achievements: str = Field(default="", max_length=3000)
+    interests: str = Field(default="", max_length=3000)
+    workActivities: str = Field(default="", max_length=3000)
+    strengths: str = Field(default="", max_length=3000)
+    skillsToDevelop: str = Field(default="", max_length=3000)
+    aspiration: str = Field(default="", max_length=500)
+    profileSummary: str = Field(default="", max_length=1200)
+    weeklyHours: str = Field(default="", max_length=40)
+    learningBudget: str = Field(default="", max_length=40)
+    learningMode: str = Field(default="", max_length=120)
+    photoDataUrl: str | None = Field(default=None, max_length=600000, pattern=r"^data:image/jpeg;base64,[A-Za-z0-9+/=]+$")
+
+
 class ProfileInput(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
     status: Status
     education_level: Literal["secondary", "certificate", "diploma", "bachelor", "postgraduate", "other"]
-    field_of_study: str = Field(min_length=2, max_length=120)
+    field_of_study: str = Field(min_length=1, max_length=120)
     professional_summary: str = Field(default="", max_length=1200)
     current_occupation: str | None = Field(default=None, max_length=120)
-    years_experience: float = Field(ge=0, le=70)
+    years_experience: float | None = Field(default=None, ge=0, le=70)
     skills: list[SkillInput] = Field(min_length=1, max_length=40)
     interests: list[ProfileListEntry] = Field(default_factory=list, max_length=20)
     work_activities: list[ProfileListEntry] = Field(default_factory=list, max_length=20)
     transferable_strengths: list[ProfileListEntry] = Field(default_factory=list, max_length=20)
-    career_aspirations: str = Field(min_length=3, max_length=500)
+    career_aspirations: str = Field(default="", max_length=500)
     skills_to_develop: list[ProfileListEntry] = Field(default_factory=list, max_length=20)
     education: list[ProfileItem] = Field(default_factory=list, max_length=20)
     experience: list[ProfileItem] = Field(default_factory=list, max_length=20)
@@ -70,7 +117,8 @@ class ProfileInput(BaseModel):
     certifications: list[ProfileItem] = Field(default_factory=list, max_length=30)
     achievements: list[ProfileItem] = Field(default_factory=list, max_length=30)
     learning_preferences: LearningPreferences = Field(default_factory=LearningPreferences)
-    synthetic_demo: Literal[True] = True
+    synthetic_demo: bool = True
+    registration_profile: RegistrationProfile | None = None
 
     @model_validator(mode="after")
     def evidence_links_reference_profile_records(self) -> "ProfileInput":
@@ -91,7 +139,7 @@ class NormalizedSkill(BaseModel):
     display_name: str
     input_names: list[str]
     proficiency: Proficiency
-    taxonomy_source: Literal["Local prototype vocabulary", "Custom"]
+    taxonomy_source: Literal["Local prototype vocabulary", "ESCO v1.2.1", "Custom"]
     is_custom: bool
     evidence_record_ids: list[str] = Field(default_factory=list)
 

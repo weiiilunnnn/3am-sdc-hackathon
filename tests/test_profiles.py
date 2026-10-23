@@ -58,8 +58,7 @@ class ProfileTests(unittest.TestCase):
 
         sample = deepcopy(get_sample_profiles()[0])
         sample["synthetic_demo"] = False
-        with self.assertRaises(ValidationError):
-            profile_input(sample)
+        self.assertFalse(profile_input(sample).synthetic_demo)
 
     def test_alias_resolves_and_unknown_skill_remains_custom(self) -> None:
         result = normalize_skills(
@@ -101,6 +100,23 @@ class ProfileTests(unittest.TestCase):
             normalize_skills(
                 [SkillInput(name="Python programming", skill_id="esco:unknown", proficiency="beginner")]
             )
+
+    def test_verified_esco_identifier_is_preserved_as_an_esco_skill(self) -> None:
+        from src.services.future_roles.occupation_index import get_occupation_index
+
+        index = get_occupation_index()
+        python = next(
+            skill for skill in index.skills.values()
+            if skill.skill_id.startswith("http://data.europa.eu/esco/skill/")
+            and skill.name == "Python (computer programming)"
+        )
+        normalized = normalize_skills([
+            SkillInput(name="Python", skill_id=python.skill_id, proficiency="intermediate")
+        ])
+        self.assertEqual(normalized[0].skill_id, python.skill_id)
+        self.assertEqual(normalized[0].display_name, python.name)
+        self.assertEqual(normalized[0].taxonomy_source, "ESCO v1.2.1")
+        self.assertFalse(normalized[0].is_custom)
 
     def test_profile_create_get_and_update_round_trip(self) -> None:
         created = create_profile(profile_input(get_sample_profiles()[1]))

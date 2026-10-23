@@ -1,0 +1,85 @@
+{
+  "$defs": {
+    "SDGMapping": {
+      "properties": {
+        "sdg_number": {
+          "maximum": 17,
+          "minimum": 1,
+          "title": "Sdg Number",
+          "type": "integer"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "mapping_owner": {
+          "minLength": 1,
+          "title": "Mapping Owner",
+          "type": "string"
+        },
+        "mapping_status": {
+          "enum": [
+            "verified",
+            "proposed",
+            "unknown"
+          ],
+          "title": "Mapping Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sdg_number",
+        "reason",
+        "source_ids",
+        "mapping_owner",
+        "mapping_status"
+      ],
+      "title": "SDGMapping",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "snapshot_id": {
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "role_sdg_mappings": {
+      "additionalProperties": {
+        "items": {
+          "$ref": "#/$defs/SDGMapping"
+        },
+        "type": "array"
+      },
+      "title": "Role Sdg Mappings",
+      "type": "object"
+    },
+    "skill_sdg_mappings": {
+      "additionalProperties": {
+        "items": {
+          "$ref": "#/$defs/SDGMapping"
+        },
+        "type": "array"
+      },
+      "title": "Skill Sdg Mappings",
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "snapshot_id"
+  ],
+  "title": "SDGMappingSnapshot",
+  "type": "object"
+}

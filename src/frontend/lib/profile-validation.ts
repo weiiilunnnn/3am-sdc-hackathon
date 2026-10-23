@@ -18,13 +18,13 @@ export function splitCommaList(value: string): string[] {
 export function validateProfileDraft(draft: ProfileDraft): ProfileValidationResult {
   const errors: Record<string, string> = {};
   const fieldOfStudy = draft.field_of_study.trim();
-  if (fieldOfStudy.length < 2 || fieldOfStudy.length > 120) {
+  if (fieldOfStudy.length < (draft.synthetic_demo ? 2 : 1) || fieldOfStudy.length > 120) {
     errors.field_of_study = "Enter a field of study between 2 and 120 characters.";
   }
   if (
-    !Number.isFinite(draft.years_experience) ||
+    draft.years_experience !== null && (!Number.isFinite(draft.years_experience) ||
     draft.years_experience < 0 ||
-    draft.years_experience > 70
+    draft.years_experience > 70)
   ) {
     errors.years_experience = "Enter a number from 0 to 70 years of experience.";
   }
@@ -41,7 +41,7 @@ export function validateProfileDraft(draft: ProfileDraft): ProfileValidationResu
     errors.current_occupation = "Occupation must be 120 characters or fewer.";
   }
   const aspiration = draft.career_aspirations.trim();
-  if (aspiration.length < 3 || aspiration.length > 500) {
+  if ((draft.synthetic_demo && aspiration.length < 3) || aspiration.length > 500) {
     errors.career_aspirations = "Enter an aspiration between 3 and 500 characters.";
   }
   if (
@@ -60,7 +60,7 @@ export function validateProfileDraft(draft: ProfileDraft): ProfileValidationResu
   ) {
     errors.budget_myr = "Budget must be between MYR 0 and MYR 100,000.";
   }
-  if (draft.synthetic_demo !== true) {
+  if (typeof draft.synthetic_demo !== "boolean") {
     errors.synthetic_demo = "Only fictional demonstration profiles can be saved.";
   }
   for (const [field, values] of [

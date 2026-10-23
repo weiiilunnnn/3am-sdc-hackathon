@@ -1,0 +1,356 @@
+{
+  "schema_version": "1.0",
+  "profiles": [
+    {
+      "schema_version": "1.0",
+      "profile_id": "demo-discovery-data",
+      "is_synthetic": true,
+      "education": "Synthetic data profile",
+      "experience_years": null,
+      "skills": [
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d",
+          "name": "Python (computer programming)",
+          "proficiency": "unknown",
+          "self_reported": true
+        },
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/598de5b0-5b58-4ea7-8058-a4bc4d18c742",
+          "name": "SQL",
+          "proficiency": "unknown",
+          "self_reported": true
+        },
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/3a2d5b45-56e4-4f5a-a55a-4a4a65afdc43",
+          "name": "machine learning",
+          "proficiency": "unknown",
+          "self_reported": true
+        }
+      ],
+      "interests": [],
+      "learning_preferences": {
+        "hours_per_week": 5.0,
+        "study_days_per_week": 5,
+        "budget": {
+          "amount": 0.0,
+          "currency": "MYR"
+        },
+        "preferred_resource_types": []
+      },
+      "unresolved_skills": []
+    },
+    {
+      "schema_version": "1.0",
+      "profile_id": "demo-discovery-web",
+      "is_synthetic": true,
+      "education": "Synthetic web profile",
+      "experience_years": null,
+      "skills": [
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/e5d1f825-60ed-4bdd-872a-e748c387f777",
+          "name": "CSS",
+          "proficiency": "unknown",
+          "self_reported": true
+        },
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/3cd569a2-4f88-4c1e-9995-8dce8c5e51a7",
+          "name": "JavaScript",
+          "proficiency": "unknown",
+          "self_reported": true
+        },
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/69bbd53f-fbb0-4476-b4b2-ef7844464e28",
+          "name": "web programming",
+          "proficiency": "unknown",
+          "self_reported": true
+        },
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/0af062de-eb43-41e9-9b96-249e2cd22d26",
+          "name": "use markup languages",
+          "proficiency": "unknown",
+          "self_reported": true
+        }
+      ],
+      "interests": [],
+      "learning_preferences": {
+        "hours_per_week": 5.0,
+        "study_days_per_week": 5,
+        "budget": {
+          "amount": 0.0,
+          "currency": "MYR"
+        },
+        "preferred_resource_types": []
+      },
+      "unresolved_skills": [
+        "HTML",
+        "React"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "profile_id": "demo-discovery-business",
+      "is_synthetic": true,
+      "education": "Synthetic business profile",
+      "experience_years": null,
+      "skills": [
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/ecc18804-a466-40d9-98b4-fba5cd67dd4b",
+          "name": "accounting",
+          "proficiency": "unknown",
+          "self_reported": true
+        },
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/4a460161-eaea-4fe2-bd0e-164ccc635be1",
+          "name": "financial statements",
+          "proficiency": "unknown",
+          "self_reported": true
+        },
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/60f51172-37c0-4933-a27a-cbf55dcd7580",
+          "name": "prepare financial statements",
+          "proficiency": "unknown",
+          "self_reported": true
+        }
+      ],
+      "interests": [],
+      "learning_preferences": {
+        "hours_per_week": 5.0,
+        "study_days_per_week": 5,
+        "budget": {
+          "amount": 0.0,
+          "currency": "MYR"
+        },
+        "preferred_resource_types": []
+      },
+      "unresolved_skills": [
+        "Excel",
+        "financial reporting"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "profile_id": "demo-discovery-generic-one",
+      "is_synthetic": true,
+      "education": "Synthetic generic one profile",
+      "experience_years": null,
+      "skills": [
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/15d76317-c71a-4fa2-aadc-2ecc34e627b7",
+          "name": "communication",
+          "proficiency": "unknown",
+          "self_reported": true
+        }
+      ],
+      "interests": [],
+      "learning_preferences": {
+        "hours_per_week": 5.0,
+        "study_days_per_week": 5,
+        "budget": {
+          "amount": 0.0,
+          "currency": "MYR"
+        },
+        "preferred_resource_types": []
+      },
+      "unresolved_skills": []
+    },
+    {
+      "schema_version": "1.0",
+      "profile_id": "demo-discovery-generic-two",
+      "is_synthetic": true,
+      "education": "Synthetic generic two profile",
+      "experience_years": null,
+      "skills": [
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/60c78287-22eb-4103-9c8c-28deaa460da0",
+          "name": "work in teams",
+          "proficiency": "unknown",
+          "self_reported": true
+        },
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/b19e0820-a96f-4c0a-a724-3c056180c1b3",
+          "name": "build team spirit",
+          "proficiency": "unknown",
+          "self_reported": true
+        }
+      ],
+      "interests": [],
+      "learning_preferences": {
+        "hours_per_week": 5.0,
+        "study_days_per_week": 5,
+        "budget": {
+          "amount": 0.0,
+          "currency": "MYR"
+        },
+        "preferred_resource_types": []
+      },
+      "unresolved_skills": []
+    },
+    {
+      "schema_version": "1.0",
+      "profile_id": "demo-discovery-specific-one",
+      "is_synthetic": true,
+      "education": "Synthetic specific one profile",
+      "experience_years": null,
+      "skills": [
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d",
+          "name": "Python (computer programming)",
+          "proficiency": "unknown",
+          "self_reported": true
+        }
+      ],
+      "interests": [],
+      "learning_preferences": {
+        "hours_per_week": 5.0,
+        "study_days_per_week": 5,
+        "budget": {
+          "amount": 0.0,
+          "currency": "MYR"
+        },
+        "preferred_resource_types": []
+      },
+      "unresolved_skills": []
+    },
+    {
+      "schema_version": "1.0",
+      "profile_id": "demo-discovery-unknown",
+      "is_synthetic": true,
+      "education": "Synthetic unknown profile",
+      "experience_years": null,
+      "skills": [],
+      "interests": [],
+      "learning_preferences": {
+        "hours_per_week": 5.0,
+        "study_days_per_week": 5,
+        "budget": {
+          "amount": 0.0,
+          "currency": "MYR"
+        },
+        "preferred_resource_types": []
+      },
+      "unresolved_skills": [
+        "Pyhton typo",
+        "not a reviewed skill"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "profile_id": "demo-discovery-empty",
+      "is_synthetic": true,
+      "education": "Synthetic empty profile",
+      "experience_years": null,
+      "skills": [],
+      "interests": [],
+      "learning_preferences": {
+        "hours_per_week": 5.0,
+        "study_days_per_week": 5,
+        "budget": {
+          "amount": 0.0,
+          "currency": "MYR"
+        },
+        "preferred_resource_types": []
+      },
+      "unresolved_skills": []
+    },
+    {
+      "schema_version": "1.0",
+      "profile_id": "demo-discovery-mixed",
+      "is_synthetic": true,
+      "education": "Synthetic mixed profile",
+      "experience_years": null,
+      "skills": [
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d",
+          "name": "Python (computer programming)",
+          "proficiency": "unknown",
+          "self_reported": true
+        },
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/598de5b0-5b58-4ea7-8058-a4bc4d18c742",
+          "name": "SQL",
+          "proficiency": "unknown",
+          "self_reported": true
+        },
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/3a2d5b45-56e4-4f5a-a55a-4a4a65afdc43",
+          "name": "machine learning",
+          "proficiency": "unknown",
+          "self_reported": true
+        },
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/ecc18804-a466-40d9-98b4-fba5cd67dd4b",
+          "name": "accounting",
+          "proficiency": "unknown",
+          "self_reported": true
+        },
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/4a460161-eaea-4fe2-bd0e-164ccc635be1",
+          "name": "financial statements",
+          "proficiency": "unknown",
+          "self_reported": true
+        },
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/e5d1f825-60ed-4bdd-872a-e748c387f777",
+          "name": "CSS",
+          "proficiency": "unknown",
+          "self_reported": true
+        },
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/60c78287-22eb-4103-9c8c-28deaa460da0",
+          "name": "work in teams",
+          "proficiency": "unknown",
+          "self_reported": true
+        },
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/3cd569a2-4f88-4c1e-9995-8dce8c5e51a7",
+          "name": "JavaScript",
+          "proficiency": "unknown",
+          "self_reported": true
+        }
+      ],
+      "interests": [],
+      "learning_preferences": {
+        "hours_per_week": 5.0,
+        "study_days_per_week": 5,
+        "budget": {
+          "amount": 0.0,
+          "currency": "MYR"
+        },
+        "preferred_resource_types": []
+      },
+      "unresolved_skills": []
+    },
+    {
+      "schema_version": "1.0",
+      "profile_id": "demo-discovery-aliases",
+      "is_synthetic": true,
+      "education": "Synthetic aliases profile",
+      "experience_years": null,
+      "skills": [
+        {
+          "skill_id": "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d",
+          "name": "Python (computer programming)",
+          "proficiency": "unknown",
+          "self_reported": true
+        },
+        {
+          "skill_id": "Python",
+          "name": "Python",
+          "proficiency": "unknown",
+          "self_reported": true
+        }
+      ],
+      "interests": [],
+      "learning_preferences": {
+        "hours_per_week": 5.0,
+        "study_days_per_week": 5,
+        "budget": {
+          "amount": 0.0,
+          "currency": "MYR"
+        },
+        "preferred_resource_types": []
+      },
+      "unresolved_skills": []
+    }
+  ]
+}

@@ -124,12 +124,12 @@ export default function HomePage() {
   }, [loadEmployment, registrationLoading, registrationProfile]);
 
   return <main className="page-wrap">
-    <PageIntro kicker="YOUR WORKSPACE · OVERVIEW" title={<>A small next step<br />is still progress.</>} description="A practical home for your saved fictional profile, the evidence behind it, and a few useful places to continue." index="LEARNER WORKSPACE / 00" />
+    <PageIntro kicker="YOUR WORKSPACE · OVERVIEW" title={<>A small next step<br />is still progress.</>} description="A practical home for your saved profile, the evidence behind it, and a few useful places to continue." index="LEARNER WORKSPACE / 00" />
     {registrationLoading ? <ProfileGate loading error="" onRetry={() => {}} />
       : registrationProfile ? <RegistrationHome profile={registrationProfile} />
       : loading || error || !profile ? <ProfileGate loading={loading} error={error} onRetry={() => void reload()} /> : <>
       <section className="home-welcome panel">
-        <div><span className="topic-tag">SAVED FICTIONAL PROFILE</span><h2>{profile.field_of_study || "Your profile"}</h2><p>{profile.professional_summary || "A profile is a living draft. Add a short summary when you are ready to describe your focus in your own words."}</p><div className="welcome-meta"><span>{profile.skills.length} skills named</span><span>{profile.experience.length + profile.projects.length + profile.education.length + profile.certifications.length + profile.achievements.length} records added</span><span>Updated {new Date(profile.updated_at).toLocaleDateString(undefined, { dateStyle: "medium" })}</span></div></div>
+        <div><span className="topic-tag">SAVED PROFILE</span><h2>{profile.field_of_study || "Your profile"}</h2><p>{profile.professional_summary || "A profile is a living draft. Add a short summary when you are ready to describe your focus in your own words."}</p><div className="welcome-meta"><span>{profile.skills.length} skills named</span><span>{profile.experience.length + profile.projects.length + profile.education.length + profile.certifications.length + profile.achievements.length} records added</span><span>Updated {new Date(profile.updated_at).toLocaleDateString(undefined, { dateStyle: "medium" })}</span></div></div>
         <Link className="button" href="/profile">View completed profile <span aria-hidden="true">→</span></Link>
       </section>
 
@@ -153,7 +153,7 @@ export default function HomePage() {
       </div>
 
       <section className="panel home-section home-outlook" aria-labelledby="home-outlook-heading">
-        <div className="section-heading"><span className="section-no">03</span><div><h2 id="home-outlook-heading">Skills Outlook highlights</h2><p>Only exact saved skill IDs with a configured keyword signal are shown.</p></div></div>
+        <div className="section-heading"><span className="section-no">03</span><div><h2 id="home-outlook-heading">AI skill connection highlights</h2><p>Only exact saved skill IDs with a configured keyword signal are shown.</p></div></div>
         {employmentLoading && <div className="skeleton" style={{ height: 90 }} aria-label="Loading saved-skill market signals" />}
         {employmentError && <div className="message error" role="alert">{employmentError} <button type="button" className="button ghost small" onClick={() => void loadEmployment()}>Retry</button></div>}
         {!employmentLoading && employment && profile.skills.length > 0 && (() => {
@@ -164,7 +164,7 @@ export default function HomePage() {
         })()}
         {!employmentLoading && employment?.posting_count === 0 && <p className="message info">No retained postings are available for comparison. No zero or trend is inferred.</p>}
         <p className="field-hint">Remote OK snapshot only · not representative of the whole labour market · mentions are not confirmed requirements.</p>
-        <Link className="text-link" href="/outlook">View Skills Outlook and source details →</Link>
+        <Link className="text-link" href="/outlook">View your AI skill connections →</Link>
       </section>
 
       <section className="shortcut-band" aria-label="Workspace shortcuts">
@@ -175,7 +175,7 @@ export default function HomePage() {
           <Link href="/profile/edit#completed-proof-heading"><span>03</span><strong>Review Projects</strong><small>Show where a skill was used</small></Link>
           <Link href="/profile/edit"><span>04</span><strong>Edit Profile</strong><small>Update your completed details</small></Link>
           <Link href="/cv-studio"><span>05</span><strong>Generate CV</strong><small>Preview saved profile content</small></Link>
-          <Link href="/outlook"><span>06</span><strong>View Skills Outlook</strong><small>Inspect source-backed signals</small></Link>
+          <Link href="/outlook"><span>06</span><strong>AI Skill Connections</strong><small>Inspect source-backed signals</small></Link>
         </div>
       </section>
     </>}

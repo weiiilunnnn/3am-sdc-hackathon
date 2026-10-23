@@ -1,0 +1,642 @@
+{
+  "dataset_id": "esco-tech-shortlist",
+  "dataset_version": "v1.2.1",
+  "decision": "Retain strict coverage. Skill/knowledge types are not competency domains; no reviewed domain assignments exist.",
+  "diagnostic_formula": "100 * mean(matched / total for each nonempty skill_type); not used by application",
+  "aliases": [
+    {
+      "skill_id": "http://data.europa.eu/esco/skill/3cd569a2-4f88-4c1e-9995-8dce8c5e51a7",
+      "name": "JavaScript",
+      "aliases": [
+        "JS"
+      ]
+    },
+    {
+      "skill_id": "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d",
+      "name": "Python (computer programming)",
+      "aliases": [
+        "Python"
+      ]
+    },
+    {
+      "skill_id": "http://data.europa.eu/esco/skill/598de5b0-5b58-4ea7-8058-a4bc4d18c742",
+      "name": "SQL",
+      "aliases": [
+        "Structured Query Language"
+      ]
+    },
+    {
+      "skill_id": "http://data.europa.eu/esco/skill/21d2f96d-35f7-4e3f-9745-c533d2dd6e97",
+      "name": "computer programming",
+      "aliases": [
+        "programming"
+      ]
+    }
+  ],
+  "roles": [
+    {
+      "role_id": "http://data.europa.eu/esco/occupation/f2b15a0e-e65a-438a-affb-29b9d50b77d1",
+      "title": "software developer",
+      "essential_count": 24,
+      "optional_count": 84,
+      "essential_types": {
+        "knowledge": 9,
+        "skill": 15
+      },
+      "source_ids": [
+        "esco:occupation:f2b15a0e-e65a-438a-affb-29b9d50b77d1"
+      ]
+    },
+    {
+      "role_id": "http://data.europa.eu/esco/occupation/258e46f9-0075-4a2e-adae-1ff0477e0f30",
+      "title": "data scientist",
+      "essential_count": 63,
+      "optional_count": 34,
+      "essential_types": {
+        "skill": 45,
+        "knowledge": 18
+      },
+      "source_ids": [
+        "esco:occupation:258e46f9-0075-4a2e-adae-1ff0477e0f30"
+      ]
+    },
+    {
+      "role_id": "http://data.europa.eu/esco/occupation/c40a2919-48a9-40ea-b506-1f34f693496d",
+      "title": "web developer",
+      "essential_count": 26,
+      "optional_count": 77,
+      "essential_types": {
+        "knowledge": 12,
+        "skill": 14
+      },
+      "source_ids": [
+        "esco:occupation:c40a2919-48a9-40ea-b506-1f34f693496d"
+      ]
+    },
+    {
+      "role_id": "http://data.europa.eu/esco/occupation/35553663-deab-4d9a-bf22-15c1625d28e8",
+      "title": "artificial intelligence engineer",
+      "essential_count": 31,
+      "optional_count": 58,
+      "essential_types": {
+        "knowledge": 19,
+        "skill": 11,
+        "unknown": 1
+      },
+      "source_ids": [
+        "esco:occupation:35553663-deab-4d9a-bf22-15c1625d28e8"
+      ]
+    },
+    {
+      "role_id": "http://data.europa.eu/esco/occupation/b11e1742-5e28-4270-b081-b0193d85ee7d",
+      "title": "database developer",
+      "essential_count": 20,
+      "optional_count": 96,
+      "essential_types": {
+        "skill": 13,
+        "knowledge": 7
+      },
+      "source_ids": [
+        "esco:occupation:b11e1742-5e28-4270-b081-b0193d85ee7d"
+      ]
+    },
+    {
+      "role_id": "http://data.europa.eu/esco/occupation/bd272aee-adc9-4a06-a15c-a73b4b4a46a7",
+      "title": "ICT application developer",
+      "essential_count": 17,
+      "optional_count": 74,
+      "essential_types": {
+        "knowledge": 4,
+        "skill": 13
+      },
+      "source_ids": [
+        "esco:occupation:bd272aee-adc9-4a06-a15c-a73b4b4a46a7"
+      ]
+    },
+    {
+      "role_id": "http://data.europa.eu/esco/occupation/a7c1d23d-aeca-4bee-9a08-5993ed98b135",
+      "title": "ICT system developer",
+      "essential_count": 20,
+      "optional_count": 77,
+      "essential_types": {
+        "knowledge": 7,
+        "skill": 13
+      },
+      "source_ids": [
+        "esco:occupation:a7c1d23d-aeca-4bee-9a08-5993ed98b135"
+      ]
+    },
+    {
+      "role_id": "http://data.europa.eu/esco/occupation/52d5edc9-7902-4cd3-8b06-6bd77c98d440",
+      "title": "ICT system tester",
+      "essential_count": 12,
+      "optional_count": 30,
+      "essential_types": {
+        "skill": 9,
+        "knowledge": 3
+      },
+      "source_ids": [
+        "esco:occupation:52d5edc9-7902-4cd3-8b06-6bd77c98d440"
+      ]
+    },
+    {
+      "role_id": "http://data.europa.eu/esco/occupation/0ab5c12c-c1c1-4772-8345-aa287d0e391d",
+      "title": "ICT test analyst",
+      "essential_count": 9,
+      "optional_count": 27,
+      "essential_types": {
+        "skill": 8,
+        "knowledge": 1
+      },
+      "source_ids": [
+        "esco:occupation:0ab5c12c-c1c1-4772-8345-aa287d0e391d"
+      ]
+    },
+    {
+      "role_id": "http://data.europa.eu/esco/occupation/a6a0b60f-08da-4faa-bf54-942987efb471",
+      "title": "ICT system analyst",
+      "essential_count": 28,
+      "optional_count": 69,
+      "essential_types": {
+        "knowledge": 10,
+        "skill": 18
+      },
+      "source_ids": [
+        "esco:occupation:a6a0b60f-08da-4faa-bf54-942987efb471"
+      ]
+    },
+    {
+      "role_id": "http://data.europa.eu/esco/occupation/fe0fa514-b48d-4a53-9757-a283c0baacf0",
+      "title": "ICT business analyst",
+      "essential_count": 18,
+      "optional_count": 19,
+      "essential_types": {
+        "skill": 13,
+        "knowledge": 5
+      },
+      "source_ids": [
+        "esco:occupation:fe0fa514-b48d-4a53-9757-a283c0baacf0"
+      ]
+    },
+    {
+      "role_id": "http://data.europa.eu/esco/occupation/64c7d461-152c-477f-a8e2-c2c537e9d617",
+      "title": "ICT network technician",
+      "essential_count": 20,
+      "optional_count": 19,
+      "essential_types": {
+        "knowledge": 5,
+        "skill": 15
+      },
+      "source_ids": [
+        "esco:occupation:64c7d461-152c-477f-a8e2-c2c537e9d617"
+      ]
+    },
+    {
+      "role_id": "http://data.europa.eu/esco/occupation/a44a1dc5-be08-4840-8bd5-770c4ac1ca6d",
+      "title": "ICT security technician",
+      "essential_count": 34,
+      "optional_count": 61,
+      "essential_types": {
+        "knowledge": 15,
+        "skill": 19
+      },
+      "source_ids": [
+        "esco:occupation:a44a1dc5-be08-4840-8bd5-770c4ac1ca6d"
+      ]
+    },
+    {
+      "role_id": "http://data.europa.eu/esco/occupation/aaeec9a7-dc57-4485-890c-86b3eef735f9",
+      "title": "ICT help desk agent",
+      "essential_count": 20,
+      "optional_count": 12,
+      "essential_types": {
+        "knowledge": 4,
+        "skill": 16
+      },
+      "source_ids": [
+        "esco:occupation:aaeec9a7-dc57-4485-890c-86b3eef735f9"
+      ]
+    },
+    {
+      "role_id": "http://data.europa.eu/esco/occupation/22987b58-dbfa-4ecd-ae3f-82dd209255f6",
+      "title": "green ICT consultant",
+      "essential_count": 14,
+      "optional_count": 13,
+      "essential_types": {
+        "knowledge": 5,
+        "skill": 9
+      },
+      "source_ids": [
+        "esco:occupation:22987b58-dbfa-4ecd-ae3f-82dd209255f6"
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "profile_id": "demo-graduate-a",
+      "role_id": "http://data.europa.eu/esco/occupation/35553663-deab-4d9a-bf22-15c1625d28e8",
+      "role_title": "artificial intelligence engineer",
+      "rank": 1,
+      "strict_coverage_pct": 6.45,
+      "diagnostic_type_balanced_pct": 3.51,
+      "adopted_display_pct": 6.45
+    },
+    {
+      "profile_id": "demo-graduate-a",
+      "role_id": "http://data.europa.eu/esco/occupation/b11e1742-5e28-4270-b081-b0193d85ee7d",
+      "role_title": "database developer",
+      "rank": 2,
+      "strict_coverage_pct": 5.0,
+      "diagnostic_type_balanced_pct": 3.85,
+      "adopted_display_pct": 5.0
+    },
+    {
+      "profile_id": "demo-graduate-a",
+      "role_id": "http://data.europa.eu/esco/occupation/258e46f9-0075-4a2e-adae-1ff0477e0f30",
+      "role_title": "data scientist",
+      "rank": 3,
+      "strict_coverage_pct": 4.76,
+      "diagnostic_type_balanced_pct": 6.67,
+      "adopted_display_pct": 4.76
+    },
+    {
+      "profile_id": "demo-graduate-a",
+      "role_id": "http://data.europa.eu/esco/occupation/0ab5c12c-c1c1-4772-8345-aa287d0e391d",
+      "role_title": "ICT test analyst",
+      "rank": 4,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-a",
+      "role_id": "http://data.europa.eu/esco/occupation/22987b58-dbfa-4ecd-ae3f-82dd209255f6",
+      "role_title": "green ICT consultant",
+      "rank": 5,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-a",
+      "role_id": "http://data.europa.eu/esco/occupation/52d5edc9-7902-4cd3-8b06-6bd77c98d440",
+      "role_title": "ICT system tester",
+      "rank": 6,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-a",
+      "role_id": "http://data.europa.eu/esco/occupation/64c7d461-152c-477f-a8e2-c2c537e9d617",
+      "role_title": "ICT network technician",
+      "rank": 7,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-a",
+      "role_id": "http://data.europa.eu/esco/occupation/a44a1dc5-be08-4840-8bd5-770c4ac1ca6d",
+      "role_title": "ICT security technician",
+      "rank": 8,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-a",
+      "role_id": "http://data.europa.eu/esco/occupation/a6a0b60f-08da-4faa-bf54-942987efb471",
+      "role_title": "ICT system analyst",
+      "rank": 9,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-a",
+      "role_id": "http://data.europa.eu/esco/occupation/a7c1d23d-aeca-4bee-9a08-5993ed98b135",
+      "role_title": "ICT system developer",
+      "rank": 10,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-a",
+      "role_id": "http://data.europa.eu/esco/occupation/aaeec9a7-dc57-4485-890c-86b3eef735f9",
+      "role_title": "ICT help desk agent",
+      "rank": 11,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-a",
+      "role_id": "http://data.europa.eu/esco/occupation/bd272aee-adc9-4a06-a15c-a73b4b4a46a7",
+      "role_title": "ICT application developer",
+      "rank": 12,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-a",
+      "role_id": "http://data.europa.eu/esco/occupation/c40a2919-48a9-40ea-b506-1f34f693496d",
+      "role_title": "web developer",
+      "rank": 13,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-a",
+      "role_id": "http://data.europa.eu/esco/occupation/f2b15a0e-e65a-438a-affb-29b9d50b77d1",
+      "role_title": "software developer",
+      "rank": 14,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-a",
+      "role_id": "http://data.europa.eu/esco/occupation/fe0fa514-b48d-4a53-9757-a283c0baacf0",
+      "role_title": "ICT business analyst",
+      "rank": 15,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-b",
+      "role_id": "http://data.europa.eu/esco/occupation/bd272aee-adc9-4a06-a15c-a73b4b4a46a7",
+      "role_title": "ICT application developer",
+      "rank": 1,
+      "strict_coverage_pct": 11.76,
+      "diagnostic_type_balanced_pct": 16.35,
+      "adopted_display_pct": 11.76
+    },
+    {
+      "profile_id": "demo-graduate-b",
+      "role_id": "http://data.europa.eu/esco/occupation/c40a2919-48a9-40ea-b506-1f34f693496d",
+      "role_title": "web developer",
+      "rank": 2,
+      "strict_coverage_pct": 11.54,
+      "diagnostic_type_balanced_pct": 11.9,
+      "adopted_display_pct": 11.54
+    },
+    {
+      "profile_id": "demo-graduate-b",
+      "role_id": "http://data.europa.eu/esco/occupation/a7c1d23d-aeca-4bee-9a08-5993ed98b135",
+      "role_title": "ICT system developer",
+      "rank": 3,
+      "strict_coverage_pct": 10.0,
+      "diagnostic_type_balanced_pct": 10.99,
+      "adopted_display_pct": 10.0
+    },
+    {
+      "profile_id": "demo-graduate-b",
+      "role_id": "http://data.europa.eu/esco/occupation/f2b15a0e-e65a-438a-affb-29b9d50b77d1",
+      "role_title": "software developer",
+      "rank": 4,
+      "strict_coverage_pct": 8.33,
+      "diagnostic_type_balanced_pct": 8.89,
+      "adopted_display_pct": 8.33
+    },
+    {
+      "profile_id": "demo-graduate-b",
+      "role_id": "http://data.europa.eu/esco/occupation/35553663-deab-4d9a-bf22-15c1625d28e8",
+      "role_title": "artificial intelligence engineer",
+      "rank": 5,
+      "strict_coverage_pct": 3.23,
+      "diagnostic_type_balanced_pct": 1.75,
+      "adopted_display_pct": 3.23
+    },
+    {
+      "profile_id": "demo-graduate-b",
+      "role_id": "http://data.europa.eu/esco/occupation/0ab5c12c-c1c1-4772-8345-aa287d0e391d",
+      "role_title": "ICT test analyst",
+      "rank": 6,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-b",
+      "role_id": "http://data.europa.eu/esco/occupation/22987b58-dbfa-4ecd-ae3f-82dd209255f6",
+      "role_title": "green ICT consultant",
+      "rank": 7,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-b",
+      "role_id": "http://data.europa.eu/esco/occupation/258e46f9-0075-4a2e-adae-1ff0477e0f30",
+      "role_title": "data scientist",
+      "rank": 8,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-b",
+      "role_id": "http://data.europa.eu/esco/occupation/52d5edc9-7902-4cd3-8b06-6bd77c98d440",
+      "role_title": "ICT system tester",
+      "rank": 9,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-b",
+      "role_id": "http://data.europa.eu/esco/occupation/64c7d461-152c-477f-a8e2-c2c537e9d617",
+      "role_title": "ICT network technician",
+      "rank": 10,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-b",
+      "role_id": "http://data.europa.eu/esco/occupation/a44a1dc5-be08-4840-8bd5-770c4ac1ca6d",
+      "role_title": "ICT security technician",
+      "rank": 11,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-b",
+      "role_id": "http://data.europa.eu/esco/occupation/a6a0b60f-08da-4faa-bf54-942987efb471",
+      "role_title": "ICT system analyst",
+      "rank": 12,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-b",
+      "role_id": "http://data.europa.eu/esco/occupation/aaeec9a7-dc57-4485-890c-86b3eef735f9",
+      "role_title": "ICT help desk agent",
+      "rank": 13,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-b",
+      "role_id": "http://data.europa.eu/esco/occupation/b11e1742-5e28-4270-b081-b0193d85ee7d",
+      "role_title": "database developer",
+      "rank": 14,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-b",
+      "role_id": "http://data.europa.eu/esco/occupation/fe0fa514-b48d-4a53-9757-a283c0baacf0",
+      "role_title": "ICT business analyst",
+      "rank": 15,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-c",
+      "role_id": "http://data.europa.eu/esco/occupation/bd272aee-adc9-4a06-a15c-a73b4b4a46a7",
+      "role_title": "ICT application developer",
+      "rank": 1,
+      "strict_coverage_pct": 5.88,
+      "diagnostic_type_balanced_pct": 12.5,
+      "adopted_display_pct": 5.88
+    },
+    {
+      "profile_id": "demo-graduate-c",
+      "role_id": "http://data.europa.eu/esco/occupation/a7c1d23d-aeca-4bee-9a08-5993ed98b135",
+      "role_title": "ICT system developer",
+      "rank": 2,
+      "strict_coverage_pct": 5.0,
+      "diagnostic_type_balanced_pct": 7.14,
+      "adopted_display_pct": 5.0
+    },
+    {
+      "profile_id": "demo-graduate-c",
+      "role_id": "http://data.europa.eu/esco/occupation/f2b15a0e-e65a-438a-affb-29b9d50b77d1",
+      "role_title": "software developer",
+      "rank": 3,
+      "strict_coverage_pct": 4.17,
+      "diagnostic_type_balanced_pct": 5.56,
+      "adopted_display_pct": 4.17
+    },
+    {
+      "profile_id": "demo-graduate-c",
+      "role_id": "http://data.europa.eu/esco/occupation/c40a2919-48a9-40ea-b506-1f34f693496d",
+      "role_title": "web developer",
+      "rank": 4,
+      "strict_coverage_pct": 3.85,
+      "diagnostic_type_balanced_pct": 4.17,
+      "adopted_display_pct": 3.85
+    },
+    {
+      "profile_id": "demo-graduate-c",
+      "role_id": "http://data.europa.eu/esco/occupation/35553663-deab-4d9a-bf22-15c1625d28e8",
+      "role_title": "artificial intelligence engineer",
+      "rank": 5,
+      "strict_coverage_pct": 3.23,
+      "diagnostic_type_balanced_pct": 1.75,
+      "adopted_display_pct": 3.23
+    },
+    {
+      "profile_id": "demo-graduate-c",
+      "role_id": "http://data.europa.eu/esco/occupation/0ab5c12c-c1c1-4772-8345-aa287d0e391d",
+      "role_title": "ICT test analyst",
+      "rank": 6,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-c",
+      "role_id": "http://data.europa.eu/esco/occupation/22987b58-dbfa-4ecd-ae3f-82dd209255f6",
+      "role_title": "green ICT consultant",
+      "rank": 7,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-c",
+      "role_id": "http://data.europa.eu/esco/occupation/258e46f9-0075-4a2e-adae-1ff0477e0f30",
+      "role_title": "data scientist",
+      "rank": 8,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-c",
+      "role_id": "http://data.europa.eu/esco/occupation/52d5edc9-7902-4cd3-8b06-6bd77c98d440",
+      "role_title": "ICT system tester",
+      "rank": 9,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-c",
+      "role_id": "http://data.europa.eu/esco/occupation/64c7d461-152c-477f-a8e2-c2c537e9d617",
+      "role_title": "ICT network technician",
+      "rank": 10,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-c",
+      "role_id": "http://data.europa.eu/esco/occupation/a44a1dc5-be08-4840-8bd5-770c4ac1ca6d",
+      "role_title": "ICT security technician",
+      "rank": 11,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-c",
+      "role_id": "http://data.europa.eu/esco/occupation/a6a0b60f-08da-4faa-bf54-942987efb471",
+      "role_title": "ICT system analyst",
+      "rank": 12,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-c",
+      "role_id": "http://data.europa.eu/esco/occupation/aaeec9a7-dc57-4485-890c-86b3eef735f9",
+      "role_title": "ICT help desk agent",
+      "rank": 13,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-c",
+      "role_id": "http://data.europa.eu/esco/occupation/b11e1742-5e28-4270-b081-b0193d85ee7d",
+      "role_title": "database developer",
+      "rank": 14,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    },
+    {
+      "profile_id": "demo-graduate-c",
+      "role_id": "http://data.europa.eu/esco/occupation/fe0fa514-b48d-4a53-9757-a283c0baacf0",
+      "role_title": "ICT business analyst",
+      "rank": 15,
+      "strict_coverage_pct": 0.0,
+      "diagnostic_type_balanced_pct": 0.0,
+      "adopted_display_pct": 0.0
+    }
+  ],
+  "three_profile_matching_ms": 17.268
+}

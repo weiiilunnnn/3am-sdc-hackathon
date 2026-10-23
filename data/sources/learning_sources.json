@@ -1,0 +1,532 @@
+{
+  "schema_version": "1.0",
+  "sources": [
+    {
+      "source_id": "learning:google-intro-ml",
+      "evidence_status": "verified",
+      "source_type": "provider_course_page",
+      "title": "Introduction to Machine Learning",
+      "publisher": "Google",
+      "url": "https://developers.google.com/machine-learning/intro-to-ml",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://developers.google.com/machine-learning/intro-to-ml",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping",
+        "duration"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "access:Google",
+      "evidence_status": "verified",
+      "source_type": "provider_access_policy",
+      "title": "Google public learning access",
+      "publisher": "Google",
+      "url": "https://blog.google/innovation-and-ai/technology/developers-tools/machine-learning-crash-course/",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "free_access"
+      ],
+      "redistribution_notes": "Link only; credentials, cloud services and partner products excluded."
+    },
+    {
+      "source_id": "learning:google-linear-regression",
+      "evidence_status": "verified",
+      "source_type": "provider_course_page",
+      "title": "Linear regression",
+      "publisher": "Google",
+      "url": "https://developers.google.com/machine-learning/crash-course/linear-regression",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://developers.google.com/machine-learning/crash-course/linear-regression",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping",
+        "duration"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "learning:google-logistic-regression",
+      "evidence_status": "verified",
+      "source_type": "provider_course_page",
+      "title": "Logistic regression",
+      "publisher": "Google",
+      "url": "https://developers.google.com/machine-learning/crash-course/logistic-regression",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://developers.google.com/machine-learning/crash-course/logistic-regression",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping",
+        "duration"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "learning:google-classification",
+      "evidence_status": "verified",
+      "source_type": "provider_course_page",
+      "title": "Classification",
+      "publisher": "Google",
+      "url": "https://developers.google.com/machine-learning/crash-course/classification",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://developers.google.com/machine-learning/crash-course/classification",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping",
+        "duration"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "learning:microsoft-explore-sql",
+      "evidence_status": "verified",
+      "source_type": "provider_article_page",
+      "title": "Explore SQL",
+      "publisher": "Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/training/modules/explore-relational-data-offerings/4-query-with-sql",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://learn.microsoft.com/en-us/training/modules/explore-relational-data-offerings/4-query-with-sql",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping",
+        "duration"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "access:Microsoft Learn",
+      "evidence_status": "verified",
+      "source_type": "provider_access_policy",
+      "title": "Microsoft Learn public learning access",
+      "publisher": "Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/training/support/faq",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "free_access"
+      ],
+      "redistribution_notes": "Link only; credentials, cloud services and partner products excluded."
+    },
+    {
+      "source_id": "learning:python-tutorial",
+      "evidence_status": "verified",
+      "source_type": "provider_article_page",
+      "title": "The Python Tutorial",
+      "publisher": "Python Software Foundation",
+      "url": "https://docs.python.org/3.13/tutorial/",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://docs.python.org/3.13/tutorial/",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "access:Python Software Foundation",
+      "evidence_status": "verified",
+      "source_type": "provider_access_policy",
+      "title": "Python Software Foundation public learning access",
+      "publisher": "Python Software Foundation",
+      "url": "https://docs.python.org/3.13/copyright.html",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "free_access"
+      ],
+      "redistribution_notes": "Link only; credentials, cloud services and partner products excluded."
+    },
+    {
+      "source_id": "learning:python-debugger",
+      "evidence_status": "verified",
+      "source_type": "provider_article_page",
+      "title": "pdb - The Python Debugger",
+      "publisher": "Python Software Foundation",
+      "url": "https://docs.python.org/3.13/library/pdb.html",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://docs.python.org/3.13/library/pdb.html",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "learning:mdn-js-debugging",
+      "evidence_status": "verified",
+      "source_type": "provider_article_page",
+      "title": "What went wrong? Troubleshooting JavaScript",
+      "publisher": "MDN Web Docs",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/What_went_wrong",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/What_went_wrong",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "access:MDN Web Docs",
+      "evidence_status": "verified",
+      "source_type": "provider_access_policy",
+      "title": "MDN Web Docs public learning access",
+      "publisher": "MDN Web Docs",
+      "url": "https://developer.mozilla.org/en-US/curriculum/",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "free_access"
+      ],
+      "redistribution_notes": "Link only; credentials, cloud services and partner products excluded."
+    },
+    {
+      "source_id": "learning:google-numerical-data",
+      "evidence_status": "verified",
+      "source_type": "provider_course_page",
+      "title": "Working with numerical data",
+      "publisher": "Google",
+      "url": "https://developers.google.com/machine-learning/crash-course/numerical-data",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://developers.google.com/machine-learning/crash-course/numerical-data",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping",
+        "duration"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "learning:google-categorical-data",
+      "evidence_status": "verified",
+      "source_type": "provider_course_page",
+      "title": "Working with categorical data",
+      "publisher": "Google",
+      "url": "https://developers.google.com/machine-learning/crash-course/categorical-data",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://developers.google.com/machine-learning/crash-course/categorical-data",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping",
+        "duration"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "learning:google-overfitting",
+      "evidence_status": "verified",
+      "source_type": "provider_course_page",
+      "title": "Datasets, generalization, and overfitting",
+      "publisher": "Google",
+      "url": "https://developers.google.com/machine-learning/crash-course/overfitting",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://developers.google.com/machine-learning/crash-course/overfitting",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping",
+        "duration"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "learning:google-neural-networks",
+      "evidence_status": "verified",
+      "source_type": "provider_course_page",
+      "title": "Neural networks",
+      "publisher": "Google",
+      "url": "https://developers.google.com/machine-learning/crash-course/neural-networks",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://developers.google.com/machine-learning/crash-course/neural-networks",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping",
+        "duration"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "learning:mdn-html-syntax",
+      "evidence_status": "verified",
+      "source_type": "provider_article_page",
+      "title": "Basic HTML syntax",
+      "publisher": "MDN Web Docs",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "learning:mdn-css-intro",
+      "evidence_status": "verified",
+      "source_type": "provider_article_page",
+      "title": "What is CSS?",
+      "publisher": "MDN Web Docs",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/What_is_CSS",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/What_is_CSS",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "learning:mdn-js-intro",
+      "evidence_status": "verified",
+      "source_type": "provider_article_page",
+      "title": "What is JavaScript?",
+      "publisher": "MDN Web Docs",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/What_is_JavaScript",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/What_is_JavaScript",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "learning:mdn-responsive",
+      "evidence_status": "verified",
+      "source_type": "provider_article_page",
+      "title": "Responsive web design",
+      "publisher": "MDN Web Docs",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Responsive_Design",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Responsive_Design",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "learning:postgres-sql",
+      "evidence_status": "verified",
+      "source_type": "provider_article_page",
+      "title": "The SQL Language",
+      "publisher": "PostgreSQL Global Development Group",
+      "url": "https://www.postgresql.org/docs/17/tutorial-sql.html",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://www.postgresql.org/docs/17/tutorial-sql.html",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "access:PostgreSQL Global Development Group",
+      "evidence_status": "verified",
+      "source_type": "provider_access_policy",
+      "title": "PostgreSQL Global Development Group public learning access",
+      "publisher": "PostgreSQL Global Development Group",
+      "url": "https://www.postgresql.org/about/licence/",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "free_access"
+      ],
+      "redistribution_notes": "Link only; credentials, cloud services and partner products excluded."
+    },
+    {
+      "source_id": "learning:postgres-backup",
+      "evidence_status": "verified",
+      "source_type": "provider_article_page",
+      "title": "SQL Dump",
+      "publisher": "PostgreSQL Global Development Group",
+      "url": "https://www.postgresql.org/docs/17/backup-dump.html",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://www.postgresql.org/docs/17/backup-dump.html",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "learning:git-version-control",
+      "evidence_status": "verified",
+      "source_type": "provider_article_page",
+      "title": "About Version Control",
+      "publisher": "Pro Git",
+      "url": "https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "access:Pro Git",
+      "evidence_status": "verified",
+      "source_type": "provider_access_policy",
+      "title": "Pro Git public learning access",
+      "publisher": "Pro Git",
+      "url": "https://git-scm.com/book/en/v2",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "free_access"
+      ],
+      "redistribution_notes": "Link only; credentials, cloud services and partner products excluded."
+    },
+    {
+      "source_id": "learning:git-recording",
+      "evidence_status": "verified",
+      "source_type": "provider_article_page",
+      "title": "Recording Changes to the Repository",
+      "publisher": "Pro Git",
+      "url": "https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "learning:cs50-sql",
+      "evidence_status": "verified",
+      "source_type": "provider_course_page",
+      "title": "CS50's Introduction to Databases with SQL",
+      "publisher": "Harvard CS50",
+      "url": "https://cs50.harvard.edu/sql/",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://cs50.harvard.edu/sql/",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping",
+        "free_access"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    },
+    {
+      "source_id": "access:Harvard CS50",
+      "evidence_status": "verified",
+      "source_type": "provider_access_policy",
+      "title": "Harvard CS50 public learning access",
+      "publisher": "Harvard CS50",
+      "url": "https://cs50.harvard.edu/sql/",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "free_access"
+      ],
+      "redistribution_notes": "Link only; credentials, cloud services and partner products excluded."
+    },
+    {
+      "source_id": "learning:cs50-python",
+      "evidence_status": "verified",
+      "source_type": "provider_course_page",
+      "title": "CS50's Introduction to Programming with Python",
+      "publisher": "Harvard CS50",
+      "url": "https://cs50.harvard.edu/python/",
+      "license": null,
+      "dataset_version": "catalog-v1",
+      "native_record_id": "https://cs50.harvard.edu/python/",
+      "accessed_at": "2026-10-21",
+      "region": "global",
+      "supported_claims": [
+        "resource_content",
+        "skill_mapping",
+        "free_access"
+      ],
+      "redistribution_notes": "Store links and original editorial metadata only; do not mirror course content.",
+      "transformations": "Syllabus-to-ESCO mapping reviewed by project; partial learning coverage, no provider endorsement."
+    }
+  ]
+}

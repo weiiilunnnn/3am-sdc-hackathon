@@ -1,0 +1,26 @@
+{
+  "note": "New diagnostic replay of the original fallback query; the prior eight URL records were not retained. Public provider data only.",
+  "query": "free normalise data tutorial course",
+  "candidates": [
+    {
+      "url": "https://www.mygreatlearning.com/academy/learn-for-free/courses/database-normalization",
+      "title": "Free Database Normalization Training Course With Certificate",
+      "screen": "Provider outside reviewed discovery scope"
+    },
+    {
+      "url": "https://www.classcentral.com/subject/data-normalization",
+      "title": "10+ Data Normalization Online Courses for 2026 | Explore Free Courses & Certifications | Class Central",
+      "screen": "Provider outside reviewed discovery scope"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=rcrsqyFtJ_4&vl=en",
+      "title": "Database Normalization for Beginners | How to Normalize Data w/ Power Query (full tutorial!)",
+      "screen": "Provider outside reviewed discovery scope"
+    },
+    {
+      "url": "https://www.sqlcourse.com/advanced-course/normalization",
+      "title": "Data Normalization: Advanced Tutorial - SQL Course",
+      "screen": "Provider outside reviewed discovery scope"
+    }
+  ]
+}

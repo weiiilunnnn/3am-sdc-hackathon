@@ -9,10 +9,9 @@ const sections = [
   { href: "/home", label: "My Home" },
   { href: "/profile", label: "My Profile" },
   { href: "/cv-studio", label: "CV Studio" },
-  { href: "/outlook", label: "My Skills Outlook" },
-  { href: "/explore", label: "Explore Skills" },
-  { href: "/radar", label: "Source Evidence" },
-  { href: "/explorer", label: "Career Demo" },
+
+  { href: "/signals", label: "AI Trend Signal" },
+  { href: "/role-matching", label: "Role Matching" },
 ];
 
 const employerSections = [
@@ -60,7 +59,15 @@ export default function PathwaayRibbon() {
       <nav className="pathwaay-ribbon-links" aria-label={employerArea ? "Employer navigation" : "Main navigation"}>
         {navigation.map((item) => {
           const active = pathname === item.href || (item.href !== "/home" && item.href !== "/employer" && pathname.startsWith(`${item.href}/`));
-          return <Link key={item.href} href={item.href} className={`pathwaay-ribbon-link${active ? " active" : ""}`} aria-current={active ? "page" : undefined}>{item.label}</Link>;
+          return <Link
+            key={item.href}
+            href={item.href}
+            className={`pathwaay-ribbon-link${active ? " active" : ""}`}
+            aria-current={active ? "page" : undefined}
+            data-testid={`link-${item.href === "/profile" ? "profile" : item.href.slice(1).replaceAll("/", "-")}`}
+          >
+            {item.label}
+          </Link>;
         })}
       </nav>
       <div className="pathwaay-ribbon-actions">

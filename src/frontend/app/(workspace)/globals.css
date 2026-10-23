@@ -28,6 +28,9 @@ a { color: inherit; }
 .brand-mark { width:35px;height:35px;border-radius:11px;background:var(--green);color:var(--lime);display:grid;place-items:center;font:500 14px "DM Mono",monospace; transform:rotate(-5deg); }
 .brand small { display:block;color:var(--muted);font:500 9px "DM Mono",monospace;letter-spacing:.12em;margin-top:1px; }
 .nav-links { display:flex; align-items:center; gap:7px; }
+.topbar > .brand { flex-shrink:0; }
+.topbar > .nav-links { min-width:0; overflow-x:auto; }
+.topbar .nav-link { flex-shrink:0; white-space:nowrap; }
 .nav-link { text-decoration:none; font-size:13px; font-weight:700; padding:10px 14px; border-radius:999px; color:var(--muted); transition:background .2s,color .2s; }
 .nav-link:hover,.nav-link.active { background:#e8efe4;color:var(--green-dark); }
 .nav-link.unavailable { opacity:.55; cursor:not-allowed; }

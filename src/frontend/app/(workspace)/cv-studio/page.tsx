@@ -82,7 +82,7 @@ export default function CVStudioPage() {
   const { profile: registrationProfile, loading: registrationLoading } = useRegistrationProfile();
   const [template, setTemplate] = useState<TemplateName>("field");
   return <main className="page-wrap cv-studio-page">
-    <PageIntro kicker="CV STUDIO · PROFILE PREVIEW" title={<>A clean view of<br />what you’ve confirmed.</>} description="Choose a layout and preview the details in your registration profile or saved fictional profile. The preview never invents missing titles, dates or employers." index="DOCUMENT STUDIO / 05" />
+    <PageIntro kicker="CV STUDIO · PROFILE PREVIEW" title={<>A clean view of<br />what you’ve confirmed.</>} description="Choose a layout and preview the details in your registration profile or saved profile. The preview never invents missing titles, dates or employers." index="DOCUMENT STUDIO / 05" />
     {registrationLoading ? <ProfileGate loading error="" onRetry={() => {}} /> : registrationProfile ? <>
       <CvTemplateControls template={template} onTemplateChange={setTemplate} />
       <RegistrationCvPreview profile={registrationProfile} template={template} />

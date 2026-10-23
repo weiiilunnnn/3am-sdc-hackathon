@@ -32,7 +32,7 @@ Alternatively, run each service in its own terminal:
 
 ```sh
 python -m uvicorn src.main:app --host 127.0.0.1 --port 8080 --reload
-npm --prefix src/frontend run dev
+npm --prefix src/frontend run dev:frontend
 ```
 
 Next.js proxies `/api/*` to `BACKEND_URL` (default `http://127.0.0.1:8080`). FastAPI docs are at http://127.0.0.1:8080/docs. SQLite defaults to `src/data/future_ready.sqlite3`; set `APP_DB_PATH` to change it. Keep local data and credentials out of Git.
@@ -77,7 +77,7 @@ src/
       (workspace)/          SH’s pages and root layout
     lib/                   Frontend API client and helpers
 runpod/handler.py          Optional career inference Serverless handler
-scripts/dev.py            Optional two-service development launcher
+scripts/dev.py            Cross-platform two-service development launcher
 tests/                    Python, frontend logic and component tests
 docs/                     Architecture, data sources and verification
 submission/               Competition documents
@@ -112,3 +112,71 @@ Team **3AM**, Domain 1, SDG 4 — Quality Education. Team leader: Ooi Wei Lun. U
 The team still needs to supply final live-demo, slide-deck and video links and complete its submission documentation and proofs of use. Existing documents are retained under `submission/`.
 
 Licensed under [Apache License 2.0](LICENSE).
+
+
+## KW ESCO matching and reskilling integration
+
+Main's pages, saved-profile contracts, source adapters, synthetic models and setup
+remain the foundation. The workspace navigation additionally links to
+**`/role-matching`**, which hosts KW's independent ESCO matching and reskilling
+workflow. `/` still redirects to `/register`. The saved-profile/local-vocabulary
+and ESCO profile formats remain separate; no automatic conversion is performed.
+
+The ESCO workflow retains verified citations, full-index skills/title search,
+backend profile-relevance scoring, recommendation qualification rules and
+reviewed learning resources with honest incomplete coverage. Its API paths
+(`/api/matches`, `/api/pathways`, `/api/v2/*`, `/api/v2.1/roles/search`, and explicit
+`/api/esco/*` lookup) retain their existing contracts. Synthetic career/scenario
+scores and ESCO profile relevance have different meanings and are not combined.
+
+Implementation: `src/api/future_roles.py`, `src/models/future_roles.py`,
+`src/models/future_role_discovery.py`, `src/services/future_roles/`,
+`src/services/sources/esco.py`, and the frontend `(workspace)/(future-ready)` route group (shared workspace navigation).
+Main's `lib/api.ts` is unchanged; KW uses `lib/future-role-api.ts`.
+
+Existing ESCO datasets, CSV exports, source registries, resource catalogues and
+export/build scripts remain under `data/` and `scripts/`. Application startup
+does not download ESCO. See `docs/FUTURE_ROLE_IMPLEMENTATION.md` and
+`docs/ROLE_SEARCH_UPDATE.md` for the original feature records, and
+`docs/MAIN_KW_MERGE_REPORT.md` for the integration and current verification.
+
+Install the backend test dependency with `python -m pip install -r requirements-dev.txt`.
+Run all backend tests with `python -m unittest discover -s tests`, and KW browser
+checks with `npm --prefix src/frontend run test:e2e`, in addition to main's
+existing frontend checks. The browser tests use isolated ports 8100/3100,
+`.next-e2e`, and temporary SQLite/model storage. Install the Playwright Chromium
+browser if the test environment does not already have it.
+
+On Windows, macOS and Linux, start both development servers from `src/frontend`:
+
+```sh
+npm run dev
+```
+
+The launcher uses the repository `.venv` automatically (or `PYTHON_EXECUTABLE`),
+starts FastAPI on port 8080 and Next.js on port 3000, and sets the API proxy URL.
+Stop both with Ctrl+C. Stop any previously running servers first. Python and npm
+dependencies must already be installed. Override ports with `API_PORT` and
+`PORT` (or `npm run dev -- --port 3001`). To run only Next.js against a separately
+managed backend, use `npm run dev:frontend` with `BACKEND_URL` set appropriately.
+The Replit `python scripts/dev.py` entry point continues to work.
+
+
+### Future-Role Matching presentation/profile handoff
+
+`/role-matching` now uses compact cards and separate canonical-role details and
+pathway routes. `PathwayView`, backend contracts, scoring and datasets are unchanged.
+Role Matching reads the saved Profile reference already stored by the workspace
+and retrieves `/api/v2/profiles/{profile_id}` on entry and after refresh. This
+read-only adapter preserves the workspace profile contract and resolves claimed
+skills against exact ESCO preferred/alternative labels. Existing local vocabulary
+aliases are used only when saved labels have no exact match. Ambiguous and unknown
+skills remain unresolved and excluded from scoring; no interests or desired skills
+become claimed skills. Duplicate concepts count once. Zero weekly hours become an
+unavailable pathway schedule, preserving the existing positive-hours contract.
+Changes to saved skills invalidate cached recommendations on the next visit.
+The optional `setCurrentFutureRoleProfile` handoff remains available. No CV or
+additional profile contents are persisted in the browser. Without a saved profile,
+the UI requests one; stale references and retrieval failures show retryable errors.
+Development/tests may explicitly use `/role-matching?demo=demo-graduate-a`;
+production never chooses a fixture implicitly.
