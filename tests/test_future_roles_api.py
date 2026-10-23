@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 from fastapi.testclient import TestClient
 from src.main import app
 
@@ -6,7 +7,11 @@ from src.main import app
 class APITests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        providers = patch.dict('os.environ', {'RUNPOD_API_KEY':'', 'TAVILY_API_KEY':'', 'FEATURE4_DYNAMIC_DISCOVERY_ENABLED':'false'})
+        providers.start()
+        cls.addClassCleanup(providers.stop)
         cls.client = TestClient(app)
+        cls.addClassCleanup(cls.client.close)
         cls.bootstrap = cls.client.get('/api/bootstrap').json()
 
     def test_existing_routes(self):

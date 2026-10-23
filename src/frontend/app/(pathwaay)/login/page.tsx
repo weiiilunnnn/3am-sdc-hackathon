@@ -21,6 +21,10 @@ export default function LoginPage() {
   return (
     <main className="login-page">
       <div className="ambient-layer" aria-hidden="true" />
+      <header className="login-topbar">
+        <Link className="brand" href="/" aria-label="Pathwaay home"><span className="brand-mark">P</span> Pathwaay <span className="brand-note">CAREER EXPLORER</span></Link>
+        <Link className="login-back-link" href="/register">Register <span aria-hidden="true">↗</span></Link>
+      </header>
       {showRegisterIntro && <div className="register-intro" aria-hidden="true"><span className="register-intro-mark">P</span><span className="register-intro-word">Pathwaay.</span></div>}
 
       <section className="login-layout" aria-labelledby="login-title">
@@ -54,10 +58,10 @@ export default function LoginPage() {
 
           <form className="login-form" onSubmit={handleSubmit}>
             <label htmlFor="login-email">Email address</label>
-            <div className="login-input-wrap"><span aria-hidden="true">✉</span><input id="login-email" name="email" type="email" placeholder="you@example.com" autoComplete="email" required /></div>
+            <div className="login-input-wrap"><span aria-hidden="true">✉</span><input id="login-email" name="email" type="email" defaultValue="alantan@example.com" placeholder="you@example.com" autoComplete="email" required /></div>
 
             <div className="login-password-label"><label htmlFor="login-password">Password</label><button type="button" className="login-text-button" onClick={() => setMessage("Password recovery will be available when authentication is connected.")}>Forgot password?</button></div>
-            <div className="login-input-wrap"><span aria-hidden="true">⌑</span><input id="login-password" name="password" type={showPassword ? "text" : "password"} placeholder="Enter your password" autoComplete="current-password" required /><button type="button" className="password-visibility" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((visible) => !visible)}>{showPassword ? "HIDE" : "SHOW"}</button></div>
+            <div className="login-input-wrap"><span aria-hidden="true">⌑</span><input id="login-password" name="password" type={showPassword ? "text" : "password"} defaultValue="DemoOnly123!" placeholder="Enter your password" autoComplete="current-password" required /><button type="button" className="password-visibility" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((visible) => !visible)}>{showPassword ? "HIDE" : "SHOW"}</button></div>
 
             <label className="remember-choice"><input type="checkbox" name="remember" /><span className="remember-box" aria-hidden="true" /><span>Keep me signed in</span></label>
             <button className="login-submit" type="submit"><span>Sign in</span><span aria-hidden="true">→</span></button>
@@ -71,7 +75,6 @@ export default function LoginPage() {
         </div>
       </section>
 
-      <footer className="login-footer"><span>PATHWAAY <i>·</i> CAREER EXPLORER</span><span>Build skills for a changing future.</span></footer>
     </main>
   );
 }

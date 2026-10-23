@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { PATHWAAY_PROFILE_HANDOFF_KEY } from "@/lib/pathwaay-profile";
 
 const sections = [
   { href: "/home", label: "My Home" },
@@ -17,7 +18,9 @@ const sections = [
 
 export default function PathwaayRibbon() {
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
 
   useEffect(() => {
     const updateScroll = () => setScrolled(window.scrollY > 8);
@@ -25,6 +28,18 @@ export default function PathwaayRibbon() {
     window.addEventListener("scroll", updateScroll, { passive: true });
     return () => window.removeEventListener("scroll", updateScroll);
   }, []);
+
+  function logOut() {
+    try {
+      window.sessionStorage.removeItem(PATHWAAY_PROFILE_HANDOFF_KEY);
+      setLogoutError("");
+      router.push("/login");
+    } catch {
+      setLogoutError("Could not end this session. Please try again.");
+    }
+  }
+
+  if (pathname === "/login" || pathname === "/register") return null;
 
   return (
     <header className={`pathwaay-ribbon${scrolled ? " is-scrolled" : ""}`}>
@@ -40,7 +55,11 @@ export default function PathwaayRibbon() {
           return <Link key={item.href} href={item.href} className={`pathwaay-ribbon-link${active ? " active" : ""}`} aria-current={active ? "page" : undefined} data-testid={`link-${item.href === "/profile" ? "profile" : item.href.slice(1)}`}>{item.label}</Link>;
         })}
       </nav>
-      <span className="pathwaay-ribbon-meta"><i aria-hidden="true" /> DEMO EXPERIENCE</span>
+      <div className="pathwaay-ribbon-actions">
+        <span className="pathwaay-ribbon-meta"><i aria-hidden="true" /> DEMO EXPERIENCE</span>
+        <button className="pathwaay-ribbon-logout" type="button" onClick={logOut}>Log out</button>
+        {logoutError && <span className="pathwaay-ribbon-logout-error" role="status">{logoutError}</span>}
+      </div>
     </header>
   );
 }

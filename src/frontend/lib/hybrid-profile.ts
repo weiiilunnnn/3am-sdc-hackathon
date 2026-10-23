@@ -1,6 +1,6 @@
 /** Local-device profile continuity, not authenticated account ownership. */
 import { createProfile, getProfile, getSkills, updateProfile, type ProfileDraft, type ProfileItem, type SkillOption, type StoredProfile } from "./api";
-import { PATHWAAY_PROFILE_HANDOFF_KEY, readPathwaayRegistrationProfile, type PathwaayRegistrationProfile } from "./pathwaay-profile";
+import { PATHWAAY_PROFILE_HANDOFF_KEY, PATHWAAY_PROFILE_UPDATED_EVENT, readPathwaayRegistrationProfile, type PathwaayRegistrationProfile } from "./pathwaay-profile";
 import { PROFILE_KEY, profileToDraft } from "../app/(workspace)/profile-workspace";
 import { request } from "./future-role-api";
 import type { Profile } from "./contracts";
@@ -77,6 +77,7 @@ function remember(profile: StoredProfile) {
   window.localStorage.setItem(PROFILE_KEY, profile.id);
   window.sessionStorage.setItem(REVISION_KEY, JSON.stringify({id: profile.id, revision: profile.updated_at}));
   if (profile.registration_profile) window.sessionStorage.setItem(PATHWAAY_PROFILE_HANDOFF_KEY, JSON.stringify(profile.registration_profile));
+  if (profile.registration_profile) window.dispatchEvent(new CustomEvent(PATHWAAY_PROFILE_UPDATED_EVENT, {detail: profile.registration_profile}));
 }
 
 export async function restoreHybridProfile(): Promise<PathwaayRegistrationProfile | null> {

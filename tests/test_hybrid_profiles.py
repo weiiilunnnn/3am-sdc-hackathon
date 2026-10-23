@@ -54,6 +54,44 @@ class HybridProfileTests(unittest.TestCase):
             self.assertEqual(path.status_code, 200, path.text)
             self.assertFalse(path.json()['is_synthetic'])
 
+    def test_main_email_and_taxonomy_links_preserved_without_bypassing_esco(self):
+        snapshot = self.draft['registration_profile']
+        snapshot['email'] = 'fictional@example.invalid'
+        # Snapshot metadata is retained, never trusted as an ESCO identifier.
+        snapshot['skillLinks'] = [{'name':'Python','skill_id':'untrusted-display-id','taxonomy_source':'Local prototype vocabulary'}]
+        first = self.create('main-extraction-metadata-test')
+        self.assertEqual(first['registration_profile']['email'], snapshot['email'])
+        self.assertEqual(first['registration_profile']['skillLinks'], snapshot['skillLinks'])
+        profile = self.client.get('/api/v2/profiles/'+first['id']).json()
+        self.assertNotIn('untrusted-display-id', [s['skill_id'] for s in profile['skills']])
+        self.assertEqual(profile['unresolved_skills'], ['SQL'])
+        self.draft['registration_profile']['email'] = 'updated@example.invalid'
+        response = self.client.put('/api/profiles/'+first['id'],json=self.draft,headers={'If-Match':first['updated_at']})
+        self.assertEqual(response.status_code,200,response.text)
+        self.assertEqual(response.json()['registration_profile']['email'],'updated@example.invalid')
+
+    def test_reviewed_ai_skill_uses_same_profile_and_esco_adapter(self):
+        import json
+        response = {'output':{'choices':[{'message':{'content':json.dumps({'skills':[{
+            'skill_id':'local:python-programming','evidence_id':'e0',
+            'evidence':'using Python','reason':'Explicit activity in the fictional project.'}]})}}]}}
+        with patch('src.services.skill_extractor.run_sync',return_value=response):
+            extracted = self.client.post('/api/profiles/extract-profile-skills',
+                headers={'X-Synthetic-Demo-Confirmed':'true'},json={'evidence':[{
+                    'source_id':'project-1','source_label':'Projects','text':'Built a chart using Python.'}]})
+        self.assertEqual(extracted.status_code,200,extracted.text)
+        candidate = extracted.json()[0]
+        self.draft['projects'] = [{'id':'project-1','title':'Fictional chart','description':'Built a chart using Python.','skill_ids':[]}]
+        # Explicitly reviewed candidate replaces only the matching draft entry.
+        self.draft['skills'][0].update(name=candidate['canonical_name'],skill_id=candidate['skill_id'],evidence_record_ids=candidate['evidence_record_ids'])
+        saved = self.create('reviewed-ai-hybrid-profile')
+        self.assertEqual(len(saved['skills']),3)  # Manual SQL/Data Analysis retained.
+        python = next(s for s in saved['skills'] if s['skill_id']==candidate['skill_id'])
+        self.assertEqual(python['evidence_record_ids'],['project-1'])
+        esco = self.client.get('/api/v2/profiles/'+saved['id']).json()
+        self.assertIn('Python (computer programming)',[s['name'] for s in esco['skills']])
+        self.assertEqual(esco['unresolved_skills'],['SQL'])
+
     def test_retried_creation_never_overwrites_or_duplicates(self):
         key = 'hybrid-test-retry-identity'
         first = self.create(key)

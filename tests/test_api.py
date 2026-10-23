@@ -205,6 +205,57 @@ class ApiIntegrationTests(unittest.TestCase):
         )
         self.assertEqual(large_status, 413)
 
+    def test_ai_skill_extraction_requires_fictional_consent_and_returns_taxonomy_links(self):
+        evidence = [{
+            "source_id": "project-1",
+            "source_label": "Projects",
+            "text": "Built a fictional dashboard using Python.",
+        }]
+        payload = {
+            "input": {
+                "model": "glm-5.3",
+                "messages": [{
+                    "role": "assistant",
+                    "content": json.dumps({
+                        "skills": [{
+                            "skill_id": "local:python-programming",
+                            "evidence_id": "e0",
+                            "evidence": "using Python",
+                            "reason": "The description explicitly mentions Python.",
+                        }]
+                    }),
+                }],
+            }
+        }
+        from src.services.sources.runpod_api import RunPodConfigurationError
+
+        path = "/api/profiles/extract-profile-skills"
+        body = {"evidence": evidence}
+        self.assertEqual(request("POST", path, body)[0], 400)
+
+        headers = [(b"x-synthetic-demo-confirmed", b"true")]
+        with patch(
+            "src.services.skill_extractor.run_sync",
+            return_value={"output": {"choices": [{"message": {"content": payload["input"]["messages"][0]["content"]}}]}},
+        ):
+            status, result = request("POST", path, body, extra_headers=headers)
+        self.assertEqual(status, 200)
+        self.assertEqual(result[0]["skill_id"], "local:python-programming")
+        self.assertEqual(result[0]["canonical_name"], "Python programming")
+        self.assertEqual(result[0]["evidence_record_ids"], ["project-1"])
+
+        with patch("src.services.skill_extractor.run_sync", side_effect=RunPodConfigurationError("RunPod is not configured.")):
+            status, error = request("POST", path, body, extra_headers=headers)
+        self.assertEqual(status, 503)
+        self.assertIn("RunPod", error["detail"])
+
+        from src.services.sources.runpod_api import RunPodRequestError
+
+        with patch("src.services.skill_extractor.run_sync", side_effect=RunPodRequestError("RunPod rejected the API key (HTTP 401). Check RUNPOD_API_KEY.")):
+            status, error = request("POST", path, body, extra_headers=headers)
+        self.assertEqual(status, 502)
+        self.assertEqual(error["detail"], "RunPod rejected the API key (HTTP 401). Check RUNPOD_API_KEY.")
+
 
 if __name__ == "__main__":
     unittest.main()

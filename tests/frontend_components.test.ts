@@ -27,6 +27,19 @@ const { renderToStaticMarkup } = requireFrontend("react-dom/server");
 
 const registrationFixture = (): PathwaayRegistrationProfile => ({firstName:"Fixture",lastName:"Learner",educationLevel:"Bachelor’s degree",university:"",major:"Computing",cgpa:"3.5",schoolAwards:"",experiences:[],skills:["Python","SQL","Data Analysis"],educationRecord:"",volunteering:"",projects:"",certifications:"",achievements:"",interests:"",workActivities:"",strengths:"",skillsToDevelop:"",aspiration:"",profileSummary:"",weeklyHours:"",learningBudget:"",learningMode:""});
 
+test("hybrid snapshot retains new Main metadata while skill IDs remain vocabulary validated", () => {
+  const main = registrationFixture();
+  main.email = "fixture@example.invalid";
+  main.skillLinks = [{name:"Python",skill_id:"esco:untrusted",taxonomy_source:"Display metadata"}];
+  const vocabulary = [{id:"local:python-programming",name:"Python programming",aliases:["Python"]}] as SkillOption[];
+  const draft = registrationToDraft(main,undefined,vocabulary);
+  assert.equal(draft.registration_profile?.email,main.email);
+  assert.deepEqual(draft.registration_profile?.skillLinks,main.skillLinks);
+  assert.equal(draft.skills[0].skill_id,"local:python-programming");
+  assert.deepEqual(draft.skills.map(s=>s.name),main.skills);
+  assert.equal(draft.skills.length,3);
+});
+
 test("hybrid conversion keeps genuine unknowns and exact Main snapshot without inventing ESCO IDs", () => {
   const main = registrationFixture();
   const draft = registrationToDraft(main);
@@ -185,10 +198,11 @@ function render(overrides: Partial<EmploymentSnapshotViewProps> = {}) {
   }));
 }
 
-test("profile recovery exposes an initial loading state before choosing the existing profile UI", () => {
+test("profile component exposes the safe handoff loading state before reading browser profile data", () => {
   const html = renderToStaticMarkup(createElement(Home));
-  assert.match(html, /role="status"/);
   assert.match(html, /Opening your completed profile/);
+  assert.match(html, /role="status"/);
+  assert.doesNotMatch(html, /data-testid="button-save-profile"/);
 });
 
 test("employment component renders attributed records, denominator and escaped text", () => {

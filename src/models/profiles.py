@@ -58,11 +58,20 @@ class RegistrationExperience(BaseModel):
     description: str = Field(default="", max_length=2000)
 
 
+class RegistrationSkillLink(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    name: str = Field(min_length=1, max_length=100)
+    skill_id: str | None = Field(default=None, max_length=100)
+    taxonomy_source: str = Field(max_length=200)
+
+
 class RegistrationProfile(BaseModel):
     """Lossless, bounded snapshot of Main's UI, in the existing profile row."""
     model_config = ConfigDict(extra="forbid")
     firstName: str = Field(max_length=120)
     lastName: str = Field(max_length=120)
+    email: str = Field(default="", max_length=320)
+    skillLinks: list[RegistrationSkillLink] = Field(default_factory=list, max_length=40)
     educationLevel: str = Field(max_length=120)
     university: str = Field(default="", max_length=160)
     major: str = Field(min_length=1, max_length=120)

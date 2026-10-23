@@ -25,7 +25,7 @@ npm --prefix src/frontend run build
 
 Python tests cover profiles, trends, utilities, employment snapshots, mocked HTTP adapters and FastAPI routes. `tests/test_api.py` drives the real ASGI application in process without an extra HTTP-client dependency. Every storage test uses temporary SQLite databases. External responses are mocked; ordinary tests do not fetch a provider.
 
-`tests/frontend_logic.test.mjs` covers profile validation/list parsing and chart geometry. `tests/frontend_components.test.ts` renders existing profile and employment components with React's server renderer: privacy/loading, source attribution, escaped content, empty/error/cache states, initial filters, exact-ID overlap and cooldown formatting. CV extraction and indicator formulas are covered by Python unit tests. `tsx` is a frontend **development-only** dependency for importing TSX in these tests. These rendering tests do not simulate clicks, hydration, or network requests.
+`tests/frontend_logic.test.mjs` covers profile validation/list parsing and chart geometry. `tests/frontend_components.test.ts` renders existing profile and employment components with React's server renderer: privacy/loading, source attribution, escaped content, empty/error/cache states, initial filters, exact-ID overlap and cooldown formatting. CV extraction and indicator formulas are covered by Python unit tests. RunPod skill extraction tests mock model responses and verify taxonomy-ID and quoted-evidence validation; the HTTP helper tests also verify safe upstream status diagnostics without calling a live endpoint. RunPod tests do not call a live endpoint. `tsx` is a frontend **development-only** dependency for importing TSX in these tests. These rendering tests do not simulate clicks, hydration, or network requests.
 
 Run frontend commands with `npm --prefix src/frontend`; there is no root JavaScript workspace.
 
@@ -40,7 +40,7 @@ When adding API coverage:
 - Use FastAPI's test client or an equivalent in-process request test.
 - Point `APP_DB_PATH` at a temporary directory; never use the developer's live SQLite database for test fixtures.
 - Test request validation, response shape/status, persistence, missing records, and source failure behavior.
-- Mock external HTTP responses, including malformed JSON, timeouts, HTTP errors, and valid grouped results.
+- Mock external HTTP responses, including malformed JSON, timeouts, HTTP errors, and valid grouped results. Mock language-model responses and verify returned IDs and evidence against the supplied taxonomy and text.
 
 ## Manual browser checklist
 
@@ -48,15 +48,18 @@ Use this checklist when a request changes an interactive user journey and browse
 
 1. Open `/profile` and confirm the form, privacy warning, validation feedback, and sample profiles load.
 2. Use a fictional sample, edit fields/skills, and submit only synthetic information.
-3. Confirm the saved profile can be retrieved and updated from the same browser.
-4. Open `/radar`; confirm real and synthetic modes are not conflated.
-5. For real observations, check measurement, publication period, source URL, and retrieval timestamp.
-6. Check empty/error/loading states when they are part of the change; do not trigger a live refresh unless the task requires it.
-7. Test `/home` shortcuts, profile record CRUD/evidence links, and saved-profile retry.
-8. Upload only fictional PDF/DOCX files to `/profile`, review/edit extracted sections and skill aliases, then explicitly apply and save.
-9. Preview both saved-profile CV templates, print or Save as PDF, and inspect page breaks.
-10. In `/explore`, combine search with profile, interest, market and research views; verify unsupported filters remain disabled and details show provenance.
-11. Inspect desktop and narrow mobile layouts and keyboard focus. A static screenshot is not an interaction test.
+3. Confirm the saved profile can be retrieved and updated from the same browser. On `/profile/edit`, confirm profile sections remain in read-only cards until their edit icon opens the matching modal; verify Done closes the modal but only the page-level “Save changes” commits the draft, and Escape closes the modal.
+4. On a workspace page, activate the top-right “Log out” button and verify it clears the current tab’s registration profile and returns to `/login`. Authentication is a prototype preview; this action does not revoke a real account session.
+5. Open `/radar`; confirm real and synthetic modes are not conflated.
+6. For real observations, check measurement, publication period, source URL, and retrieval timestamp.
+7. Check empty/error/loading states when they are part of the change; do not trigger a live refresh unless the task requires it.
+8. Test `/home` shortcuts, profile record CRUD/evidence links, and saved-profile retry.
+9. Upload only fictional PDF/DOCX files to `/profile`, review/edit extracted sections and skill aliases, then explicitly apply and save.
+10. In the 01–09 registration wizard, verify its editable fictional sample and email, confirm AI-assisted skill review is a separate step, opt in to RunPod analysis, verify the select-all control, themed accessible skip dialog, Continue gating until selected suggestions are added, add-button placement beside extraction, disabled “Added to my profile” state, responsive candidate grid and full card boundary, quoted evidence and taxonomy IDs. On the experience step, confirm “Add another job” is at the top-left above the experience cards and still adds a new entry. The sample targets up to ten supported local skills; outputs may be fewer. Do not submit a live model request in ordinary tests.
+11. Preview both saved-profile CV templates, print or Save as PDF, and inspect page breaks.
+12. In `/explore`, combine search with profile, interest, market and research views; verify unsupported filters remain disabled and details show provenance.
+13. Inspect desktop and narrow mobile layouts and keyboard focus. A static screenshot is not an interaction test.
+14. Complete registration using fictional data and confirm `/home` displays the registration name, summary, selected skills, experience, education, interests and learning preferences. Open `/cv-studio` and confirm the registration details appear in both templates and Print / Save as PDF; edit and save the profile, then confirm both pages reflect the updated session profile. Confirm registration data is clearly identified as browser-session data and is not mixed with database-backed profile indicators.
 
 ## Build and data safety
 

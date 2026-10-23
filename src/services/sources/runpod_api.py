@@ -5,9 +5,9 @@ from __future__ import annotations
 import json
 import os
 import time
+from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
-from typing import Any
 
 
 class RunPodRequestError(RuntimeError):
@@ -21,6 +21,9 @@ class RunPodRequestError(RuntimeError):
         self.timeout_seconds = timeout_seconds
 
 
+class RunPodConfigurationError(RunPodRequestError):
+    """Required provider configuration is missing."""
+
 def run_sync(endpoint_id: str, payload: dict[str, Any], *, timeout: float = 60) -> dict[str, Any]:
     return _request(endpoint_id, "runsync", payload, timeout=timeout)
 
@@ -33,7 +36,9 @@ def health(endpoint_id: str, *, timeout: float = 5) -> dict[str, Any]:
 def _request(endpoint_id: str, operation: str, payload: dict[str, Any] | None, *, timeout: float) -> dict[str, Any]:
     api_key = os.getenv("RUNPOD_API_KEY")
     if not api_key or api_key == "your-runpod-api-key":
-        raise RunPodRequestError("RunPod is not configured. Set RUNPOD_API_KEY in the backend environment.")
+        raise RunPodConfigurationError("RunPod is not configured. Set RUNPOD_API_KEY in the backend environment.")
+    if not endpoint_id:
+        raise RunPodConfigurationError("RunPod is not configured. Set RUNPOD_LLM_ENDPOINT_ID in the backend environment.")
 
     request = Request(
         f"https://api.runpod.ai/v2/{endpoint_id}/{operation}",
@@ -49,8 +54,20 @@ def _request(endpoint_id: str, operation: str, payload: dict[str, Any] | None, *
         with urlopen(request, timeout=timeout) as response:
             result = json.loads(response.read().decode("utf-8"))
     except HTTPError as exc:
+        if exc.code == 401:
+            message = "RunPod rejected the API key (HTTP 401). Check RUNPOD_API_KEY."
+        elif exc.code == 403:
+            message = "RunPod denied the request (HTTP 403). Check API key permissions."
+        elif exc.code == 404:
+            message = f"RunPod endpoint {endpoint_id} was not found (HTTP 404). Check RUNPOD_LLM_ENDPOINT_ID."
+        elif exc.code == 429:
+            message = "RunPod rate limited the request (HTTP 429). Try again later."
+        else:
+            message = f"RunPod request failed with HTTP {exc.code}."
         category = "authentication" if exc.code in {401, 403} else "rate_limit" if exc.code == 429 else "http_server" if exc.code >= 500 else "http_client"
-        raise failure(category, exc.code) from exc
+        error = failure(category, exc.code)
+        error.args = (message,)
+        raise error from exc
     except TimeoutError as exc:
         raise failure("timeout") from exc
     except URLError as exc:
