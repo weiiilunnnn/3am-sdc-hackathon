@@ -150,6 +150,8 @@ def extract_synthetic_cv(filename: str, content_type: str, payload: bytes) -> CV
                     canonical_name=match["name"] if match else None,
                     skill_id=skill_id,
                     resolution="exact_local_alias_match" if match else "unmatched_user_review_required",
+                    confidence=1.0 if match else 0.25,
+                    evidence=label[:200],
                 ),
             )
 

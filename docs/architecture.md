@@ -28,6 +28,8 @@ Keep all application source code under `src/`. Root-level tests, documentation, 
 - FastAPI is created in `src/main.py`; profile and trend routes are registered from `src/api/`.
 - Request/response validation belongs in Pydantic models under `src/models/`. Business rules and persistence belong in `src/services/`.
 - The CV endpoint accepts bounded raw PDF/DOCX request bytes only after synthetic-demo confirmation. `src/services/cv_extractor.py` extracts text in memory and returns a review payload; it does not write the uploaded file or extracted draft to SQLite.
+- Profile skill extraction sends only selected profile summary, record descriptions, work activities, and transferable strengths to the configured RunPod language-model endpoint after an explicit fictional-data/processing confirmation. The response is constrained to IDs in the current local taxonomy; quoted evidence is checked against the submitted text. Candidates remain transient until a user reviews them, adds them to the unsaved profile, chooses proficiency, and saves. Registration starts with an editable fictional sample designed to support up to ten taxonomy suggestions; model output may be fewer and is not guaranteed.
+- The extraction service does not persist submitted text or candidate output. Text is sent to RunPod, so the endpoint's configured provider data-retention terms apply. Do not submit real CVs or personal information; the profile prototype remains synthetic-only.
 - SQLite is the prototype database. It defaults to `src/data/future_ready.sqlite3`; `APP_DB_PATH` can select another path. SQLite files are excluded from Git.
 - Profile additions are backward-compatible defaults in the stored JSON payload; the feature adds no relational-table migration. Stable IDs identify user-editable education, experience, project, certification, and achievement records.
 - Research adapters return the provider-independent `SourceResult` contract from `src/services/sources/base.py`; OpenAlex supplies annual research counts.
@@ -40,7 +42,7 @@ Keep all application source code under `src/`. Root-level tests, documentation, 
 
 OpenAlex query counts describe indexed research activity, not labor-market demand. Remote OK indicators count configured keyword mentions in a single remote-board sample, not global demand or historical growth. Source IDs, URLs, dates, evidence and snapshot provenance are retained. See [the source assessment](employment-source.md).
 
-The current taxonomy is a small local vocabulary, not an active ESCO integration. RunPod is reserved for possible later work and is not used by the active app. See [Features 1–2 notes](features-1-2.md) and [the data-source template](data-source-template.md).
+The current taxonomy is a small local vocabulary, not an active ESCO integration. Extracted skill IDs are local prototype IDs, not KW/ESCO identifiers. AI extraction requires `RUNPOD_API_KEY` and uses `RUNPOD_LLM_ENDPOINT_ID` when set; it has no silent local or rule-based fallback. See [Features 1–2 notes](features-1-2.md) and [the data-source template](data-source-template.md).
 
 ## Frontend integration and tooling
 
@@ -48,7 +50,7 @@ The frontend is a standalone npm package at `src/frontend/`, matching main’s p
 
 `app/(pathwaay)/` contains main’s onboarding, login and career explorer with its original root layout and stylesheet. `app/(workspace)/` contains SH’s profile, home, CV Studio, outlook, skill explorer and radar with their existing layout and stylesheet. Separate root layouts deliberately cause a full document navigation between groups to avoid global CSS collisions. The group names do not affect URLs.
 
-`/` redirects to `/register` as in main; the existing SH profile editor now lives at `/profile`. Workspace links have been updated. Both sections link to each other. The demo onboarding does not write to the profile API or implement authentication. Existing saved profile IDs and backend contracts are unchanged.
+`/` redirects to `/register` as in main. `/profile` displays the completed onboarding profile; it no longer falls back to the separate legacy profile-intake form. `/profile/edit` edits that same session profile. Workspace links target the completed profile or its edit view. The demo onboarding does not write to the profile API or implement authentication; its demo email, selected skill names, and taxonomy links are carried in session storage only. Email is excluded from AI extraction. Login fields use clearly fictional prefilled values and do not authenticate. Existing API contracts are unchanged.
 
 `runpod/handler.py` is main’s placeholder, restored verbatim and not imported by FastAPI. `scripts/dev.py` starts and supervises the two development services, including for the Replit Run button. No automatic Drizzle migration or production deployment is configured.
 

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { ApiError, getProfile, type ProfileDraft, type StoredProfile } from "@/lib/api";
+import { PATHWAAY_PROFILE_UPDATED_EVENT, readPathwaayRegistrationProfile, type PathwaayRegistrationProfile } from "@/lib/pathwaay-profile";
 
 export const PROFILE_KEY = "aiversecity.synthetic-profile-id";
 
@@ -83,3 +84,19 @@ export function useSavedProfile() {
   return { profile, profileId, loading, error, reload };
 }
 
+export function useRegistrationProfile() {
+  const [profile, setProfile] = useState<PathwaayRegistrationProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const refresh = () => {
+      setProfile(readPathwaayRegistrationProfile());
+      setLoading(false);
+    };
+    refresh();
+    window.addEventListener(PATHWAAY_PROFILE_UPDATED_EVENT, refresh);
+    return () => window.removeEventListener(PATHWAAY_PROFILE_UPDATED_EVENT, refresh);
+  }, []);
+
+  return { profile, loading };
+}

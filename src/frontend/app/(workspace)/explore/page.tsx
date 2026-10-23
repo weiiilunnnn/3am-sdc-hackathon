@@ -180,7 +180,7 @@ export default function ExplorePage() {
         <h2>{entry.name}</h2><p className="skill-source">{entry.id.startsWith("custom:") ? "Custom profile entry · no local taxonomy ID" : `Skill ID · ${entry.id}`}</p>
         <div className="explorer-metric">{measured ? <><strong>{entry.evidence!.posting_count} / {employment!.posting_count}</strong><span>Remote OK posting mentions · {share}</span></> : <><strong>No configured measure</strong><span>{employment?.posting_count ? "This vocabulary entry is not in the posting keyword set." : "No retained posting denominator is available."}</span></>}</div>
         <p className="field-hint">{entry.isProfileSkill ? "This label is already in the saved profile; it is not a career match." : "Browse label only. No proficiency assessment is implied."}</p>
-        <Link className="text-link" href={entry.isProfileSkill ? "/profile#skills-section" : "/profile"}>{entry.isProfileSkill ? "Review this skill in your profile →" : "Open profile to add or review →"}</Link>
+        <Link className="text-link" href={entry.isProfileSkill ? "/profile#completed-skills-heading" : "/profile"}>{entry.isProfileSkill ? "Review this skill in your profile →" : "Open profile to add or review →"}</Link>
         <details><summary>How to interpret this skill</summary><dl className="catalogue-detail">
           <div><dt>Definition</dt><dd>{entry.skill ? "The local vocabulary record does not provide a validated definition." : "No taxonomy definition is available for this custom profile entry."}</dd></div>
           <div><dt>Aliases</dt><dd>{entry.aliases.length ? entry.aliases.join(", ") : "No aliases supplied"}</dd></div>

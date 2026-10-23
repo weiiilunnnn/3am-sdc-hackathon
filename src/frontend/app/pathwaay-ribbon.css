@@ -10,8 +10,14 @@
 .pathwaay-ribbon-links::-webkit-scrollbar { display: none; }
 .pathwaay-ribbon-link { flex: 0 0 auto; padding: 9px 8px; border-radius: 999px; color: #a4bcb1; font-size: 10px; font-weight: 700; text-decoration: none; white-space: nowrap; transition: background .2s, color .2s; }
 .pathwaay-ribbon-link:hover, .pathwaay-ribbon-link.active { background: #173a30; color: #85edbd; }
+.pathwaay-ribbon-actions { position: relative; display: flex; flex: 0 0 auto; align-items: center; gap: 9px; }
 .pathwaay-ribbon-meta { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 8px; padding: 8px 11px; border: 1px solid #31644d; border-radius: 30px; background: #10231c70; color: #9ed6b5; font-size: 9px; font-weight: 700; letter-spacing: .08em; white-space: nowrap; }
 .pathwaay-ribbon-meta i { width: 7px; height: 7px; border-radius: 50%; background: #4db77b; }
+.pathwaay-ribbon-logout { min-height: 36px; padding: 8px 14px; border: 1px solid #39765e; border-radius: 999px; background: #102e26; color: #bce7cf; font-size: 11px; font-weight: 700; white-space: nowrap; cursor: pointer; transition: border-color .18s, background .18s, color .18s; }
+.pathwaay-ribbon-logout:hover { border-color: #77e9b7; background: #174535; color: #effbf4; }
+.pathwaay-ribbon-logout:focus-visible { outline: 2px solid #77e9b7; outline-offset: 3px; }
+.pathwaay-ribbon-logout-error { position: absolute; top: calc(100% + 7px); right: 0; z-index: 1; width: max-content; max-width: min(280px, 80vw); padding: 7px 10px; border: 1px solid #8a4740; border-radius: 8px; background: #3a211e; color: #ffc3b8; font-size: 10px; }
 @media (max-width: 1050px) { .pathwaay-ribbon { gap: 10px; padding-inline: 20px; } .pathwaay-ribbon-links { justify-content: flex-start; } .pathwaay-ribbon-meta { display: none; } }
 @media (max-width: 680px) { .pathwaay-ribbon { min-height: 102px; padding: 10px 16px 8px; flex-wrap: wrap; align-content: center; gap: 7px 12px; } .pathwaay-ribbon::before { height: 102px; } .pathwaay-ribbon-links { order: 3; flex: 1 1 100%; justify-content: flex-start; } .pathwaay-ribbon-link { padding: 8px 7px; font-size: 9px; } }
-@media (prefers-reduced-motion: reduce) { .pathwaay-ribbon::before, .pathwaay-ribbon-link { transition: none; } }
+@media (max-width: 680px) { .pathwaay-ribbon-actions { margin-left: auto; } }
+@media (prefers-reduced-motion: reduce) { .pathwaay-ribbon::before, .pathwaay-ribbon-link, .pathwaay-ribbon-logout { transition: none; } }

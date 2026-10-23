@@ -51,12 +51,11 @@ function render(overrides: Partial<EmploymentSnapshotViewProps> = {}) {
   }));
 }
 
-test("profile component exposes fictional-only boundary, fields and visible loading state", () => {
+test("profile component exposes the safe handoff loading state before reading browser profile data", () => {
   const html = renderToStaticMarkup(createElement(Home));
-  assert.match(html, /Fictional demo profiles only/);
-  assert.match(html, /data-testid="loading-profile-message"/);
-  assert.match(html, /data-testid="input-interests"/);
-  assert.match(html, /disabled="" data-testid="button-save-profile"/);
+  assert.match(html, /Opening your completed profile/);
+  assert.match(html, /role="status"/);
+  assert.doesNotMatch(html, /data-testid="button-save-profile"/);
 });
 
 test("employment component renders attributed records, denominator and escaped text", () => {
