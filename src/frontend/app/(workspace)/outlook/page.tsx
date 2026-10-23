@@ -110,7 +110,7 @@ export default function OutlookPage() {
       {profile?.skills_to_develop.length || profile?.interests.length ? <div className="outlook-interest-list"><strong>Your stated interests · not generated recommendations</strong><div>{[...new Set([...(profile.skills_to_develop ?? []), ...(profile.interests ?? [])])].map((item) => <span className="topic-tag" key={item}>{item}</span>)}</div></div> : <p className="message info">Add interests or skills you want to develop in your profile to use the “Related to my interests” filter in Explore Skills.</p>}
       <div className="outlook-action-links">
         <Link className="button secondary" href="/explore">Explore Skills and compare filters</Link>
-        <Link className="button ghost" href="/profile#experience-section">Add experience or skill evidence</Link>
+        <Link className="button ghost" href="/profile/edit#completed-experience-heading">Review experience and skill evidence</Link>
         <Link className="button ghost" href="/cv-studio">Preview your saved CV</Link>
       </div>
     </section>

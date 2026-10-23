@@ -1,0 +1,37 @@
+{
+  "dataset_id": "kw-synthetic-profiles-v1",
+  "schema_version": "1.0",
+  "synthetic": true,
+  "profile_count": 25000,
+  "seed": 20261022,
+  "profile_format": "one KW UserProfile JSON object per JSONL line",
+  "target_labels_file": "kw_profile_targets_v1.csv",
+  "source": {
+    "name": "ESCO",
+    "version": "1.2.1",
+    "kw_git_ref": "origin/KW",
+    "kw_git_revision": "aa8b6ff024e63704abcd1c16604208d91f127137",
+    "license_and_attribution": "ESCO v1.2.1; European Commission reuse conditions (2011/833/EU). ESCO acknowledgement required.",
+    "license_url": "https://esco.ec.europa.eu/en/about-esco/faq?page=1",
+    "inputs": [
+      "data\\csv\\occupations.csv",
+      "data\\csv\\skills.csv",
+      "data\\csv\\essential_relationships.csv",
+      "data\\csv\\optional_relationships.csv"
+    ]
+  },
+  "generation_method": "Uniformly sample an occupation with essential skill relationships; select 1-20 essential skills, 0-3 optional skills, and 0-2 skills from the full ESCO skill catalog that are not linked to that target occupation. Proficiency and non-skill profile fields are left unknown or empty.",
+  "limitations": [
+    "All profiles and target-role labels are synthetic and are not real users, self-reports, observed career outcomes, or representative population samples.",
+    "Synthetic target occupations are evaluation labels only and are stored separately from the KW UserProfile contract.",
+    "ESCO occupation-skill relationships are classification data, not job vacancy, employer demand, or hiring evidence."
+  ],
+  "files": {
+    "kw_profiles_v1.jsonl.gz": {
+      "sha256": "47597099c042896d3e98d165d95c21e17bc86ae22e07ec6fdbcff840c5cafde5"
+    },
+    "kw_profile_targets_v1.csv": {
+      "sha256": "55ca32725dbcd9797a1657753951cc148e67842757c9f1f85e5005ac41a9c86f"
+    }
+  }
+}

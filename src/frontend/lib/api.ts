@@ -238,9 +238,32 @@ export type CVExtraction = {
     original_text: string;
     canonical_name: string | null;
     skill_id: string | null;
-    resolution: "exact_local_alias_match" | "unmatched_user_review_required";
+    resolution: string;
+    confidence?: number | null;
+    evidence?: string | null;
+    rationale?: string | null;
+    evidence_source?: string | null;
+    evidence_record_ids?: string[];
   }[];
   warnings: string[];
+};
+
+export type SkillExtractionCandidate = {
+  original_text: string;
+  canonical_name: string | null;
+  skill_id: string | null;
+  resolution: string;
+  confidence: number | null;
+  evidence: string | null;
+  rationale: string | null;
+  evidence_source: string | null;
+  evidence_record_ids: string[];
+};
+
+export type SkillEvidenceInput = {
+  source_id: string | null;
+  source_label: string;
+  text: string;
 };
 
 export class ApiError extends Error {
@@ -347,6 +370,14 @@ export async function extractCV(file: File): Promise<CVExtraction> {
     throw new ApiError(typeof detail === "string" ? detail : `CV extraction failed with status ${response.status}.`, response.status);
   }
   return body as CVExtraction;
+}
+
+export function extractProfileSkills(evidence: SkillEvidenceInput[], limit = 20) {
+  return request<SkillExtractionCandidate[]>("/api/profiles/extract-profile-skills", {
+    method: "POST",
+    headers: { "X-Synthetic-Demo-Confirmed": "true" },
+    body: JSON.stringify({ evidence, limit }),
+  });
 }
 
 export function getTrendTopics() {

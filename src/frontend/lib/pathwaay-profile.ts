@@ -1,4 +1,5 @@
 export const PATHWAAY_PROFILE_HANDOFF_KEY = "pathwaay.registration-profile";
+export const PATHWAAY_PROFILE_UPDATED_EVENT = "pathwaay-profile-updated";
 
 export type PathwaayExperience = {
   id: string;
@@ -8,9 +9,16 @@ export type PathwaayExperience = {
   description: string;
 };
 
+export type PathwaaySkillLink = {
+  name: string;
+  skill_id: string | null;
+  taxonomy_source: string;
+};
+
 export type PathwaayRegistrationProfile = {
   firstName: string;
   lastName: string;
+  email?: string;
   educationLevel: string;
   university: string;
   major: string;
@@ -18,6 +26,7 @@ export type PathwaayRegistrationProfile = {
   schoolAwards: string;
   experiences: PathwaayExperience[];
   skills: string[];
+  skillLinks?: PathwaaySkillLink[];
   educationRecord: string;
   volunteering: string;
   projects: string;
@@ -45,11 +54,21 @@ export function readPathwaayRegistrationProfile(): PathwaayRegistrationProfile |
     if (typeof profile.firstName !== "string" || typeof profile.major !== "string" || !Array.isArray(profile.skills)) return null;
     const text = (field: unknown) => typeof field === "string" ? field : "";
     const experiences = Array.isArray(profile.experiences) ? profile.experiences.filter((entry) => entry && typeof entry.id === "string") : [];
+    const skillLinks = Array.isArray(profile.skillLinks)
+      ? profile.skillLinks.flatMap((entry) => {
+        if (!entry || typeof entry !== "object") return [];
+        const link = entry as Partial<PathwaaySkillLink>;
+        if (typeof link.name !== "string" || typeof link.taxonomy_source !== "string") return [];
+        if (link.skill_id !== null && typeof link.skill_id !== "string") return [];
+        return [{ name: link.name, skill_id: link.skill_id ?? null, taxonomy_source: link.taxonomy_source }];
+      })
+      : [];
     return {
-      firstName: text(profile.firstName), lastName: text(profile.lastName), educationLevel: text(profile.educationLevel),
+      firstName: text(profile.firstName), lastName: text(profile.lastName), email: text(profile.email), educationLevel: text(profile.educationLevel),
       university: text(profile.university), major: text(profile.major), cgpa: text(profile.cgpa), schoolAwards: text(profile.schoolAwards),
       experiences: experiences.map((entry) => ({ id: text(entry.id), title: text(entry.title), timeframe: text(entry.timeframe), company: text(entry.company), description: text(entry.description) })),
       skills: profile.skills.filter((skill): skill is string => typeof skill === "string"),
+      skillLinks,
       educationRecord: text(profile.educationRecord), volunteering: text(profile.volunteering), projects: text(profile.projects),
       certifications: text(profile.certifications), achievements: text(profile.achievements), interests: text(profile.interests),
       workActivities: text(profile.workActivities), strengths: text(profile.strengths), skillsToDevelop: text(profile.skillsToDevelop),
