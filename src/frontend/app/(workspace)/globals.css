@@ -595,3 +595,105 @@ body { background:#06110f;color:#e8f5ee; }
 .footer-note { position:relative;z-index:1;color:#729485; }
 @media(max-width:850px) { .topbar { gap:10px; } .nav-links { flex:1;overflow-x:auto;justify-content:flex-start; } }
 @media(max-width:680px) { .topbar { position:sticky;top:0;align-items:flex-start;flex-direction:column;gap:8px;height:auto;min-height:94px;padding:10px 16px 8px;background:transparent; } .topbar::before { height:94px; } .nav-links { width:100%; } .nav-meta { display:none; } .completed-profile::after { top:110px;right:-22%;width:72vw; } }
+
+/* Employer workforce skills prototype. */
+.employer-page { max-width:1320px; }
+.employer-notice { margin:0 0 18px;padding:12px 15px;border:1px solid #765f36;border-left:3px solid #e5bd5b;border-radius:10px;background:#29271d;color:#d8c99b;font-size:10px;line-height:1.6; }
+.employer-notice strong { color:#f0d887; }
+.employer-summary-grid { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 18px; }
+.employer-summary-card { display:grid;gap:6px;padding:17px;border-radius:13px; }
+.employer-summary-card > span { color:#8eb8a3;font:500 9px "DM Mono",monospace;letter-spacing:.08em; }
+.employer-summary-card strong { color:#d9f5e5;font:700 28px "Space Grotesk",sans-serif; }
+.employer-summary-card small { color:#95afa2;font-size:9px; }
+.employer-controls,.employer-heatmap-section,.employer-members-section,.employer-member-detail { padding:clamp(18px,3vw,27px); }
+.employer-controls { display:grid;gap:17px;margin-bottom:18px; }
+.employer-controls-heading h2 { margin:6px 0 4px;color:#e8f5ee;font:700 18px "Space Grotesk",sans-serif; }
+.employer-controls-heading p,.employer-target-editor > div > p { margin:0;color:#9bb5aa;font-size:10px;line-height:1.5; }
+.employer-create-department { display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end;max-width:620px; }
+.employer-create-department .field,.employer-filter { display:grid;gap:6px; }
+.employer-create-department input,.employer-filter select,.employer-assignment select { min-width:0;min-height:39px;padding:8px 10px;border:1px solid #35715d;border-radius:8px;background:#0b211c;color:#e8f5ee;font-size:11px; }
+.employer-filter { max-width:420px; }
+.employer-target-editor { display:grid;gap:12px;padding:15px;border:1px solid #2b594b;border-radius:12px;background:#0c211c; }
+.employer-target-editor h3,.employer-member-detail h3 { margin:0 0 5px;color:#dff2e6;font:700 12px "Space Grotesk",sans-serif; }
+.employer-target-options { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;max-height:210px;overflow:auto;padding:2px; }
+.employer-target-options label { display:flex;align-items:flex-start;gap:7px;min-width:0;padding:8px;border:1px solid #2b594b;border-radius:8px;background:#102a23;color:#b8d2c3;font-size:9px;line-height:1.4;cursor:pointer; }
+.employer-target-options input { flex:0 0 auto;margin:2px 0 0;accent-color:#58d9a5; }
+.employer-target-editor .button { justify-self:start; }
+.employer-heatmap-section { margin-bottom:18px; }
+.employer-heatmap-section .section-heading,.employer-members-section .section-heading,.employer-member-detail .section-heading { align-items:flex-start; }
+.employer-heatmap { color:#cde1d4; }
+.employer-heatmap th { color:#a7c1b3; }
+.employer-heatmap tbody th { font:600 11px "DM Sans",sans-serif; }
+.employer-heatmap td { font-size:10px; }
+.employer-coverage { display:inline-flex;min-width:72px;justify-content:center;padding:5px 8px;border:1px solid;border-radius:99px;font:600 9px "DM Mono",monospace; }
+.employer-coverage-high { border-color:#398766;background:#143b30;color:#a5ebc2; }
+.employer-coverage-medium { border-color:#8c7841;background:#39341f;color:#f0d889; }
+.employer-coverage-low { border-color:#9c6154;background:#3b2824;color:#ffc0ad; }
+.employer-coverage-empty { border-color:#536960;background:#20312b;color:#b5c3bc; }
+.employer-team-layout { display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:18px;align-items:start; }
+.employer-members-section,.employer-member-detail { min-width:0; }
+.employer-member-list { display:grid;gap:8px; }
+.employer-member-card { display:grid;gap:8px;padding:11px;border:1px solid #2b594b;border-radius:10px;background:#0d241f; }
+.employer-member-card.selected { border-color:#58d9a5;box-shadow:0 0 0 1px #58d9a533; }
+.employer-member-open { display:grid;gap:4px;padding:0;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer; }
+.employer-member-open:focus-visible { outline:2px solid #77e9b7;outline-offset:3px;border-radius:4px; }
+.employer-member-number { color:#72c99d;font:500 8px "DM Mono",monospace;letter-spacing:.1em; }
+.employer-member-open strong { color:#e5f3eb;font:700 12px "Space Grotesk",sans-serif; }
+.employer-member-open > span:not(.employer-member-number),.employer-member-open small { color:#9bb5aa;font-size:9px;line-height:1.45; }
+.employer-assignment { display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;color:#99b5a7;font-size:9px; }
+.employer-assignment select { min-height:32px;padding:6px 8px;font-size:9px; }
+.employer-member-detail { display:grid;gap:13px; }
+.employer-detail-meta,.employer-interest-tags { display:flex;flex-wrap:wrap;gap:6px; }
+.employer-detail-meta span,.employer-interest-tags span { padding:6px 9px;border:1px solid #2b594b;border-radius:99px;background:#14342b;color:#aed8bd;font-size:9px; }
+.employer-member-detail h3 { margin:2px 0 0; }
+.employer-member-detail h3 small { margin-left:5px;color:#91aa9d;font:400 9px "DM Sans",sans-serif; }
+.employer-current-skills,.employer-gap-list { display:grid;gap:7px;margin:0;padding:0;list-style:none; }
+.employer-current-skills li { display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px;border:1px solid #294d40;border-radius:8px;background:#0e2922; }
+.employer-current-skills li > span { display:grid;gap:3px;min-width:0; }
+.employer-current-skills strong { color:#d5ecde;font-size:10px; }
+.employer-current-skills small,.employer-gap-list small { color:#89a99a;font-size:8px;overflow-wrap:anywhere; }
+.employer-current-skills b { flex:0 0 auto;color:#9fe9c4;font:500 8px "DM Mono",monospace;text-transform:uppercase; }
+.employer-evidence-note,.employer-muted { margin:0;color:#92ac9e;font-size:9px;line-height:1.5; }
+.employer-gap-list li { display:grid;gap:3px;padding:8px 10px;border-left:2px solid #e5bd5b;border-radius:0 7px 7px 0;background:#29271d;color:#f0d887;font-size:10px; }
+.employer-plan-button { justify-self:start; }
+.employer-learning-plan { display:grid;gap:10px;padding:14px;border:1px solid #35715d;border-radius:11px;background:#0c211c; }
+.employer-learning-plan h3 { margin:0;color:#dff2e6; }
+.employer-learning-plan > p { margin:0;color:#b7cfc0;font-size:10px;line-height:1.55; }
+.employer-learning-plan ol { display:grid;gap:8px;margin:0;padding-left:20px; }
+.employer-learning-plan li { padding-left:3px;color:#8ee9bc;font-size:10px; }
+.employer-learning-plan li strong,.employer-learning-plan li span { display:block; }
+.employer-learning-plan li strong { color:#dceee3; }
+.employer-learning-plan li span { margin-top:3px;color:#8fb7a0;font-size:8px; }
+.employer-learning-plan li p { margin:5px 0 0;color:#a8c4b5;font-size:9px;line-height:1.5; }
+.employer-learning-plan > small { color:#e1cc86;font-size:8px;line-height:1.5; }
+.employer-back-link { margin:18px 0 0;text-align:right;font-size:10px; }
+.employer-back-link a { color:#9fe9c4; }
+.employer-directory-controls { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:clamp(18px,3vw,27px);margin-bottom:18px; }
+.employer-directory-controls .field input,.employer-directory-controls .field select { min-width:0;min-height:42px;padding:9px 11px;border:1px solid #35715d;border-radius:9px;background:#0b211c;color:#e8f5ee;font-size:11px; }
+.employer-directory-results { display:grid;gap:10px; }
+.employer-directory-count { margin:0;color:#9bb5aa;font-size:10px; }
+.employer-directory-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px; }
+.employer-directory-card { display:grid;align-content:start;gap:9px;min-width:0;padding:18px; }
+.employer-directory-card h2 { margin:0;color:#e8f5ee;font:700 16px "Space Grotesk",sans-serif;overflow-wrap:anywhere; }
+.employer-directory-card > p { margin:0;color:#9bb5aa;font-size:10px;line-height:1.55; }
+.employer-directory-card .employer-detail-meta { margin:0; }
+.employer-directory-skills strong { color:#c9e6d4; }
+.employer-directory-empty { display:grid;justify-items:start;gap:10px;padding:clamp(20px,4vw,34px); }
+.employer-directory-empty h2 { margin:0;color:#e8f5ee;font:700 17px "Space Grotesk",sans-serif; }
+.employer-directory-empty p { max-width:620px;margin:0;color:#9bb5aa;font-size:11px;line-height:1.6; }
+.employer-company-card { display:flex;align-items:center;gap:18px;padding:clamp(20px,4vw,34px);margin-bottom:18px; }
+.employer-company-monogram { display:grid;width:64px;height:64px;flex:0 0 64px;place-items:center;border:1px solid #398766;border-radius:18px;background:linear-gradient(145deg,#176a51,#104c3b);color:#e8f5ee;font:800 28px "Space Grotesk",sans-serif; }
+.employer-company-identity { min-width:0; }
+.employer-company-identity h2 { margin:5px 0;color:#e8f5ee;font:800 clamp(23px,4vw,34px) "Space Grotesk",sans-serif;letter-spacing:-.04em; }
+.employer-company-identity p { margin:0;color:#9bb5aa;font-size:11px; }
+.employer-company-badge { margin-left:auto;padding:7px 10px;border:1px solid #398766;border-radius:99px;background:#143b30;color:#a5ebc2;font:600 8px "DM Mono",monospace;letter-spacing:.08em;white-space:nowrap; }
+.employer-company-details { display:grid;gap:18px;padding:clamp(18px,3vw,27px); }
+.employer-company-details .section-heading { margin-bottom:0; }
+.employer-company-facts { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0; }
+.employer-company-facts > div { display:grid;gap:7px;padding:13px;border:1px solid #2b594b;border-radius:10px;background:#0d241f; }
+.employer-company-facts dt { color:#89a99a;font:500 8px "DM Mono",monospace;letter-spacing:.08em;text-transform:uppercase; }
+.employer-company-facts dd { margin:0;color:#e5f3eb;font-size:11px;font-weight:700; }
+.employer-company-description { max-width:740px;margin:0;color:#a9c2b4;font-size:11px;line-height:1.65; }
+@media(max-width:850px) { .employer-team-layout { grid-template-columns:1fr; } .employer-target-options { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:850px) { .employer-directory-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:680px) { .employer-summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .employer-create-department { grid-template-columns:1fr; } .employer-target-options { grid-template-columns:1fr; } .employer-heatmap { min-width:520px; } .employer-assignment { grid-template-columns:1fr; } .employer-directory-controls,.employer-directory-grid,.employer-company-facts { grid-template-columns:1fr; } .employer-company-card { align-items:flex-start;flex-wrap:wrap; } .employer-company-badge { margin-left:0; } }

@@ -229,6 +229,66 @@ export type ProfileInsights = {
   notice: string;
 };
 
+export type EmployerSkill = {
+  skill_id: string | null;
+  name: string;
+  proficiency: Proficiency;
+  evidence_record_count: number;
+};
+
+export type DepartmentSkillCoverage = {
+  skill_id: string;
+  skill_name: string;
+  member_count: number;
+  members_with_skill: number;
+  coverage_percent: number | null;
+  gap_percent: number | null;
+};
+
+export type EmployerDepartment = {
+  id: string;
+  name: string;
+  member_count: number;
+  target_skill_ids: string[];
+  skill_coverage: DepartmentSkillCoverage[];
+};
+
+export type EmployerMember = {
+  id: string;
+  department_id: string | null;
+  department_name: string | null;
+  status: string;
+  field_of_study: string;
+  current_occupation: string | null;
+  years_experience: number;
+  skills: EmployerSkill[];
+  skills_to_develop: string[];
+  evidence_coverage_percent: number | null;
+};
+
+export type EmployerTeamDashboard = {
+  member_count: number;
+  unassigned_count: number;
+  departments: EmployerDepartment[];
+  members: EmployerMember[];
+  data_notice: string;
+};
+
+export type EmployerLearningPlan = {
+  member_id: string;
+  department_name: string;
+  summary: string;
+  steps: {
+    skill_name: string;
+    title: string;
+    activity: string;
+    resource_type: "guided practice" | "project" | "reading topic" | "video topic" | "peer exercise";
+    duration_hours: number;
+  }[];
+  model: "RunPod GLM-5.3";
+  notice: string;
+};
+
 export type CVExtraction = {
   synthetic_demo: true;
   filename: string;
@@ -318,6 +378,37 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export function getSkills(query = "") {
   const suffix = query ? `?q=${encodeURIComponent(query)}` : "";
   return request<SkillsResponse>(`/api/skills${suffix}`);
+}
+
+export function getEmployerDashboard() {
+  return request<EmployerTeamDashboard>("/api/employer/dashboard");
+}
+
+export function createEmployerDepartment(name: string) {
+  return request<{ id: string; name: string }>("/api/employer/departments", {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  });
+}
+
+export function assignEmployerMember(memberId: string, departmentId: string | null) {
+  return request<null>(`/api/employer/members/${encodeURIComponent(memberId)}/department`, {
+    method: "PUT",
+    body: JSON.stringify({ department_id: departmentId }),
+  });
+}
+
+export function setEmployerDepartmentTargets(departmentId: string, skillIds: string[]) {
+  return request<null>(`/api/employer/departments/${encodeURIComponent(departmentId)}/targets`, {
+    method: "PUT",
+    body: JSON.stringify({ skill_ids: skillIds }),
+  });
+}
+
+export function generateEmployerLearningPlan(memberId: string) {
+  return request<EmployerLearningPlan>(`/api/employer/members/${encodeURIComponent(memberId)}/learning-plan`, {
+    method: "POST",
+  });
 }
 
 export function getSampleProfiles() {

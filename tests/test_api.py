@@ -42,7 +42,7 @@ def request(
         await app(scope, receive, send)
         status = next(message["status"] for message in messages if message["type"] == "http.response.start")
         data = b"".join(message.get("body", b"") for message in messages if message["type"] == "http.response.body")
-        return status, json.loads(data)
+        return status, json.loads(data) if data else None
     return asyncio.run(run())
 
 
@@ -255,6 +255,118 @@ class ApiIntegrationTests(unittest.TestCase):
             status, error = request("POST", path, body, extra_headers=headers)
         self.assertEqual(status, 502)
         self.assertEqual(error["detail"], "RunPod rejected the API key (HTTP 401). Check RUNPOD_API_KEY.")
+
+    def test_employer_dashboard_departments_targets_and_minimized_member_records(self):
+        first = self.draft()
+        first["skills"] = [{
+            "name": "Python programming",
+            "skill_id": "local:python-programming",
+            "proficiency": "intermediate",
+            "force_custom": False,
+            "evidence_record_ids": [],
+        }]
+        first["professional_summary"] = "Fictional private summary should not be included in the employer list."
+        first_status, first_profile = request("POST", "/api/profiles", first)
+        second = self.draft()
+        second["skills"] = [{
+            "name": "Data analysis",
+            "skill_id": "local:data-analysis",
+            "proficiency": "beginner",
+            "force_custom": False,
+            "evidence_record_ids": [],
+        }]
+        second_status, second_profile = request("POST", "/api/profiles", second)
+        self.assertEqual((first_status, second_status), (201, 201))
+
+        status, department = request("POST", "/api/employer/departments", {"name": "Data & Insights"})
+        self.assertEqual(status, 201)
+        self.assertEqual(request("POST", "/api/employer/departments", {"name": "data & insights"})[0], 409)
+        for profile in (first_profile, second_profile):
+            self.assertEqual(
+                request("PUT", f"/api/employer/members/{profile['id']}/department", {"department_id": department["id"]})[0],
+                204,
+            )
+        self.assertEqual(
+            request("PUT", f"/api/employer/departments/{department['id']}/targets", {
+                "skill_ids": ["local:python-programming", "local:data-analysis"],
+            })[0],
+            204,
+        )
+        status, dashboard = request("GET", "/api/employer/dashboard")
+        self.assertEqual(status, 200)
+        self.assertEqual(dashboard["member_count"], 2)
+        self.assertEqual(dashboard["unassigned_count"], 0)
+        data_team = next(item for item in dashboard["departments"] if item["id"] == department["id"])
+        self.assertEqual(data_team["member_count"], 2)
+        self.assertEqual([item["coverage_percent"] for item in data_team["skill_coverage"]], [50.0, 50.0])
+        self.assertNotIn("private summary", json.dumps(dashboard).lower())
+        self.assertIn("No HR authentication", dashboard["data_notice"])
+        self.assertEqual(request("PUT", "/api/employer/members/missing/department", {"department_id": department["id"]})[0], 404)
+        self.assertEqual(request("PUT", f"/api/employer/departments/{department['id']}/targets", {"skill_ids": ["fake:skill"]})[0], 422)
+
+    def test_employer_learning_plan_sends_only_minimum_skill_context_and_validates_output(self):
+        draft = self.draft()
+        draft["professional_summary"] = "Do not send this fictional summary to the model."
+        draft["current_occupation"] = "Do not send this occupation to the model."
+        draft["skills"] = [{
+            "name": "Python programming",
+            "skill_id": "local:python-programming",
+            "proficiency": "intermediate",
+            "force_custom": False,
+            "evidence_record_ids": [],
+        }]
+        _, profile = request("POST", "/api/profiles", draft)
+        _, department = request("POST", "/api/employer/departments", {"name": "Data Team"})
+        request("PUT", f"/api/employer/members/{profile['id']}/department", {"department_id": department["id"]})
+        request("PUT", f"/api/employer/departments/{department['id']}/targets", {"skill_ids": ["local:data-analysis"]})
+        plan_content = json.dumps({
+            "summary": "Build practical data analysis experience.",
+            "steps": [{
+                "skill_name": "Data analysis",
+                "title": "Explore a small dataset",
+                "activity": "Use a fictional dataset to identify patterns and explain one result.",
+                "resource_type": "guided practice",
+                "duration_hours": 2,
+            }],
+        })
+        with patch(
+            "src.services.employer_service.run_sync",
+            return_value={"output": {"choices": [{"message": {"content": plan_content}}]}},
+        ) as run_model:
+            status, result = request("POST", f"/api/employer/members/{profile['id']}/learning-plan")
+        self.assertEqual(status, 200)
+        self.assertEqual(result["steps"][0]["skill_name"], "Data analysis")
+        self.assertIn("not verified courses or links", result["notice"])
+        model_payload = run_model.call_args.args[1]
+        model_text = json.dumps(model_payload)
+        self.assertNotIn(profile["id"], model_text)
+        self.assertNotIn("Do not send this", model_text)
+        self.assertNotIn("occupation", model_text.lower())
+
+        wrong_skill = json.dumps({
+            "summary": "Unsupported plan.",
+            "steps": [{
+                "skill_name": "Machine learning",
+                "title": "Take a course",
+                "activity": "Complete activities.",
+                "resource_type": "project",
+                "duration_hours": 3,
+            }],
+        })
+        with patch(
+            "src.services.employer_service.run_sync",
+            return_value={"output": {"choices": [{"message": {"content": wrong_skill}}]}},
+        ):
+            status, error = request("POST", f"/api/employer/members/{profile['id']}/learning-plan")
+        self.assertEqual(status, 502)
+        self.assertIn("invalid employer learning plan", error["detail"])
+
+        from src.services.sources.runpod_api import RunPodConfigurationError
+
+        with patch("src.services.employer_service.run_sync", side_effect=RunPodConfigurationError("RunPod is not configured.")):
+            status, error = request("POST", f"/api/employer/members/{profile['id']}/learning-plan")
+        self.assertEqual(status, 502)
+        self.assertIn("RunPod is not configured", error["detail"])
 
 
 if __name__ == "__main__":

@@ -4,7 +4,19 @@ A career-development prototype combining Pathwaay’s onboarding and career/SDG 
 
 ## Local development
 
-Requires Python 3.10+ and Node.js 22.18+ (Node 24 recommended). Use npm inside `src/frontend`; this repository is not a pnpm workspace.
+Requires Python 3.10+ and Node.js 22.18+ (Node 24 recommended). Use npm inside `src/frontend`; this repository is not a pnpm workspace. The development launcher supports Windows, macOS and Linux.
+
+Windows PowerShell:
+
+```sh
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+npm --prefix src/frontend ci
+python scripts/dev.py
+```
+
+macOS/Linux:
 
 ```sh
 python3 -m venv .venv
@@ -14,7 +26,7 @@ npm --prefix src/frontend ci
 python scripts/dev.py
 ```
 
-Open http://localhost:3000. The launcher starts FastAPI on 127.0.0.1:8080 and Next.js on port 3000, and stops both when interrupted or either service exits. `PORT` and `API_PORT` can override these development ports. The launcher requires a POSIX environment (macOS/Linux/Replit).
+Open http://localhost:3000. The launcher starts FastAPI on 127.0.0.1:8080 and Next.js on port 3000, and stops both when interrupted or either service exits. `PORT` and `API_PORT` can override these development ports.
 
 Alternatively, run each service in its own terminal:
 
@@ -32,6 +44,9 @@ Next.js proxies `/api/*` to `BACKEND_URL` (default `http://127.0.0.1:8080`). Fas
 | `/` | Redirects to `/register`, matching main |
 | `/register`, `/login` | Main’s onboarding/sign-in previews; no account creation or authentication |
 | `/explorer` | Main’s career matching, SDG mapping and scenario demo |
+| `/employer` | Employer dashboard with department setup and team skills-gap coverage |
+| `/employer/directory` | Search and filter synthetic team profiles |
+| `/employer/profile` | Fictional Company X IT company demo profile |
 | `/profile` | SH’s existing profile editor, sample profiles and CV upload/review (previously `/`) |
 | `/home` | Saved-profile workspace overview |
 | `/cv-studio` | Saved-profile CV previews and printing |
