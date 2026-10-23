@@ -8,7 +8,7 @@
 .evolution-profile-line { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 19px; }
 .evolution-profile-line span { padding: 5px 11px; border: 1px solid #60c58d55; border-radius: 100px; background: #11382a; color: #d2f5dd; font-size: 12px; }
 .evolution-profile-line span + span { background: transparent; color: #9fbfab; }
-.evolution-profile-picker { display: grid; flex: 0 0 230px; gap: 7px; color: #a9c6b5; font-size: 12px; font-weight: 700; }
+.evolution-profile-picker { display: grid; flex: 0 1 360px; min-width: min(100%, 320px); gap: 7px; color: #a9c6b5; font-size: 12px; font-weight: 700; }
 .evolution-profile-picker select { width: 100%; min-height: 44px; padding: 9px 12px; border: 1px solid #70bc94; border-radius: 10px; background: #09251d; color: #f3fff6; font: 600 13px "DM Sans",sans-serif; }
 .evolution-view-tabs { display: inline-flex; gap: 5px; margin: 0 0 24px; padding: 5px; border: 1px solid #5da77c75; border-radius: 12px; background: #0a241c; }
 .evolution-view-tabs button { min-height: 43px; padding: 8px 18px; border: 0; border-radius: 9px; background: transparent; color: #b8d8c1; font: 700 14px "DM Sans",sans-serif; cursor: pointer; }
@@ -286,6 +286,7 @@
 .evolution-page .evolution-support-summary p {max-width:62ch;}
 .evolution-page .evolution-support-summary>strong {flex-shrink:0;font:700 clamp(18px,2.2vw,26px)/1.15 "Space Grotesk",sans-serif;color:#a2f2c1;}
 .evolution-page .evolution-limits {margin-top:28px;padding:26px 0 0;}
+.evolution-page .evolution-limits.evolution-conclusion {padding:24px 28px;}
 .evolution-page .evolution-limits strong {font-size:20px;}
 .evolution-page .evolution-limits p {font-size:14px;line-height:1.6;}
 @media(max-width:650px){.evolution-page .evolution-support-summary{align-items:flex-start;flex-direction:column;}}
@@ -358,7 +359,13 @@
 .evolution-research-detail a { flex: none; color: #a1f5be; text-underline-offset: 3px; }
 .evolution-research-footer { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; padding: 18px 3px 0; color: #a6c3ae; font-size: 12px; }
 .evolution-research-footer p { max-width: 65ch; margin: 0; line-height: 1.5; }
+@media (max-width: 900px) {
+  .evolution-page .evolution-header { align-items: stretch; flex-direction: column; gap: 20px; }
+  .evolution-profile-picker { flex: none; width: min(100%, 460px); min-width: 0; }
+}
 @media (max-width: 700px) {
+  .evolution-profile-picker { min-width: 0; width: 100%; }
+  .evolution-page .evolution-limits.evolution-conclusion { padding:20px; }
   .evolution-page .evolution-skills { padding: 21px; }
   .evolution-page .evolution-results-title { align-items: start; }
   .evolution-research-chart { padding: 20px; }
