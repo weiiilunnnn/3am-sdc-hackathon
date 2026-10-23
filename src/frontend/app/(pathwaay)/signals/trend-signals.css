@@ -359,9 +359,12 @@
 .evolution-research-track { height: 13px; margin: 13px 0 11px; overflow: hidden; border-radius: 99px; background: #29533e; }
 .evolution-research-track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#2fbf80,#95f3b5); }
 .evolution-research-detail { color: #b4d1bd; font-size: 13px; line-height: 1.4; font-variant-numeric: tabular-nums; }
-.evolution-research-detail a { flex: none; color: #a1f5be; text-underline-offset: 3px; }
-.evolution-research-footer { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; padding: 18px 3px 0; color: #a6c3ae; font-size: 12px; }
+.evolution-research-footer { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 12px 18px; padding: 18px 3px 0; color: #a6c3ae; font-size: 12px; }
 .evolution-research-footer p { max-width: 65ch; margin: 0; line-height: 1.5; }
+.evolution-research-sources { flex-basis: 100%; }
+.evolution-research-sources summary { width: fit-content; color: #a1f5be; cursor: pointer; }
+.evolution-research-sources ul { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 12px 0 0; padding: 0; list-style: none; }
+.evolution-research-sources a { color: #a1f5be; text-underline-offset: 3px; }
 @media (max-width: 900px) {
   .evolution-page .evolution-header { align-items: stretch; flex-direction: column; gap: 20px; }
   .evolution-profile-picker { flex: none; width: min(100%, 460px); min-width: 0; }
