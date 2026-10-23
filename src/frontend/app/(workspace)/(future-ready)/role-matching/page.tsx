@@ -62,7 +62,6 @@ export default function RoleMatching() {
       {error && <div role="alert" className="error-panel compact">{error}<button className="text-button" onClick={() => void (ready ? calculate() : load())}>Try again</button></div>}
       {!ready && !error && <p role="status">Loading verified reference data...</p>}
       {ready && !profile && <div className="empty-state"><h3>Complete your profile to see personalised matches</h3><p>Save your skills on the Profile page, then return here for personalised matches.</p><Link className="secondary" href="/profile">Go to your profile</Link></div>}
-      {ready && profile && <p className="micro notice">{profile.is_synthetic ? `Synthetic profile: ${profile.profile_id}` : "Current skills profile"}</p>}
       <form className="catalogue-toolbar role-search-toolbar" onSubmit={e => { e.preventDefault(); void calculate(); }}>
         <label htmlFor="occupation-search">Search occupations</label><div className="role-search-input-row">
           <input id="occupation-search" type="search" maxLength={100} value={session.query} disabled={!ready || !profile} onChange={e => changeQuery(e.target.value)} />
@@ -75,7 +74,6 @@ export default function RoleMatching() {
       {busy && <p role="status">Comparing your skills against verified requirements...</p>}
       {matches && <div aria-live="polite" aria-busy={busy}>
         <p className="small result-count">{count} {search ? "title search results" : "qualifying occupations"}</p>
-        {matches.unknown_user_skills.length > 0 && <p className="notice">Unresolved skills, excluded from scoring: {matches.unknown_user_skills.join(", ")}</p>}
         {!matches.results.length && <div className="empty-state"><h3>{search ? "No occupations found" : matches.insufficient_evidence ? "Add more specific skills" : "No qualifying roles found"}</h3><p>{search ? "No indexed preferred title or official alternative label matches this search." : "The recommendation threshold and evidence safeguards have not been lowered to force results."}</p></div>}
         <div className="compact-results-grid">{matches.results.map(role => <CareerCard key={role.role_id} match={role} busy={busy} />)}</div>
         {matches.next_offset !== null && <button className="secondary see-more" disabled={busy} onClick={() => void calculate(matches.next_offset!, matches.role_query)}>{search ? "Show more search results" : "Show more qualifying roles"}</button>}
