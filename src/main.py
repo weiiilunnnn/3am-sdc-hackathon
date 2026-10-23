@@ -18,6 +18,7 @@ from src.api.employment import router as employment_router
 from src.api.cv import router as cv_router
 from src.api.career import router as career_router
 from src.api.sdg import router as sdg_router
+from src.api.employer import router as employer_router
 from src.services.storage import initialize_database
 from src.utils import format_greeting, summarize
 
@@ -35,6 +36,7 @@ app.include_router(employment_router)
 app.include_router(cv_router)
 app.include_router(career_router)
 app.include_router(sdg_router)
+app.include_router(employer_router)
 
 
 class SummarizeRequest(BaseModel):
