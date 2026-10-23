@@ -33,7 +33,7 @@
 .role-search-input-row .role-search-submit{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;padding:0}
 
 /* Dedicated results/detail presentation, isolated to the FutureReady route group. */
-.role-pages{max-width:1120px}.role-results-panel{max-width:none;margin:0 0 30px;text-align:left}.role-results-panel .results-heading{padding-top:0}.compact-results-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;margin:20px 0}.compact-career-card{display:flex;flex-direction:column;margin:0;padding:24px;min-width:0}.compact-career-card h3{margin-bottom:20px}.relevance-summary{display:grid;gap:12px}.relevance-summary .score{display:flex;align-items:baseline;gap:10px;text-align:left;white-space:normal}.relevance-summary .score span{font-size:11px}.compact-card-actions{display:flex;justify-content:flex-end;margin-top:auto;padding-top:24px}.compact-card-actions a{text-decoration:none}.back-to-matches{display:inline-block;margin:24px 0}.career-overview,.career-skills-analysis{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:32px;margin:0 0 24px;min-width:0}.career-overview-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px}.career-overview-top h1{font-size:clamp(27px,4vw,38px);letter-spacing:-1px;overflow-wrap:anywhere}.career-overview-top .secondary{white-space:nowrap;flex-shrink:0}.career-overview .relevance-summary{max-width:380px;margin:16px 0}.career-overview .description-block{margin-top:24px}.skills-analysis-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:32px;margin-top:28px}.skills-analysis-columns h3,.skills-gap-breakdown h3{font-size:18px}.area-tiles{display:grid;gap:10px}.area-tile{padding:14px;background:var(--paper);border-radius:8px;overflow-wrap:anywhere}.area-tile>strong{font-size:12px}.area-tile>.area-count{display:inline-block;margin-left:8px}.area-tile p{margin:8px 0}.skills-gap-breakdown{border-top:1px solid var(--line);padding-top:24px;margin-top:28px}.gap-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}.gap-facts>div{background:var(--soft);border-radius:8px;padding:14px}.gap-facts dt{font-size:11px;line-height:1.6}.gap-facts dd{margin:8px 0 0;font-size:24px;color:var(--green)}.role-pages .record-id{overflow-wrap:anywhere}
+.role-pages{max-width:1120px}.role-results-panel{max-width:none;margin:0 0 30px;text-align:left}.role-results-panel .results-heading{padding-top:0}.compact-results-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;margin:20px 0}.compact-career-card{display:flex;flex-direction:column;margin:0;padding:24px;min-width:0}.compact-career-card h3{margin-bottom:20px}.relevance-summary{display:grid;gap:12px}.relevance-summary .score{display:flex;align-items:baseline;gap:10px;text-align:left;white-space:normal}.relevance-summary .score span{font-size:11px}.compact-card-actions{display:flex;justify-content:flex-end;margin-top:auto;padding-top:24px}.compact-card-actions a{text-decoration:none}.back-to-matches{display:inline-block;margin:24px 0;text-decoration:none}.career-overview,.career-skills-analysis{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:32px;margin:0 0 24px;min-width:0}.career-overview-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px}.career-overview-top h1{font-size:clamp(27px,4vw,38px);letter-spacing:-1px;overflow-wrap:anywhere}.career-overview-top .secondary{white-space:nowrap;flex-shrink:0}.career-overview .relevance-summary{max-width:380px;margin:16px 0}.career-overview .description-block{margin-top:24px}.skills-analysis-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:32px;margin-top:28px}.skills-analysis-columns h3,.skills-gap-breakdown h3{font-size:18px}.area-tiles{display:grid;gap:10px}.area-tile{padding:14px;background:var(--paper);border-radius:8px;overflow-wrap:anywhere}.area-tile>strong{font-size:12px}.area-tile>.area-count{display:inline-block;margin-left:8px}.area-tile p{margin:8px 0}.skills-gap-breakdown{border-top:1px solid var(--line);padding-top:24px;margin-top:28px}.gap-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}.gap-facts>div{background:var(--soft);border-radius:8px;padding:14px}.gap-facts dt{font-size:11px;line-height:1.6}.gap-facts dd{margin:8px 0 0;font-size:24px;color:var(--green)}.role-pages .record-id{overflow-wrap:anywhere}
 @media(max-width:680px){.compact-results-grid,.skills-analysis-columns,.gap-facts{grid-template-columns:1fr}.career-overview,.career-skills-analysis{padding:20px 16px}.career-overview-top{flex-direction:column;gap:12px}.career-overview-top .secondary{min-height:44px}.compact-career-card{padding:20px}.role-pages .relevance-summary .score{max-width:none}.role-pages .header-label{display:none}.skills-analysis-columns{gap:22px}}
 
 /* Full-width result cards; details and pathway presentation stay scoped separately. */
@@ -137,4 +137,39 @@
 .future-role-ui .pathway-hero{background:linear-gradient(140deg,#173e30,#102d29);border:1px solid var(--line)}
 .future-role-ui .resource-card{box-shadow:0 10px 28px #0002}
 .future-role-ui :is(a,button,input,select,summary):focus-visible{outline:3px solid var(--green);outline-offset:3px}
+.role-sdg-page{padding:20px 0 48px}
+.role-sdg-career{margin:0 0 30px}
+.role-sdg-career h1{font-size:clamp(28px,4vw,40px);letter-spacing:-1px;overflow-wrap:anywhere}
+.role-sdg-career>p:not(.eyebrow){max-width:800px;color:var(--muted);line-height:1.7}
+.role-sdg-skills{border-top:1px solid var(--line);margin-top:24px;padding-top:20px}
+.role-sdg-skills h2{font-size:18px}
+.role-sdg-skills ul{display:flex;flex-wrap:wrap;gap:9px;list-style:none;margin:0;padding:0}
+.role-sdg-skills li{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:9px;padding:9px 12px;background:var(--panel-solid);font-size:12px}
+.role-sdg-skills li span{color:var(--muted);font-size:9px}
+.role-sdg-skills li.is-sdg-mapped{border-color:#548d70}
+.role-sdg-skills li.is-sdg-mapped span{color:var(--green)}
+.role-sdg-section{padding:12px 0 30px}
+.role-sdg-section-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+.role-sdg-section-heading h2{font-size:clamp(23px,3vw,30px)}
+.role-sdg-goals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:20px 0}
+.role-sdg-goal{display:flex;align-items:flex-start;gap:14px;width:100%;min-width:0;text-align:left;padding:17px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}
+.role-sdg-goal:hover,.role-sdg-goal.selected{border-color:var(--green);background:#123329}
+.role-sdg-goal img{width:54px;height:54px;object-fit:contain;border-radius:5px;flex:0 0 54px}
+.role-sdg-goal-copy{display:grid;gap:7px;min-width:0}
+.role-sdg-goal-copy strong{font-size:14px}
+.role-sdg-goal-copy>span{font-size:12px;line-height:1.5;color:var(--muted)}
+.role-sdg-goal-copy small{font-size:10px;color:var(--green)}
+.role-sdg-targets{margin-top:25px;padding:20px;border:1px solid var(--line);border-radius:12px;background:var(--panel-solid)}
+.role-sdg-targets h3{font-size:18px}
+.role-sdg-target-list{display:grid;gap:9px}
+.role-sdg-target-list button{display:flex;align-items:center;gap:14px;padding:12px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--ink);text-align:left}
+.role-sdg-target-list button:hover,.role-sdg-target-list button.selected{border-color:var(--green);background:#15382e}
+.role-sdg-target-list strong{color:var(--green);font-size:12px}
+.role-sdg-target-list span{font-size:12px}
+.role-sdg-target-detail{margin-top:17px;padding:17px;border-left:3px solid var(--green);background:#112820}
+.role-sdg-target-detail h4{margin:7px 0;font-size:16px}
+.role-sdg-target-detail p{margin:0;color:var(--muted);font-size:12px}
+.role-sdg-attribution{margin-top:22px;color:var(--muted);font-size:10px;line-height:1.6}
+.role-sdg-attribution a{color:var(--green)}
+@media(max-width:680px){.role-sdg-page{padding-top:10px}.role-sdg-career{padding:22px 18px}.role-sdg-goals{grid-template-columns:1fr}.role-sdg-section-heading{flex-direction:column}.role-sdg-targets{padding:16px}.role-sdg-target-list button{align-items:flex-start;flex-direction:column;gap:5px}}
 @media(prefers-reduced-motion:reduce){.future-role-ui *,.future-role-ui *::before,.future-role-ui *::after{animation:none;transition:none;scroll-behavior:auto}}

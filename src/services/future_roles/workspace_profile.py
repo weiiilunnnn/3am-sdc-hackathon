@@ -9,6 +9,18 @@ def adapt_workspace_profile(saved: ProfileRecord, index: OccupationIndex) -> Use
     skills: dict[str, ProfileSkill] = {}
     unresolved = []
     for skill in saved.skills:
+        if skill.taxonomy_source == "ESCO v1.2.1":
+            if (
+                skill.skill_id
+                and skill.skill_id.startswith("http://data.europa.eu/esco/skill/")
+                and skill.skill_id in index.skills
+            ):
+                sid = skill.skill_id
+                skills[sid] = ProfileSkill(skill_id=sid, name=index.skills[sid].name,
+                                           proficiency=skill.proficiency, self_reported=True)
+            else:
+                unresolved.append(skill.display_name)
+            continue
         labels = [skill.display_name, *skill.input_names]
         local = find_skill_by_id(skill.skill_id) if skill.skill_id and not skill.is_custom else None
         candidates = set()

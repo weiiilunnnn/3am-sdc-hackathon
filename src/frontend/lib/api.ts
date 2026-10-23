@@ -65,7 +65,7 @@ export type NormalizedSkill = {
   display_name: string;
   input_names: string[];
   proficiency: Proficiency;
-  taxonomy_source: "Local prototype vocabulary" | "Custom";
+  taxonomy_source: "Local prototype vocabulary" | "ESCO v1.2.1" | "Custom";
   is_custom: boolean;
   evidence_record_ids: string[];
 };
@@ -103,6 +103,18 @@ export type SkillsResponse = {
     status_note: string;
   };
   skills: SkillOption[];
+};
+
+type EscoSkillRecord = {
+  skill_id: string;
+  name: string;
+  aliases: string[];
+};
+
+type EscoSkillsResponse = {
+  skills: EscoSkillRecord[];
+  esco_release: string;
+  data_source_status: string;
 };
 
 export type TrendObservation = {
@@ -260,6 +272,7 @@ export type SkillExtractionCandidate = {
   evidence: string | null;
   rationale: string | null;
   evidence_source: string | null;
+  taxonomy_source: string | null;
   evidence_record_ids: string[];
 };
 
@@ -267,6 +280,11 @@ export type SkillEvidenceInput = {
   source_id: string | null;
   source_label: string;
   text: string;
+};
+
+type SkillExtractionJobStatus = {
+  status: "pending" | "completed";
+  skills?: SkillExtractionCandidate[] | null;
 };
 
 export class ApiError extends Error {
@@ -323,6 +341,26 @@ export function getSkills(query = "") {
   return request<SkillsResponse>(`/api/skills${suffix}`);
 }
 
+export async function getEscoSkills(query = "", signal?: AbortSignal): Promise<SkillOption[]> {
+  const suffix = query ? `?q=${encodeURIComponent(query)}` : "";
+  const response = await request<EscoSkillsResponse>(`/api/v2/skills${suffix}`, { signal });
+  if (response.esco_release !== "v1.2.1" || response.data_source_status !== "local_full") {
+    throw new ApiError(
+      "The verified full ESCO v1.2.1 skill catalogue is unavailable; no local prototype vocabulary was substituted.",
+      503,
+    );
+  }
+  return response.skills.map((skill) => ({
+    id: skill.skill_id,
+    name: skill.name,
+    aliases: skill.aliases,
+    taxonomy_source: "ESCO v1.2.1",
+    esco_uri: skill.skill_id,
+    source_version: "v1.2.1",
+    source_url: skill.skill_id,
+  }));
+}
+
 export function getSampleProfiles() {
   return request<{ synthetic: true; profiles: SampleProfile[] }>("/api/profiles/samples");
 }
@@ -377,12 +415,48 @@ export async function extractCV(file: File): Promise<CVExtraction> {
   return body as CVExtraction;
 }
 
-export function extractProfileSkills(evidence: SkillEvidenceInput[], limit = 20) {
-  return request<SkillExtractionCandidate[]>("/api/profiles/extract-profile-skills", {
+function waitForSkillExtractionPoll(signal?: AbortSignal) {
+  return new Promise<void>((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new DOMException("Skill extraction was cancelled.", "AbortError"));
+      return;
+    }
+    const timeout = window.setTimeout(() => {
+      signal?.removeEventListener("abort", abort);
+      resolve();
+    }, 1000);
+    const abort = () => {
+      window.clearTimeout(timeout);
+      signal?.removeEventListener("abort", abort);
+      reject(new DOMException("Skill extraction was cancelled.", "AbortError"));
+    };
+    signal?.addEventListener("abort", abort, { once: true });
+  });
+}
+
+export async function extractProfileSkills(
+  evidence: SkillEvidenceInput[],
+  limit = 10,
+  signal?: AbortSignal,
+) {
+  const job = await request<{ job_id: string }>("/api/profiles/extract-profile-skills", {
     method: "POST",
     headers: { "X-Synthetic-Demo-Confirmed": "true" },
     body: JSON.stringify({ evidence, limit }),
+    signal,
   });
+  const deadline = Date.now() + 110_000;
+  while (Date.now() < deadline) {
+    await waitForSkillExtractionPoll(signal);
+    const result = await request<SkillExtractionJobStatus>(
+      `/api/profiles/extract-profile-skills/${encodeURIComponent(job.job_id)}`,
+      { signal },
+    );
+    if (result.status === "completed") {
+      return (result.skills ?? []).slice(0, limit);
+    }
+  }
+  throw new ApiError("Skill extraction is taking longer than expected. Please try again.", 408);
 }
 
 export function getTrendTopics() {

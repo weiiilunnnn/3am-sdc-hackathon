@@ -1,5 +1,6 @@
 """Existing KW HTTP contracts, registered alongside main's routers."""
 import logging
+from functools import lru_cache
 from fastapi import APIRouter, HTTPException, Query
 from src.models.future_roles import MatchRequest, MatchResponse, PathwayRequest, PathwayResponse, UserProfile
 from src.models.future_role_discovery import DiscoveryRequest, DiscoveryResponse, RoleSearchRequest, RoleSearchResponse
@@ -18,6 +19,7 @@ from src.models.career_analysis import AnalysisRequest, CareerAnalysis
 from src.services.future_roles.career_analysis import analyse_career
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.post('/api/v2/roles/analysis', response_model=CareerAnalysis)
@@ -157,13 +159,40 @@ def discovery_bootstrap():
 
 
 @router.get('/api/v2/skills')
-def search_skills(q: str = Query('', max_length=100), limit: int = Query(40, ge=1, le=40)):
+def search_skills(q: str = Query('', max_length=300), limit: int = Query(40, ge=1, le=100)):
     index = get_occupation_index()
-    query = ' '.join(q.casefold().split())
-    matches = [s for s in index.skills.values() if not query or any(query in ' '.join(t.casefold().split()) for t in [s.name, *s.aliases])]
-    matches.sort(key=lambda s: (s.name.casefold() != query, s.name.casefold(), s.skill_id))
+    if index.coverage != 'local_full' or index.catalog.dataset_version != 'v1.2.1':
+        logger.error('ESCO skill search unavailable: %s', index.warning or 'full pinned index unavailable')
+        raise HTTPException(status_code=503, detail='The verified full ESCO v1.2.1 skill catalogue is unavailable.')
+    labels_by_id = _esco_skill_search_labels(index.fingerprint)
+    queries = [' '.join(value.casefold().split()) for value in q.split('|') if value.strip()]
+    matches = [
+        index.skills[skill_id]
+        for skill_id, labels in labels_by_id
+        if not queries or any(query in label for query in queries for label in labels)
+    ]
+    matches.sort(key=lambda skill: (
+        not any(skill.name.casefold() == query for query in queries),
+        skill.name.casefold(),
+        skill.skill_id,
+    ))
     return {'schema_version': '2.0', 'total': len(matches), 'skills': [s.model_dump(mode='json') for s in matches[:limit]],
             'esco_release': index.catalog.dataset_version, 'data_source_status': index.coverage}
+
+
+@lru_cache(maxsize=1)
+def _esco_skill_search_labels(fingerprint: str) -> tuple[tuple[str, tuple[str, ...]], ...]:
+    index = get_occupation_index()
+    if index.fingerprint != fingerprint:
+        raise HTTPException(status_code=503, detail='The ESCO skill catalogue changed while preparing search.')
+    skills = (
+        skill for skill in index.skills.values()
+        if skill.skill_id.startswith('http://data.europa.eu/esco/skill/')
+    )
+    return tuple(
+        (skill.skill_id, tuple(' '.join(label.casefold().split()) for label in [skill.name, *skill.aliases]))
+        for skill in sorted(skills, key=lambda item: (item.name.casefold(), item.skill_id))
+    )
 
 
 @router.get('/api/v2/roles/detail')

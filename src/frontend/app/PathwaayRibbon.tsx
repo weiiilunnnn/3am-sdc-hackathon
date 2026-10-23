@@ -11,7 +11,6 @@ const sections = [
   { href: "/cv-studio", label: "CV Studio" },
 
   { href: "/signals", label: "AI Trend Signal" },
-  { href: "/explorer", label: "Career Demo" },
   { href: "/role-matching", label: "Role Matching" },
 ];
 

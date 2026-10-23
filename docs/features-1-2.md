@@ -15,12 +15,12 @@ scenarios remain out of scope.
 - Profile create, read, and update data is stored in SQLite. By default the
   database is `src/data/future_ready.sqlite3`; set `APP_DB_PATH` to use another
   location. SQLite database files are excluded from Git.
-- Skill matches use stable `local:` identifiers in the current prototype.
-  Unknown skills are kept as custom entries without an identifier rather than
-  being silently mapped to a known concept. Duplicate known skills are merged;
-  the highest supplied proficiency is retained and the original labels are
-  preserved. A user can explicitly keep a known alias as custom, and that
-  choice is preserved when the profile is updated.
+- Skills selected or reviewed during registration use canonical ESCO v1.2.1
+  skill IDs from the verified English snapshot. Legacy profile entries can
+  still use stable `local:` identifiers. Unknown skills are kept as custom
+  entries without an identifier rather than being silently mapped to a known
+  concept. Duplicate known skills are merged; the highest supplied proficiency
+  is retained and the original labels are preserved.
 - Two fictional sample profiles are available from
   `GET /api/profiles/samples`; loading a sample in the UI does not save it until
   the user submits the form.
@@ -74,21 +74,26 @@ scores. CV Studio previews only saved profile information, offers two layouts,
 and invokes the browser's print / Save as PDF flow. Browser export and multi-page
 print layout still need manual confirmation.
 
-### ESCO status
+### ESCO-backed registration search and skill extraction
 
-The official ESCO API and reuse terms were investigated. The API returned HTTP
-500 during its announced maintenance on 21 October 2026, and the classification
-pages returned a temporary-issue message alongside conflicting concept status.
-To avoid shipping potentially obsolete or mislabelled ESCO identifiers, this
-version uses a documented, small local vocabulary and labels it as such. It
-does not claim the local identifiers are ESCO URIs.
+Registration skill search and AI-assisted skill extraction use the committed,
+verified full English ESCO v1.2.1 snapshot at
+`data/index/esco_v1.2.1_en.json.gz`. The index manifest records its acquisition,
+coverage, integrity hash, version assurance, and attribution; the application
+does not call the ESCO API during search or extraction. Search uses ESCO skill
+concept URIs only. AI extraction retrieves a bounded candidate set locally,
+sends those candidates with fictional profile evidence to RunPod after
+confirmation, validates returned IDs against that set, and verifies each quote
+against its source text. The full taxonomy is never placed in a model request.
+If the full verified snapshot is unavailable, search/extraction reports an
+error rather than falling back to the local prototype vocabulary.
 
-ESCO's official FAQ says the classification may be reused free of charge,
-subject to attribution; see the [ESCO FAQ](https://esco.ec.europa.eu/en/about-esco/faq).
-When service access is restored, verify each concept's status in a pinned
-version before adding ESCO URIs. The required attribution for future ESCO-backed
-services is: “This service uses the ESCO classification of the European
-Commission.”
+Reviewed ESCO skill IDs are retained when registration data is saved and are
+validated against the pinned snapshot before profile persistence or matching.
+ESCO content remains subject to the European Commission's reuse conditions
+cited by the [ESCO FAQ](https://esco.ec.europa.eu/en/about-esco/faq). The
+required attribution is: “This service uses the ESCO classification of the
+European Commission.”
 
 ## AI-Trend Signal Layer
 
@@ -180,13 +185,15 @@ demo remains visibly synthetic and separate.
 
 | Route | Purpose |
 | --- | --- |
-| `GET /api/skills?q=...` | Search the local vocabulary and show its provenance |
+| `GET /api/skills?q=...` | Search the legacy local vocabulary and show its provenance |
+| `GET /api/v2/skills?q=...` | Search ESCO v1.2.1 skill concepts from the full local snapshot |
 | `GET /api/profiles/samples` | Return five fictional profile drafts |
 | `POST /api/profiles` | Validate and persist a fictional profile |
 | `GET /api/profiles/{id}` | Retrieve a saved profile |
 | `PUT /api/profiles/{id}` | Replace a saved profile |
 | `GET /api/profiles/{id}/insights` | Return deterministic profile-content indicators |
 | `POST /api/profiles/extract-cv` | Extract bounded text from a confirmed synthetic PDF/DOCX without saving the upload |
+| `POST /api/profiles/extract-profile-skills` | Start transient skill extraction using bounded ESCO v1.2.1 candidates; poll `GET /api/profiles/extract-profile-skills/{job_id}` for status and results |
 | `GET /api/trends/topics` | Return search definitions and measurement notes |
 | `GET /api/trends/sources` | Return provider and license metadata |
 | `GET /api/trends` | Return the real-data cache without making a source request |

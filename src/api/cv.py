@@ -5,9 +5,19 @@ import logging
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
-from src.models.cv import CVExtraction, ExtractedSkill
+from src.models.cv import CVExtraction, SkillExtractionJobStarted, SkillExtractionJobStatus
 from src.services.cv_extractor import CVExtractionError, MAX_UPLOAD_BYTES, extract_synthetic_cv
-from src.services.skill_extractor import SkillEvidence, SkillExtractionError, extract_profile_skill_candidates
+from src.services.skill_extractor import (
+    SkillEvidence,
+    SkillExtractionError,
+    SkillTaxonomyUnavailableError,
+    validate_skill_evidence,
+)
+from src.services.skill_extraction_jobs import (
+    SkillExtractionBusyError,
+    get_skill_extraction_job,
+    submit_skill_extraction,
+)
 from src.services.sources.runpod_api import RunPodConfigurationError, RunPodRequestError
 
 router = APIRouter(prefix="/api")
@@ -51,11 +61,15 @@ async def extract_cv(request: Request) -> CVExtraction:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/profiles/extract-profile-skills", response_model=list[ExtractedSkill])
-async def extract_profile_skills(
+@router.post(
+    "/profiles/extract-profile-skills",
+    response_model=SkillExtractionJobStarted,
+    status_code=202,
+)
+def extract_profile_skills(
     request: Request,
     payload: ProfileSkillExtractionRequest,
-) -> list[ExtractedSkill]:
+) -> SkillExtractionJobStarted:
     if request.headers.get("x-synthetic-demo-confirmed", "").casefold() != "true":
         raise HTTPException(status_code=400, detail="Confirm that the profile contains fictional demo content before AI extraction.")
     try:
@@ -68,11 +82,41 @@ async def extract_profile_skills(
             )
             for index, item in enumerate(payload.evidence)
         ]
-        return extract_profile_skill_candidates(evidence, limit=payload.limit)
+        validate_skill_evidence(evidence)
+        job_id = submit_skill_extraction(evidence, limit=payload.limit)
+        return SkillExtractionJobStarted(job_id=job_id)
     except SkillExtractionError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except SkillExtractionBusyError as exc:
+        raise HTTPException(status_code=429, detail=str(exc)) from exc
+
+
+@router.get(
+    "/profiles/extract-profile-skills/{job_id}",
+    response_model=SkillExtractionJobStatus,
+)
+def get_profile_skill_extraction_status(job_id: str) -> SkillExtractionJobStatus:
+    job = get_skill_extraction_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Skill extraction job was not found or has expired.")
+    if not job.future.done():
+        return SkillExtractionJobStatus(status="pending")
+    try:
+        return SkillExtractionJobStatus(status="completed", skills=job.future.result())
+    except SkillExtractionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except SkillTaxonomyUnavailableError as exc:
+        logger.error("ESCO skill extraction is unavailable: %s", exc)
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     except RunPodConfigurationError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except RunPodRequestError as exc:
-        logger.warning("RunPod skill extraction failed: %s", exc)
+        logger.warning(
+            "RunPod skill extraction failed (category=%s, status=%s, elapsed=%s, timeout=%s): %s",
+            exc.category,
+            exc.http_status,
+            exc.elapsed_seconds,
+            exc.timeout_seconds,
+            exc,
+        )
         raise HTTPException(status_code=502, detail=str(exc)) from exc

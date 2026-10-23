@@ -3,24 +3,64 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useRef, useState } from "react";
-import { extractProfileSkills, getSkills, type SkillEvidenceInput, type SkillExtractionCandidate, type SkillOption } from "@/lib/api";
+import { extractProfileSkills, getEscoSkills, type SkillEvidenceInput, type SkillExtractionCandidate, type SkillOption } from "@/lib/api";
 import { PATHWAAY_PROFILE_HANDOFF_KEY, type PathwaayRegistrationProfile } from "@/lib/pathwaay-profile";
 
 import { saveHybridProfile } from "@/lib/hybrid-profile";
 
 const educationOptions = ["Secondary", "Certificate", "Diploma", "Bachelor’s degree", "Postgraduate", "Other"];
 const learningModes = ["Self-paced", "Instructor-led", "Peer learning", "A mix of formats"];
-const recommendedSkillNames = ["Python programming", "Data analysis", "Machine learning", "Communication", "Problem solving", "Critical thinking"];
+const recommendedSkillNames = [
+  "Python (computer programming)",
+  "perform data analysis",
+  "machine learning",
+  "communication",
+  "solve problems",
+  "think critically",
+];
 
 type ChosenSkill = { id: string; name: string; source: string };
 type JobExperience = { id: string; title: string; timeframe: string; company: string; description: string };
 
+const demoPresetSkills: ChosenSkill[] = [
+  { id: "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d", name: "Python (computer programming)", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/2b92a5b2-6758-4ee3-9fb4-b6387a55cc8f", name: "perform data analysis", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be", name: "use spreadsheets software", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/07889c08-7220-47c8-96f7-6068fbea00dc", name: "normalise data", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/1b70a55d-b8a4-49fc-96c6-15ab4cff2522", name: "use data processing techniques", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/1e77e42a-181f-4b48-8e74-201ce50ffc29", name: "interpret current data", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/31c69100-b612-4a61-8db5-fd314318854c", name: "execute analytical mathematical calculations", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/382c11ed-20d5-4ae7-b60e-15fec527fa6c", name: "apply statistical analysis techniques", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/4463a721-69f3-413d-8321-43e3af13a4f1", name: "use databases", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/4a193795-fa63-414e-9f2e-bfdb3924571e", name: "handle data samples", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/50b100ea-74fd-4706-99db-3e4ca55e51b8", name: "perform data cleansing", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/54c9c155-9293-4329-8ed2-2e76e8b519d4", name: "define data quality criteria", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/79e29b8b-47d1-470d-b7b1-32506bfe7d9a", name: "collect ICT data", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/918f5211-b99f-4b29-9a34-6e475583ef55", name: "write work-related reports", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/27ed854c-15b8-4ba2-90e9-ae888a219703", name: "perform business analysis", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/56042303-972b-41be-9310-58467599ff7e", name: "analyse business processes", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/03b9b491-fc9b-4868-914a-bf7cd47b5041", name: "create solutions to problems", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/415abd43-e8e5-4643-b5da-5f11307af57a", name: "use different communication channels", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/3c03ee71-4a23-448f-b79e-81fd75d27dca", name: "apply change management", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/43d1d56b-ce62-4fe8-8f18-35d92ec73023", name: "identify undetected organisational needs", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/91816e1a-d026-4d21-9b1c-59ca5cf488de", name: "analyse internal factors of companies", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/ce5b1446-b5e3-4f05-a5ac-83f2ee142a44", name: "analyse external factors of companies", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/f14ff4b7-be1e-4b55-b39b-520005f8a97e", name: "liaise with managers", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/48b68726-0fd6-4e03-a5eb-82236516ee7a", name: "provide cost benefit analysis reports", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/07e51c60-763a-4335-b4ec-70a15f66d328", name: "propose ICT solutions to business problems", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/0e0c9c11-b39e-43cf-ba95-2fe646f5de64", name: "identify customer requirements", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/a8797f21-1af0-4c5e-98ca-bf1442929363", name: "interact with users to gather requirements", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/d9e5349e-8791-49c2-8ba4-839fdd1606c2", name: "define technical requirements", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/6a7792a9-888a-46ad-afc9-2c0d94c8fde6", name: "create business process models", source: "ESCO v1.2.1" },
+  { id: "http://data.europa.eu/esco/skill/cd5efa8c-e44d-4cbc-91c6-796018dbed68", name: "perform project management", source: "ESCO v1.2.1" },
+];
+
 const demoExperience: JobExperience = {
   id: "demo-experience-1",
-  title: "Data Analytics Intern",
+  title: "Data & Business Analysis Intern",
   timeframe: "Jan 2025 – Apr 2025",
   company: "Aiversecity Demo Lab",
-  description: "Cleaned fictional survey and campus energy datasets with Python programming and performed data analysis to find patterns. Built and tested a basic machine learning classifier to group records, then checked totals with spreadsheet analysis. Investigated missing values, used critical thinking to compare likely causes, and applied problem solving to resolve inconsistent records.",
+  description: "Fictional campus analytics project: collected sample energy and waste records from spreadsheets and a database, normalised and cleaned the data, documented quality checks, and used Python and basic statistics to interpret patterns. Gathered user requirements from a fictional campus team, mapped the existing reporting process, proposed a dashboard workflow, compared options with a simple cost-benefit report, coordinated milestones, and presented recommendations.",
 };
 
 function ParticleWave() {
@@ -129,11 +169,11 @@ export default function RegisterPage() {
   const [jobExperiences, setJobExperiences] = useState<JobExperience[]>([{ ...demoExperience }]);
   const [skillQuery, setSkillQuery] = useState("");
   const [skillOptions, setSkillOptions] = useState<SkillOption[]>([]);
-  const [selectedSkills, setSelectedSkills] = useState<ChosenSkill[]>([
-    { id: "local:python-programming", name: "Python programming", source: "Local prototype vocabulary" },
-  ]);
+  const [selectedSkills, setSelectedSkills] = useState<ChosenSkill[]>(() => demoPresetSkills.map((skill) => ({ ...skill })));
+  const [recommendedSkillOptions, setRecommendedSkillOptions] = useState<SkillOption[]>([]);
   const [skillLoading, setSkillLoading] = useState(false);
   const [skillLoadError, setSkillLoadError] = useState("");
+  const [recommendedSkillLoadError, setRecommendedSkillLoadError] = useState("");
   const [skillExtractionConsent, setSkillExtractionConsent] = useState(false);
   const [skillExtractionBusy, setSkillExtractionBusy] = useState(false);
   const [skillExtractionCompleted, setSkillExtractionCompleted] = useState(false);
@@ -142,16 +182,17 @@ export default function RegisterPage() {
   const [selectedSkillCandidates, setSelectedSkillCandidates] = useState<number[]>([]);
   const [skillExtractionNotice, setSkillExtractionNotice] = useState("");
   const [skillExtractionError, setSkillExtractionError] = useState("");
-  const [educationRecord, setEducationRecord] = useState("Completed fictional coursework in applied statistics and data visualisation, including practice explaining charts and findings in concise written reports.");
-  const [workExperience, setWorkExperience] = useState("Collaborated with a four-person student team, planned weekly project milestones, shared progress updates, and presented findings to a fictional campus sustainability committee.");
-  const [projects, setProjects] = useState("Created a dashboard comparing fictional campus energy use and waste. Coordinated tasks with teammates, planned a two-week delivery, and explained recommendations to peers. Used sustainability principles to compare options and propose ways to reduce waste.");
-  const [certifications, setCertifications] = useState("Demo training: Python data analysis and spreadsheet fundamentals.");
-  const [achievements, setAchievements] = useState("Presented the team dashboard at a fictional campus showcase; feedback praised clear communication and practical sustainability recommendations.");
-  const [workActivities, setWorkActivities] = useState("Analyzing data, checking spreadsheets, preparing presentations, and coordinating team tasks.");
-  const [strengths, setStrengths] = useState("Clear written and verbal communication, critical thinking, practical problem solving, and collaboration.");
+  const skillExtractionController = useRef<AbortController | null>(null);
+  const [educationRecord, setEducationRecord] = useState("Fictional coursework in applied statistics, relational databases, spreadsheet modelling, business process analysis, and requirements gathering. Completed exercises cleaning sample datasets, checking data quality, interpreting results, and writing concise reports.");
+  const [workExperience, setWorkExperience] = useState("Collaborated with a fictional campus sustainability team, coordinated weekly milestones, gathered reporting needs, shared progress updates, incorporated feedback, and presented a dashboard with recommendations.");
+  const [projects, setProjects] = useState("Built a fictional campus energy-and-waste dashboard. Collected sample survey and facilities records, combined spreadsheet and database extracts, normalised and cleaned data, applied basic statistical analysis in Python, documented quality checks, mapped reporting steps, gathered user requirements, compared dashboard options with a simple cost-benefit table, and wrote a findings report.");
+  const [certifications, setCertifications] = useState("Fictional coursework exercises: Python data analysis, SQL/database queries, spreadsheet modelling, statistics, and dashboard reporting.");
+  const [achievements, setAchievements] = useState("Presented the fictional campus dashboard at a student showcase, with a written analysis of data quality, user requirements, and practical recommendations.");
+  const [workActivities, setWorkActivities] = useState("Collecting and cleaning data, validating samples, analysing trends, documenting requirements, mapping workflows, preparing reports, and coordinating project milestones.");
+  const [strengths, setStrengths] = useState("Structured problem-solving, data accuracy, clear reporting, stakeholder communication, teamwork, and organised project follow-through.");
   const [skillsToDevelop, setSkillsToDevelop] = useState("Data visualisation, facilitation, and presenting to larger groups.");
-  const [aspiration, setAspiration] = useState("Explore data-informed work that helps teams make more sustainable decisions.");
-  const [profileSummary, setProfileSummary] = useState("Information Systems student who builds clear data summaries and shares evidence-based recommendations with teams.");
+  const [aspiration, setAspiration] = useState("Explore entry-level data analyst, business analyst, ICT business analyst, and digital operations roles.");
+  const [profileSummary, setProfileSummary] = useState("Information Systems student building data analysis, business analysis, and digital workflow skills through fictional coursework and capstone projects.");
   const [weeklyHours, setWeeklyHours] = useState("5");
   const [learningBudget, setLearningBudget] = useState("100");
   const [learningMode, setLearningMode] = useState("Self-paced");
@@ -164,6 +205,8 @@ export default function RegisterPage() {
   const continueButtonRef = useRef<HTMLButtonElement>(null);
   const cancelSkipRef = useRef<HTMLButtonElement>(null);
   const lastStep = 8;
+
+  useEffect(() => () => skillExtractionController.current?.abort(), []);
 
   useEffect(() => {
     const updateScrollState = () => setHasScrolled(window.scrollY > 8);
@@ -232,22 +275,54 @@ export default function RegisterPage() {
   useEffect(() => {
     if (activeStep !== 2) return;
     let active = true;
+    const query = skillQuery.trim();
+    const controller = new AbortController();
+    if (query.length < 2) {
+      setSkillOptions([]);
+      setSkillLoading(false);
+      setSkillLoadError("");
+      return () => controller.abort();
+    }
     setSkillLoading(true);
     const timer = window.setTimeout(() => {
-      getSkills(skillQuery).then((result) => {
+      getEscoSkills(query, controller.signal).then((result) => {
         if (active) {
-          setSkillOptions(result.skills);
+          setSkillOptions(result);
           setSkillLoadError("");
         }
-      }).catch(() => {
-        if (active) {
+      }).catch((error: unknown) => {
+        if (active && !controller.signal.aborted) {
           setSkillOptions([]);
-          setSkillLoadError("The skill list is unavailable. You can still add a custom skill.");
+          setSkillLoadError(error instanceof Error ? error.message : "The ESCO skill list is unavailable.");
         }
       }).finally(() => { if (active) setSkillLoading(false); });
-    }, 180);
-    return () => { active = false; window.clearTimeout(timer); };
+    }, 250);
+    return () => { active = false; window.clearTimeout(timer); controller.abort(); };
   }, [activeStep, skillQuery]);
+
+  useEffect(() => {
+    if (activeStep !== 2) return;
+    let active = true;
+    const controller = new AbortController();
+    setRecommendedSkillLoadError("");
+    getEscoSkills(recommendedSkillNames.join("|"), controller.signal).then((results) => {
+      if (active) {
+        const byName = new Map(results.map((skill) => [skill.name.toLocaleLowerCase(), skill]));
+        setRecommendedSkillOptions(
+          recommendedSkillNames.flatMap((name) => {
+            const skill = byName.get(name.toLocaleLowerCase());
+            return skill ? [skill] : [];
+          }),
+        );
+      }
+    }).catch((error: unknown) => {
+      if (active && !controller.signal.aborted) {
+        setRecommendedSkillOptions([]);
+        setRecommendedSkillLoadError(error instanceof Error ? error.message : "ESCO skill suggestions are unavailable.");
+      }
+    });
+    return () => { active = false; controller.abort(); };
+  }, [activeStep]);
 
   async function advanceRegistrationStep() {
     if (activeStep === null || saveInFlight.current) return;
@@ -370,18 +445,24 @@ export default function RegisterPage() {
     }
 
     setSkillExtractionBusy(true);
+    const controller = new AbortController();
+    skillExtractionController.current = controller;
     try {
-      const candidates = await extractProfileSkills(evidence, 10);
+      const candidates = await extractProfileSkills(evidence, 10, controller.signal);
       setSkillExtractionCandidates(candidates);
       setSelectedSkillCandidates([]);
       setSkillExtractionCompleted(true);
       setSkillExtractionNotice(candidates.length
         ? "Suggestions are ready. Review each evidence quote and taxonomy match before adding skills."
-        : "The model found no supported matches in the current local taxonomy.");
+        : "The model found no supported matches in the ESCO v1.2.1 skill taxonomy.");
     } catch (error) {
+      if (controller.signal.aborted) return;
       setSkillExtractionError(error instanceof Error ? error.message : "AI skill extraction could not be completed.");
     } finally {
-      setSkillExtractionBusy(false);
+      if (skillExtractionController.current === controller) {
+        skillExtractionController.current = null;
+        if (!controller.signal.aborted) setSkillExtractionBusy(false);
+      }
     }
   }
 
@@ -411,7 +492,7 @@ export default function RegisterPage() {
       const next = [...current];
       for (const candidate of chosen) {
         if (!candidate.skill_id || !candidate.canonical_name || next.some((skill) => skill.id === candidate.skill_id)) continue;
-        next.push({ id: candidate.skill_id, name: candidate.canonical_name, source: "Local prototype vocabulary" });
+        next.push({ id: candidate.skill_id, name: candidate.canonical_name, source: candidate.taxonomy_source ?? "ESCO v1.2.1" });
       }
       return next;
     });
@@ -419,7 +500,7 @@ export default function RegisterPage() {
     setSkillExtractionNotice(`${chosen.length} supported skill${chosen.length === 1 ? "" : "s"} added to your selected skills${chosen.length < selected.length ? `; ${selected.length - chosen.length} stale suggestion${selected.length - chosen.length === 1 ? " was" : "s were"} skipped` : ""}. The taxonomy IDs will be kept with your session profile.`);
   }
 
-  const recommendedSkills = skillOptions.filter((skill) => recommendedSkillNames.includes(skill.name));
+  const recommendedSkills = recommendedSkillOptions;
   const allCandidatesSelected = skillExtractionCandidates.length > 0
     && selectedSkillCandidates.length === skillExtractionCandidates.length;
 
@@ -493,19 +574,21 @@ export default function RegisterPage() {
             {activeStep === 2 && <div className="onboarding-question">
               <span className="onboarding-step-tag">BUILD YOUR SKILL PROFILE</span>
               <h1>Add your skills</h1>
-              <p>Search the skill list or start with a few suggestions. Select all that apply.</p>
+              <p>Search the ESCO v1.2.1 skill list or start with a few suggestions. Select all that apply.</p>
               <div className="skill-picker">
                 <label className="onboarding-label" htmlFor="journey-skill-search">Search skills</label>
                 <input ref={skillSearchRef} id="journey-skill-search" className="onboarding-control" type="search" value={skillQuery} onChange={(event) => setSkillQuery(event.target.value)} placeholder="Try Python, data analysis, communication…" autoComplete="off" />
                 {skillQuery.trim() && <div className="onboarding-skill-results" role="listbox" aria-label="Skill search results">
-                  {skillLoading && <span className="onboarding-skill-message" role="status">Searching skills…</span>}
-                  {!skillLoading && skillOptions.slice(0, 5).map((skill) => <button className="onboarding-skill-result" type="button" key={skill.id} role="option" aria-selected={selectedSkills.some((item) => item.id === skill.id)} onClick={() => addSkill({ id: skill.id, name: skill.name, source: skill.taxonomy_source })}><span>{skill.name}</span><small>{selectedSkills.some((item) => item.id === skill.id) ? "Added" : "Add skill"}</small></button>)}
-                  {!skillLoading && skillOptions.length === 0 && <span className="onboarding-skill-message">{skillLoadError || "No matching skills found."}</span>}
-                  {!skillLoading && skillOptions.length === 0 && <button className="onboarding-skill-result custom" type="button" onClick={addCustomSkill}><span>Add “{skillQuery.trim()}” as a custom skill</span><small>Add</small></button>}
+                  {skillQuery.trim().length < 2 && <span className="onboarding-skill-message">Enter at least two characters to search ESCO skills.</span>}
+                  {skillLoading && <span className="onboarding-skill-message" role="status">Searching ESCO skills…</span>}
+                  {!skillLoading && skillOptions.slice(0, 5).map((skill) => <button className="onboarding-skill-result" type="button" key={skill.id} role="option" aria-selected={selectedSkills.some((item) => item.id === skill.id)} onClick={() => addSkill({ id: skill.id, name: skill.name, source: skill.taxonomy_source })}><span>{skill.name}</span><small>ESCO v1.2.1 · {selectedSkills.some((item) => item.id === skill.id) ? "Added" : "Add skill"}</small></button>)}
+                  {!skillLoading && skillQuery.trim().length >= 2 && skillOptions.length === 0 && <span className="onboarding-skill-message">{skillLoadError || "No matching ESCO skills found."}</span>}
+                  {!skillLoading && skillQuery.trim().length >= 2 && skillOptions.length === 0 && <button className="onboarding-skill-result custom" type="button" onClick={addCustomSkill}><span>Add “{skillQuery.trim()}” as a custom skill</span><small>Add</small></button>}
                 </div>}
                 {skillLoadError && !skillQuery.trim() && <span className="onboarding-field-hint" role="status">{skillLoadError}</span>}
                 <div className="onboarding-recommendations" aria-label="Suggested skills">
-                  <span className="onboarding-recommendation-label">SUGGESTED SKILLS</span>
+                  <span className="onboarding-recommendation-label">SUGGESTED ESCO SKILLS</span>
+                  {recommendedSkillLoadError && <span className="onboarding-skill-message" role="status">{recommendedSkillLoadError}</span>}
                   {recommendedSkills.map((skill) => {
                     const selected = selectedSkills.some((item) => item.id === skill.id);
                     return <button type="button" className={`onboarding-skill-chip ${selected ? "selected" : ""}`} key={skill.id} aria-pressed={selected} onClick={() => addSkill({ id: skill.id, name: skill.name, source: skill.taxonomy_source })}>{skill.name}{selected && <span aria-hidden="true"> ✓</span>}</button>;
@@ -576,13 +659,13 @@ export default function RegisterPage() {
               <h1>Review your<br />skill suggestions</h1>
               <p>Use AI to identify skills supported by the descriptions you provided. Review every suggestion before adding it to your profile.</p>
               <section className="onboarding-ai-tools" aria-labelledby="onboarding-ai-skills-heading">
-                <div><h2 id="onboarding-ai-skills-heading">Extract skills from your descriptions</h2><p>RunPod will read your experience, coursework, project and achievement descriptions, plus work activities and strengths. Names, email, school details, interests, aspirations and learning preferences are not sent. The fictional sample contains evidence intended to support up to 10 skill suggestions; the model may return fewer.</p></div>
+                <div><h2 id="onboarding-ai-skills-heading">Extract skills from your descriptions</h2>                <p>RunPod will read your experience, coursework, project and achievement descriptions, plus work activities and strengths. Names, email, school details, interests, aspirations and learning preferences are not sent. Candidates are matched against the pinned ESCO v1.2.1 English snapshot; this service uses the ESCO classification of the European Commission. The fictional sample contains evidence intended to support up to 10 skill suggestions; the model may return fewer.</p></div>
                 <label className="onboarding-ai-consent"><input type="checkbox" checked={skillExtractionConsent} onChange={(event) => setSkillExtractionConsent(event.target.checked)} /><span>I confirm the included descriptions are fictional and consent to send them to RunPod for skill analysis. The app does not save this extraction request; RunPod’s configured data-retention terms apply.</span></label>
                 <div className="onboarding-ai-actions">
                   <button className="login-submit onboarding-ai-button" type="button" onClick={() => void extractRegistrationSkills()} disabled={skillExtractionBusy || !skillExtractionConsent} data-testid="button-onboarding-ai-extract">{skillExtractionBusy ? "Understanding your descriptions…" : "Extract skills from my descriptions"}</button>
                   {skillExtractionCandidates.length > 0 && <button className={`onboarding-ai-add${skillReviewApplied ? " is-applied" : ""}`} type="button" onClick={applyRegistrationSkillReview} disabled={skillReviewApplied || !selectedSkillCandidates.length}>{skillReviewApplied ? "✓ Added to my profile" : "Add selected skills to my profile"}</button>}
                 </div>
-                {skillExtractionBusy && <p className="onboarding-ai-status" role="status">The model is checking your descriptions against the current local skill taxonomy.</p>}
+                {skillExtractionBusy && <p className="onboarding-ai-status" role="status">Checking your descriptions against ESCO v1.2.1 and waiting for RunPod (up to 90 seconds)…</p>}
                 {skillExtractionError && <p className="onboarding-ai-error" role="alert">{skillExtractionError}</p>}
                 {skillExtractionNotice && <p className="onboarding-ai-status" role="status">{skillExtractionNotice}</p>}
                 {skillExtractionCandidates.length > 0 && <>

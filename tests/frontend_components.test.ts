@@ -56,6 +56,39 @@ test("hybrid conversion keeps genuine unknowns and exact Main snapshot without i
   assert.throws(() => registrationToDraft(main), /non-negative/);
 });
 
+test("hybrid registration handoff preserves selected ESCO IDs and removes unselected ESCO skills", () => {
+  const main = registrationFixture();
+  main.skills = ["Python (computer programming)"];
+  main.skillLinks = [{
+    name: "Python (computer programming)",
+    skill_id: "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d",
+    taxonomy_source: "ESCO v1.2.1",
+  }];
+  const draft = registrationToDraft(main);
+  assert.equal(draft.skills[0].skill_id, main.skillLinks[0].skill_id);
+  assert.equal(draft.registration_profile?.skillLinks?.[0].taxonomy_source, "ESCO v1.2.1");
+
+  const saved = {
+    ...draft,
+    id: "saved-esco",
+    created_at: "2026-10-23",
+    updated_at: "2026-10-23",
+    skills: [{
+      skill_id: main.skillLinks[0].skill_id,
+      display_name: "Python (computer programming)",
+      input_names: ["Python (computer programming)"],
+      proficiency: "unknown",
+      taxonomy_source: "ESCO v1.2.1",
+      is_custom: false,
+      evidence_record_ids: [],
+    }],
+  } as StoredProfile;
+  const changed = registrationFixture();
+  changed.skills = ["SQL"];
+  changed.skillLinks = [];
+  assert.equal(registrationToDraft(changed, saved).skills.some(skill => skill.skill_id === main.skillLinks?.[0].skill_id), false);
+});
+
 test("hybrid updates retain existing evidence, proficiency and unrelated records", () => {
   const main = registrationFixture();
   const draft = registrationToDraft(main);
@@ -327,6 +360,7 @@ for (const value of [0, 47.1234, 100, null]) {
     assert.ok(html.includes("Matched Profile Concepts"));
     assert.ok(html.includes("Essential Concepts Not Evidenced"));
     assert.ok(html.includes("Relevance does not indicate career readiness or hiring probability."));
+    assert.ok(html.includes('href="/role-matching/sdg?role_id=http%3A%2F%2Fdata.europa.eu%2Fesco%2Foccupation%2Ftest-role"'));
     assert.doesNotMatch(html, /Very high match|High digital intensity|Research &amp; Development|scoring-footer/);
     if (value === null) assert.match(html, /role="link" aria-disabled="true"/);
     else assert.match(html, /class="overview-pathway-link" href="\/role-matching\/roles\/test-role\/pathway"/);

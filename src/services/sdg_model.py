@@ -22,11 +22,30 @@ def _read_csv(path: Path) -> tuple[dict[str, str], ...]:
         return tuple(csv.DictReader(handle))
 
 
-def recommend_sdgs(role: str) -> dict[str, Any]:
-    """Rank goals with dataset support and return only the best two."""
-    mappings = [row for row in _read_csv(MAPPING_FILE) if row["role"] == role]
+def _normalise_skill(skill: str) -> str:
+    return " ".join(skill.casefold().split())
+
+
+def recommend_sdgs(role: str, profile_skills: list[str] | None = None) -> dict[str, Any]:
+    """Rank role mappings, or transparently fall back to exact profile-skill mappings."""
+    all_mappings = _read_csv(MAPPING_FILE)
+    role_key = _normalise_skill(role)
+    mappings = [row for row in all_mappings if _normalise_skill(row["role"]) == role_key]
+    mapping_basis = "role"
     if not mappings:
-        raise ValueError(f"No SDG mapping rows found for role: {role}")
+        requested_skills = {_normalise_skill(skill) for skill in profile_skills or [] if skill.strip()}
+        matched_rows: dict[tuple[str, str], dict[str, str]] = {}
+        for row in all_mappings:
+            skill_key = _normalise_skill(row["skill"])
+            if skill_key not in requested_skills:
+                continue
+            key = (skill_key, row["target_code"])
+            if key not in matched_rows or float(row["alignment_weight"]) > float(matched_rows[key]["alignment_weight"]):
+                matched_rows[key] = row
+        mappings = list(matched_rows.values())
+        mapping_basis = "profile_skills"
+    if not mappings:
+        raise ValueError(f"No role-specific SDG mappings or exact current-skill mappings found for role: {role}")
 
     catalog_rows = _read_csv(REFERENCE_FILE)
     catalog: dict[str, dict[str, Any]] = {}
@@ -85,10 +104,15 @@ def recommend_sdgs(role: str) -> dict[str, Any]:
     ]
     return {
         "role": role,
+        "mapping_basis": mapping_basis,
         "recommended_sdg": ranked_numbers[0],
         "ranked_sdgs": ranked,
         "skill_mappings": skill_mappings,
-        "data_notice": "All 17 goals are considered; only goals with role-skill links in this curated synthetic dataset can rank. Relative fit is an illustrative comparison, not a probability or a measure of SDG impact.",
+        "data_notice": (
+            "All 17 goals are considered; only goals with role-skill links in this curated synthetic dataset can rank. Relative fit is an illustrative comparison, not a probability or a measure of SDG impact."
+            if mapping_basis == "role"
+            else "No role-specific mapping is available. These illustrative links use exact matches between current profile skills and skill names in the curated synthetic dataset; they are not occupation-specific evidence, a probability, or a measure of SDG impact."
+        ),
     }
 
 

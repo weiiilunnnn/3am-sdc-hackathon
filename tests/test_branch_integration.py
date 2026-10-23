@@ -77,6 +77,7 @@ class BranchIntegrationTests(unittest.TestCase):
         self.assertEqual(result.status_code, 200, result.text[:300])
         mapping = result.json()
         self.assertEqual(mapping['role'], role)
+        self.assertEqual(mapping['mapping_basis'], 'role')
         self.assertIn('synthetic', mapping['data_notice'])
         code = mapping['skill_mappings'][0]['goals'][0]
         target = sdg_model.get_sdg_target(code)
@@ -93,3 +94,28 @@ class BranchIntegrationTests(unittest.TestCase):
                     'targets': [{'code': code, **target}], 'skills': payload['skills']}
         with patch('src.api.sdg.generate_sdg_overview', side_effect=RunPodRequestError('not configured')):
             self.assertEqual(self.client.post('/api/sdg/overview', json=overview).status_code, 503)
+
+    def test_sdg_recommendations_use_exact_profile_skills_when_role_is_unmapped(self):
+        response = self.client.post('/api/sdg/recommendations', json={
+            'role': 'Computer Vision Engineer',
+            'skills': [' Python ', 'sql', 'unmapped profile skill'],
+        })
+        self.assertEqual(response.status_code, 200, response.text[:300])
+        result = response.json()
+        self.assertEqual(result['mapping_basis'], 'profile_skills')
+        self.assertIn('not occupation-specific evidence', result['data_notice'])
+        self.assertTrue(result['ranked_sdgs'])
+        self.assertTrue({'Python', 'SQL'} <= {item['name'] for item in result['skill_mappings']})
+        self.assertNotIn('unmapped profile skill', {item['name'] for item in result['skill_mappings']})
+
+    def test_sdg_recommendations_match_supported_role_titles_case_insensitively(self):
+        response = self.client.post('/api/sdg/recommendations', json={'role': 'data scientist'})
+        self.assertEqual(response.status_code, 200, response.text[:300])
+        self.assertEqual(response.json()['mapping_basis'], 'role')
+
+    def test_sdg_recommendations_reject_skill_based_fallback_without_exact_matches(self):
+        response = self.client.post('/api/sdg/recommendations', json={
+            'role': 'Computer Vision Engineer',
+            'skills': ['Unmapped skill'],
+        })
+        self.assertEqual(response.status_code, 422)
