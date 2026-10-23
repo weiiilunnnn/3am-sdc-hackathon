@@ -13,7 +13,45 @@ from src.services.trend_service import (
     refresh_trends,
 )
 
+from src.services.ai_skill_exploration import get_ai_skill_exploration
+from src.services.session_signal_adapter import SessionSignalProfile, get_session_connections
+
+from src.services.session_signal_runpod import (
+    SessionExplanationRequest, SignalExplanationError, generate_session_explanation,
+)
+
+from src.services.session_signal_review import (SessionReviewRequest, SessionReviewError, review_connection)
+
 router = APIRouter(prefix="/api/trends")
+
+
+@router.post("/session-review")
+def review_session_connection(request: SessionReviewRequest) -> dict:
+    try:
+        return review_connection(request)
+    except SessionReviewError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/session-explanation")
+def session_explanation(request: SessionExplanationRequest) -> dict:
+    try:
+        return generate_session_explanation(request)
+    except SignalExplanationError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/session-connections")
+def session_connections(profile: SessionSignalProfile, skill_id: str | None = Query(default=None, max_length=180)) -> dict:
+    try:
+        return get_session_connections(profile, skill_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.get("/explore-ai-skills")
+def explore_ai_skills() -> dict:
+    return get_ai_skill_exploration()
 
 
 @router.get("/topics")

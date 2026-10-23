@@ -9,9 +9,8 @@ const sections = [
   { href: "/home", label: "My Home" },
   { href: "/profile", label: "My Profile" },
   { href: "/cv-studio", label: "CV Studio" },
-  { href: "/outlook", label: "My Skills Outlook" },
-  { href: "/explore", label: "Explore Skills" },
-  { href: "/radar", label: "Source Evidence" },
+
+  { href: "/signals", label: "AI Trend Signal" },
   { href: "/explorer", label: "Career Demo" },
   { href: "/role-matching", label: "Role Matching" },
 ];
