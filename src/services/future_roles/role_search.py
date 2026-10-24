@@ -1,13 +1,13 @@
 """Bounded local title search; recommendation qualification is never bypassed in v2.
 
-Search scores use the same IDF/overlap arithmetic as profile-relevance-idf-v1.
+Search scores use the shared IDF/weighted unmatched-penalty display formula.
 Only the presentation pool/order differs; these are not qualified recommendations.
 """
 from math import fsum, log
 
 from .data_repository import supported
 from .discovery_models import RelevanceScore, RoleSearchResponse, RoleSearchResult
-from .profile_relevance import RelevanceConfig, development_areas, discover
+from .profile_relevance import RelevanceConfig, development_areas, discover, relevance_percentage
 from .skills_intake import normalize_profile
 
 
@@ -53,7 +53,7 @@ def search_roles(profile, index, *, role_query, page_size=5, offset=0, resources
                   'No recognised listed skills are available for scoring.' if not denominator else
                   'Complete verified occupation-skill evidence is unavailable.' if not complete or not evidence else None)
         numerator = fsum(weights[sid] * (1 if edges[sid].requirement == 'essential' else config.optional_strength if edges[sid].requirement == 'optional' else 0) for sid in matched)
-        raw = 100 * numerator / denominator if denominator else None
+        raw = relevance_percentage(numerator, denominator, config.unmatched_penalty)
         assessments[rid] = (essential, matched, matched_essential, reason, numerator, raw, complete, evidence)
 
     def search_order(item):

@@ -296,6 +296,9 @@ class Resource(BaseModel):
     content_verified_at: datetime | None = None
     prerequisite_status: Literal["unknown", "provider_stated", "reviewed_catalogue"] = "reviewed_catalogue"
     mapping_evidence: dict[str, str] = Field(default_factory=dict)
+    related_skill_ids: list[str] = Field(default_factory=list)
+    relevance_notes: dict[str, str] = Field(default_factory=dict)
+    alternative_reason: str | None = None
     discovery_query: str | None = None
     claim_evidence: dict[str, str] = Field(default_factory=dict)
     discovery_rank: int | None = None
@@ -304,6 +307,7 @@ class Resource(BaseModel):
     @model_validator(mode="after")
     def consistent(self):
         unique(self.covers_skill_ids, "resource coverage IDs")
+        unique(self.related_skill_ids, "related resource skill IDs")
         unique(self.prerequisite_skill_ids, "prerequisite skill IDs")
         unique(self.prerequisite_resource_ids, "prerequisite resource IDs")
         if not self.url.startswith("https://") or not urlsplit(self.url).hostname:
@@ -477,6 +481,7 @@ class CredentialRecommendation(BaseModel):
 
 
 class PathwayResponse(Contract):
+    alternative_resources: list[Resource] = Field(default_factory=list)
     credentials: list[CredentialRecommendation] = Field(default_factory=list)
     credential_message: str | None = None
     credential_metrics: dict[str, float] = Field(default_factory=dict)

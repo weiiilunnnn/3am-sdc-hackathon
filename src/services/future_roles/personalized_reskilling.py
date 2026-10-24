@@ -25,19 +25,42 @@ def build_pathway(profile: UserProfile, selected_career_match: CareerMatch, reso
     budget = preferences.budget
     warnings, blocked = [], set()
     eligible = {}
+    alternatives = {}
+    price_excluded = set()
+    metrics = {"pricing_exclusions": 0, "displayed_resources": 0, "displayed_alternatives": 0}
+    def alternative(resource, reason):
+        alternatives[resource.url] = resource.model_copy(update={"alternative_reason": reason})
+
     for resource in resources.resources:
         if resource.evidence_status != "verified" or not resource.access_verified_at:
             continue
-        if not all(supported(resource.source_ids, sources, c) for c in ["resource_content", "skill_mapping"]):
+        if not supported(resource.source_ids, sources, "resource_content"):
             continue
         if not any(sources[sid].url == resource.url and "resource_content" in sources[sid].supported_claims
                    for sid in resource.source_ids if sid in sources):
+            continue
+        confirmed = bool(set(resource.covers_skill_ids) & targets.keys()) and supported(resource.source_ids, sources, "skill_mapping")
+        related = bool(set(resource.related_skill_ids) & targets.keys()) and supported(resource.source_ids, sources, "related_learning_topic")
+        if related and not confirmed:
+            if resource.cost_status == "unknown":
+                price_excluded.add(resource.resource_id)
+            alternative(resource, "Suggested related resource — ESCO coverage requires review.")
+            continue
+        if not supported(resource.source_ids, sources, "skill_mapping"):
+            continue
+        if resource.cost_status == "unknown":
+            price_excluded.add(resource.resource_id)
+            if confirmed:
+                alternative(resource, "Price not verified — check provider. Not included in the affordable plan.")
             continue
         if resource.cost_status == "free":
             if not supported(resource.source_ids, sources, "free_access"):
                 continue
         elif (resource.cost_status not in ["low_cost", "paid"] or not budget or not resource.cost
               or resource.cost.currency != budget.currency or resource.cost.amount > budget.amount):
+            price_excluded.add(resource.resource_id)
+            if confirmed and resource.cost and supported(resource.source_ids, sources, "cost"):
+                alternative(resource, "Not confirmed affordable within your budget/currency — check provider.")
             continue
         elif not supported(resource.source_ids, sources, "cost"):
             continue
@@ -94,6 +117,8 @@ def build_pathway(profile: UserProfile, selected_career_match: CareerMatch, reso
             # Budget applies to the whole plan, including prerequisites.
             cost = sum(eligible[n].cost.amount for n in additions if eligible[n].cost)
             if budget and spent.get(budget.currency, 0) + cost > budget.amount:
+                price_excluded.add(resource.resource_id)
+                alternative(resource, "Exceeds the remaining plan budget including prerequisites.")
                 continue
             covered = remaining.intersection({s for n in additions for s in eligible[n].covers_skill_ids})
             preferred = resource.resource_type in preferences.preferred_resource_types
@@ -179,6 +204,9 @@ def build_pathway(profile: UserProfile, selected_career_match: CareerMatch, reso
     if completed:
         warnings.append("Prerequisite checks use self-reported skills. Review provider prerequisite notes before studying.")
     schedule = plan_time([eligible[n] for n in sorted(completed)], hours, preferences.study_days_per_week)
+    selected_urls = {eligible[n].url for n in completed}
+    alternatives = [r for url, r in alternatives.items() if url not in selected_urls]
+    metrics.update(pricing_exclusions=len(price_excluded), displayed_resources=len(completed), displayed_alternatives=len(alternatives))
     if targets and not completed:
         schedule = schedule.model_copy(update={"scheduled_weeks": None, "scheduled_study_days": None,
                                                "estimate_basis": "unknown"})
@@ -189,4 +217,5 @@ def build_pathway(profile: UserProfile, selected_career_match: CareerMatch, reso
         uncovered_skill_ids=uncovered, blocked_resource_ids=sorted(blocked),
         source_ids=sorted(set(match.occupation_source_ids) | {s for n in completed for s in eligible[n].source_ids}),
         warnings=warnings, status="no_documented_gaps" if not targets else "resource_not_found" if not completed else "starter" if uncovered else "covered",
-        coverage_complete=not uncovered and not (selected - completed), planning_estimate=schedule)
+        coverage_complete=not uncovered and not (selected - completed), planning_estimate=schedule,
+        alternative_resources=alternatives, discovery_metrics=metrics)

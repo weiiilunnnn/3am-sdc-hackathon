@@ -28,6 +28,11 @@ export default function PathwayView({ pathway: p, data }: { pathway: Pathway; da
         </>}
       </div></article>)}</div>
     {p.uncovered_skill_ids.length > 0 && <section className="remaining-gaps" aria-label="Remaining Learning Gaps"><p className="small muted">{p.uncovered_skill_ids.length} gaps still need learning resources</p></section>}
+    {!!p.alternative_resources?.length && <section aria-label="Additional learning resources" className="pathway-alternatives">
+      <h3>Additional Learning Resources</h3>
+      <p className="small muted">Review relevance and pricing with the provider. These alternatives are not included in the affordable plan, gap coverage or time estimates.</p>
+      {p.alternative_resources.map(resource => <PathwayResourceCard key={resource.resource_id} resource={resource} earlierTitles={[]} />)}
+    </section>}
     <CredentialRecommendations pathway={p} skillName={name} /></div>
     {p.warnings.filter(warning => !/^No eligible verified route for \d+ documented gaps\. This is a starter pathway\.$/.test(warning)).map((warning, i) => <p className="notice small" key={i}>{warning}</p>)}
     {p.blocked_resource_ids.length > 0 && <p className="notice small">Unavailable alternatives: {p.blocked_resource_ids.join(", ")}</p>}

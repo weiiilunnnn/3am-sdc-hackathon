@@ -56,3 +56,25 @@ class CareerAnalysis(BaseModel):
     bridges: list[SkillBridge] = Field(default_factory=list)
     evidence: list[AnalysisEvidence] = Field(default_factory=list)
     used_cache: bool = False
+
+
+class AnalysisJobStart(AnalysisRequest):
+    retry_failed: bool = False
+    retry_job_id: str | None = Field(default=None, pattern=r"^[a-f0-9]{32}$")
+
+
+class AnalysisJobStatus(AnalysisRequest):
+    job_id: str = Field(pattern=r"^[a-f0-9]{32}$")
+    evidence_key: str = Field(pattern=r"^[a-f0-9]{64}$")
+
+
+class AnalysisJob(BaseModel):
+    job_id: str | None = None
+    evidence_key: str
+    status: Literal["submitting", "queued", "in_progress", "completed", "failed", "expired", "unavailable"]
+    poll_after_ms: int = 3000
+    expires_at: float | None = None
+    error_code: str | None = None
+    analysis: CareerAnalysis | None = None
+    retryable: bool = False
+    retry_blocked_reason: str | None = None

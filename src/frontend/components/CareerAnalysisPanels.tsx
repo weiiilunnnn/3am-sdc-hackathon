@@ -28,12 +28,12 @@ function Evidence({ ids, analysis, interpretation }: { ids: string[]; analysis: 
   </details>;
 }
 
-export type AnalysisPanelProps = { analysis: CareerAnalysis | null; busy?: boolean; error?: string; hasProfile?: boolean; occupationSourceUrl?: string };
+export type AnalysisPanelProps = { analysis: CareerAnalysis | null; busy?: boolean; error?: string; hasProfile?: boolean; occupationSourceUrl?: string; retryable?: boolean; retrying?: boolean; onRetry?: () => void };
 export default function CareerAnalysisPanels(props: AnalysisPanelProps) {
   // Retain expansion during progressive AI loading; reset only for new evidence.
   return <Panels key={props.analysis?.evidence_key ?? "pending"} {...props} />;
 }
-function Panels({ analysis, busy = false, error = "", hasProfile = true, occupationSourceUrl }: AnalysisPanelProps) {
+function Panels({ analysis, busy = false, error = "", hasProfile = true, occupationSourceUrl, retryable = false, retrying = false, onRetry }: AnalysisPanelProps) {
   const [tab, setTab] = useState<"matched" | "missing">("missing");
   const [visible, setVisible] = useState({ matched: 4, missing: 4 });
   const prefix = useId();
@@ -72,7 +72,7 @@ function Panels({ analysis, busy = false, error = "", hasProfile = true, occupat
           <div className="skill-bridge"><div className="chips">{bridge.matched_skill_ids.map(id => <span className="chip positive" key={id}>{label(analysis.matched.find(s => s.skill_id === id)?.name ?? "")}</span>)}</div><span className="bridge-arrow" aria-hidden="true">→</span><span className="bridge-target">{iconTile(capabilityIcon(target?.title ?? ""))}{label(target?.title ?? "")}</span></div>
           <p className="capability-copy">{bridge.explanation}</p><span className="potential-label">Potential Learning Connection · AI-Inferred</span><Evidence ids={bridge.evidence_ids} analysis={analysis} interpretation={bridge.explanation} />
         </article>;
-      })}</div> : <div className="analysis-neutral bridge-empty">{iconTile("bridge")}<div><h3>{bridgeState[0]}</h3><p>{bridgeState[1]}</p></div></div>}
+      })}</div> : <div className="analysis-neutral bridge-empty">{iconTile("bridge")}<div><h3>{bridgeState[0]}</h3><p>{bridgeState[1]}</p>{analysis && hasProfile && !noGaps && !noMatched && onRetry && (retrying || (retryable && !busy)) && <button type="button" className="secondary retry-career-analysis" disabled={retrying || busy} onClick={onRetry}>{retrying ? "Preparing AI analysis..." : "Retry AI Analysis"}</button>}</div></div>}
     </section>
     <section className="career-analysis-card" aria-labelledby={`${prefix}-matrix`}>
       <Heading id={`${prefix}-matrix`} icon="grid" title="Skill Evidence Matrix" subtitle="What Your Profile Shows—and What Is Not Yet Evidenced" />

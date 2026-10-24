@@ -21,7 +21,7 @@ export default function CareerDetails({ id }: { id: string }) {
     {profile?.is_synthetic && <p className="micro notice">Synthetic profile: {profile.profile_id}</p>}
     {detail && <>
       <CareerOverview key={detail.role.role_id} role={detail.role} match={match} hasProfile={!!profile} scoring={scoring} sourceUrl={occupationSourceUrl ?? undefined} pathwayHref={`${careerHref(id)}/pathway`} />
-      <CareerAnalysisPanels analysis={analysis.data} busy={analysis.busy} error={analysis.error} hasProfile={!!profile} occupationSourceUrl={occupationSourceUrl ?? undefined} />
+      <CareerAnalysisPanels analysis={analysis.data} busy={analysis.busy} error={analysis.error} hasProfile={!!profile} retryable={analysis.retryable} retrying={analysis.retrying} onRetry={analysis.retry} occupationSourceUrl={occupationSourceUrl ?? undefined} />
       {results?.scenario_context && <ScenarioNotice context={results.scenario_context} sources={sources} />}
     </>}
   </FutureRoleShell>;

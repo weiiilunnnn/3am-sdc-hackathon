@@ -112,6 +112,59 @@ class CareerAnalysisTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 service.validate_analysis(raw, *self.bundle[:4])
 
+    def test_explanation_digits_symbols_and_forbidden_terms_remain_rejected(self):
+        invalid = ["This may support 3D modelling.", "This could improve results by 50%.",
+                   "This may use <markup> wording.", "This could use a > comparison.",
+                   "This may refer to https://example.invalid.", "This may refer to www.example.invalid.",
+                   "This may demonstrate proficiency.", "This may have high priority.",
+                   "This may provide a guarantee.", "This establishes competence without qualification."]
+        for field, collection in [('why_relevant','groups'),('explanation','bridges')]:
+            for wording in invalid:
+                with self.subTest(field=field,wording=wording):
+                    raw=copy.deepcopy(self.raw);raw[collection][0][field]=wording
+                    with self.assertRaises(service.EvidenceGroundingError):
+                        service.validate_analysis(raw,*self.bundle[:4])
+
+    def test_natural_language_wording_passes_and_cache_remains_reusable(self):
+        self.raw['groups'][0]['why_relevant']='This area may support exploring three-dimensional modelling within the documented role requirements.'
+        self.raw['bridges'][0]['explanation']='Your recognised capability could support learning the documented area through further study.'
+        self.invoke.return_value=self.raw
+        result=service.analyse_career(self.request,self.index)
+        self.assertEqual(result.status,'ready')
+        self.assertTrue(result.interpretations);self.assertTrue(result.bridges)
+        self.assertTrue(service.analyse_career(self.request,self.index).used_cache)
+        self.invoke.assert_called_once()
+        self.assertEqual(self.invoke.call_args.kwargs['max_tokens'],1500)
+
+    def test_prose_rules_never_rewrite_exact_evidence_quotations(self):
+        # Deliberately mocked evidence, not a new ESCO source claim.
+        result,payload,groups,matched,_=copy.deepcopy(self.bundle)
+        raw=copy.deepcopy(self.raw)
+        eid=raw['groups'][0]['evidence_ids'][0]
+        literal='Mocked evidence: 3D modelling <reference> and 50% are literal source text.'
+        next(e for e in result.evidence if e.evidence_id==eid).text=literal
+        raw['groups'][0]['evidence_quote']=literal
+        for bridge in raw['bridges']:
+            if eid in bridge['evidence_ids']:
+                bridge['evidence_quote']=literal
+        result_valid=service.validate_analysis(raw,result,payload,groups,matched)
+        self.assertEqual(result_valid.status,'ready')
+        self.assertEqual(raw['groups'][0]['evidence_quote'],literal)
+        raw['groups'][0]['evidence_quote']=literal.replace('3D','three-dimensional')
+        with self.assertRaises(service.EvidenceGroundingError):
+            service.validate_analysis(raw,result,payload,groups,matched)
+
+    def test_prompt_separates_explanatory_wording_from_verbatim_quotes(self):
+        prompt=service.CAREER_INSTRUCTIONS
+        for instruction in ['why_relevant','explanation','may or could','under forty words',
+                            'under forty-five words','numeric digits 0-9','%, < or >',
+                            'URLs, website references','three-dimensional modelling',
+                            'copy evidence_quote verbatim','preserve supplied identifiers exactly']:
+            self.assertIn(instruction,prompt)
+        for term in ['course','certification','certificate','salary','confidence','guarantee',
+                     'proficient','proficiency','mastered','readiness']:
+            self.assertIn(term,prompt)
+
     def test_missing_keys_timeout_bad_json_keep_complete_matrix(self):
         os.environ["RUNPOD_API_KEY"] = ""
         result = service.analyse_career(self.request, self.index)

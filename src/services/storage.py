@@ -44,6 +44,19 @@ def initialize_database() -> None:
                 updated_at TEXT NOT NULL
             );
 
+            CREATE TABLE IF NOT EXISTS career_analysis_jobs (
+                evidence_key TEXT PRIMARY KEY,
+                ticket TEXT NOT NULL UNIQUE,
+                endpoint TEXT NOT NULL,
+                remote_id TEXT,
+                status TEXT NOT NULL,
+                created_at REAL NOT NULL,
+                expires_at REAL NOT NULL,
+                poll_after REAL NOT NULL,
+                error_code TEXT,
+                result_json TEXT
+            );
+
             CREATE TABLE IF NOT EXISTS trend_refresh_state (
                 id INTEGER PRIMARY KEY CHECK (id = 1),
                 last_attempt_at TEXT,
@@ -218,3 +231,7 @@ def initialize_database() -> None:
         db.execute("INSERT OR IGNORE INTO signal_processing_state (id) VALUES (1)")
         db.execute("INSERT OR IGNORE INTO signal_model_usage (id) VALUES (1)")
         db.execute("INSERT OR IGNORE INTO signal_connection_state (id) VALUES (1)")
+        # Additive migration: preserve prior Career AI attempts in the same table.
+        columns = {row[1] for row in db.execute("PRAGMA table_info(career_analysis_jobs)")}
+        if "history_json" not in columns:
+            db.execute("ALTER TABLE career_analysis_jobs ADD COLUMN history_json TEXT NOT NULL DEFAULT '[]'")

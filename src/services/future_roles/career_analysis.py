@@ -15,6 +15,28 @@ from .profile_relevance import development_areas
 from .pathway_llm import invoke, report_failure
 
 PROMPT_VERSION = "career-details-esco-v1"
+CAREER_INSTRUCTIONS = (
+    "Return JSON role_id, groups, bridges only. For each supplied group return group_id, why_relevant "
+    "(one conditional sentence, under forty words, containing may or could), evidence_ids, evidence_quote "
+    "(verbatim excerpt from one referenced evidence text). Do not invent labels, groups, tasks or facts. "
+    "For bridges return at most three entries: matched_skill_ids (only supplied matched concepts), target_group_id, "
+    "explanation (one conditional learning connection under forty-five words containing may or could), "
+    "evidence_ids, evidence_quote. Each bridge must cite evidence for every source skill and at least one target concept. "
+    "Decline unsupported links with an empty bridges list. "
+    "Wording rules apply specifically to why_relevant and explanation: each must contain may or could. "
+    "Keep why_relevant under forty words and explanation under forty-five words. "
+    "Never use numeric digits 0-9 or any other numeric digit, %, < or > in these two fields. "
+    "Never include URLs, website references, markup, percentages, scores, numbered technologies or version numbers. "
+    "Describe only the supplied ESCO evidence using natural-language wording; for example, use "
+    "three-dimensional modelling instead of 3D modelling in explanation prose. "
+    "Do not use these forbidden terms in either explanatory field: course, certification, certificate, salary, "
+    "confidence, guarantee, proficient, proficiency, mastered, readiness. "
+    "Do not assert mastery, guaranteed outcomes, unsupported capability, workplace facts, credentials, "
+    "or high/medium/low impact or priority tiers. These are AI inferences, not official skill relations. "
+    "These prose restrictions do not apply to identifiers or evidence_quote: preserve supplied identifiers exactly "
+    "and copy evidence_quote verbatim, including any original digits or symbols. Never rewrite a quotation "
+    "to satisfy prose rules. If compliant wording cannot be grounded, omit that interpretation or bridge."
+)
 _cache = OrderedDict()
 _pending = {}
 _lock = threading.Lock()
@@ -93,28 +115,32 @@ def prepare_analysis(request, index):
     return result, payload, group_evidence, matched_evidence, verified
 
 
+class EvidenceGroundingError(ValueError):
+    """Generated content violates the existing ESCO evidence/wording rules."""
+
+
 def _safe_interpretation(text, max_words):
     # All model prose is explicitly conditional inference, never a new factual source.
     if (len(text.split()) > max_words or not re.search(r"\b(may|could)\b", text, re.I)
             or re.search(r"https?://|www\.|[<>\d%]|\b(course|certification|certificate|salary|confidence|guarantee|proficient|proficiency|mastered|readiness)\b|\b(?:high|medium|low)\s+(?:impact|priority)\b", text, re.I)):
-        raise ValueError("Unsupported interpretation text")
+        raise EvidenceGroundingError("Unsupported interpretation text")
 
 
 def validate_analysis(raw, result, payload, group_evidence, matched_evidence):
     generated = GeneratedAnalysis.model_validate(raw)
     if generated.role_id != result.role_id:
-        raise ValueError("Unknown role")
+        raise EvidenceGroundingError("Unknown role")
     known = {e.evidence_id: e for e in result.evidence}
     allowed_groups = {g["group_id"] for g in payload["groups"]}
     seen, interpretations, bridges = set(), [], []
 
     def check_quote(ids, quote):
         if len(ids) != len(set(ids)) or not set(ids) <= known.keys() or not any(quote in known[eid].text for eid in ids):
-            raise ValueError("Ungrounded evidence reference")
+            raise EvidenceGroundingError("Ungrounded evidence reference")
 
     for item in generated.groups:
         if item.group_id not in allowed_groups or item.group_id in seen or not set(item.evidence_ids) <= set(group_evidence[item.group_id]):
-            raise ValueError("Unknown or duplicate group/evidence")
+            raise EvidenceGroundingError("Unknown or duplicate group/evidence")
         check_quote(item.evidence_ids, item.evidence_quote)
         _safe_interpretation(item.why_relevant, 40)
         seen.add(item.group_id)
@@ -123,17 +149,17 @@ def validate_analysis(raw, result, payload, group_evidence, matched_evidence):
     for item in generated.bridges:
         skills = set(item.matched_skill_ids)
         if item.target_group_id not in allowed_groups or len(skills) != len(item.matched_skill_ids) or not skills <= matched_evidence.keys():
-            raise ValueError("Unknown bridge skill/group")
+            raise EvidenceGroundingError("Unknown bridge skill/group")
         source_ids = {matched_evidence[sid] for sid in skills}
         target_ids = set(group_evidence[item.target_group_id])
         ids = set(item.evidence_ids)
         if not source_ids <= ids or not ids & target_ids or not ids <= source_ids | target_ids:
-            raise ValueError("Bridge evidence membership mismatch")
+            raise EvidenceGroundingError("Bridge evidence membership mismatch")
         check_quote(item.evidence_ids, item.evidence_quote)
         _safe_interpretation(item.explanation, 45)
         bridge_key = (tuple(sorted(skills)), item.target_group_id)
         if bridge_key in bridge_keys:
-            raise ValueError("Duplicate bridge")
+            raise EvidenceGroundingError("Duplicate bridge")
         bridge_keys.add(bridge_key)
         bridges.append(SkillBridge(matched_skill_ids=item.matched_skill_ids, target_group_id=item.target_group_id,
             explanation=item.explanation, evidence_ids=item.evidence_ids))
@@ -178,14 +204,7 @@ def analyse_career(request, index):
     try:
         try:
             raw = invoke(payload,
-                "Return JSON role_id, groups, bridges only. For each supplied group return group_id, why_relevant "
-                "(one conditional sentence, under forty words, containing may or could), evidence_ids, evidence_quote "
-                "(verbatim excerpt from one referenced evidence text). Do not invent labels, groups, tasks or facts. "
-                "For bridges return at most three entries: matched_skill_ids (only supplied matched concepts), target_group_id, "
-                "explanation (one conditional learning connection under forty-five words containing may or could), evidence_ids, evidence_quote. "
-                "Each bridge must cite evidence for every source skill and at least one target concept. "
-                "Decline unsupported links with an empty bridges list. No URLs in prose, scores, numbers, proficiency, "
-                "courses, credentials, workplace facts or impact tiers. These are AI inferences, not official skill relations.",
+                CAREER_INSTRUCTIONS,
                 timeout=ai_timeout, max_tokens=1500)
             result = validate_analysis(raw, result, payload, group_evidence, matched_evidence)
         except Exception as exc:

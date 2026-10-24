@@ -6,7 +6,7 @@ export default function PathwayResourceCard({ resource: r, earlierTitles }: { re
   const verified = r.evidence_status === "verified";
   const appearance = resourceAppearance(verified ? r.resource_type : undefined);
   const provider = verified && supportedText(r.provider);
-  const cost = verified ? r.cost_status === "free" ? "FREE CONTENT" : r.cost_status !== "unknown" ? moneyLabel(r.cost) : null : null;
+  const cost = verified ? r.cost_status === "free" ? "FREE CONTENT" : r.cost_status === "unknown" ? "Price not verified — check provider" : moneyLabel(r.cost) : null;
   const time = resourceTiming(r);
   const date = checkedDate(r.content_verified_at) ?? checkedDate(r.access_verified_at);
   const origin = r.resource_origin === "web_discovered" ? r.retrieval_mode === "cached_verified" ? "Previously discovered" : "Discovered online" : r.resource_origin === "local_catalogue" ? "Reviewed catalogue" : null;
@@ -20,6 +20,12 @@ export default function PathwayResourceCard({ resource: r, earlierTitles }: { re
       {time && <p className="resource-duration"><PathwayIcon kind="clock" />{time}</p>}
       {earlierTitles.length > 0 && <p className="prerequisite-hint micro">Earlier learning: {earlierTitles.join(", ")}</p>}
       {prerequisites && <p className="prerequisite-hint micro">Prerequisites: {prerequisites}</p>}
+      {r.alternative_reason && <p className="small">{r.alternative_reason}</p>}
+      {(r.related_skill_ids?.length ?? 0) > 0 && <p className="micro">Suggested related resource — not confirmed ESCO coverage.</p>}
+      {verified && Object.entries(r.mapping_evidence ?? {}).map(([id, excerpt]) => <div className="micro" key={id}>
+        {r.relevance_notes?.[id] && <p>{r.relevance_notes[id]}</p>}
+        <blockquote>{excerpt}</blockquote>
+      </div>)}
 
     </div>
   </section>;

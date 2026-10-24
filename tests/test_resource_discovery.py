@@ -166,6 +166,91 @@ class ResourceDiscoveryTests(unittest.TestCase):
             discovery._cache.clear(); discovery._pages.clear(); self.text = text
             self.assertEqual(self.build().discovery_status, "catalogue_fallback")
 
+    def test_nonliteral_curriculum_becomes_related_alternative_not_esco_coverage(self):
+        self.text = "# Visualization tutorial\n" + "Learn to create charts and plots from datasets with practical exercises. " * 2
+        plan = self.build()
+        self.assertTrue(any(r.resource_id == 'test:course' for p in plan.phases for r in p.resources))
+        self.assertEqual(len(plan.alternative_resources),1)
+        resource = plan.alternative_resources[0]
+        self.assertEqual(resource.covers_skill_ids,[])
+        self.assertEqual(resource.related_skill_ids,['demo:visualization'])
+        self.assertIn('Suggested related resource',resource.alternative_reason)
+        self.assertTrue(all(quote in self.text for quote in resource.mapping_evidence.values()))
+        self.assertIn('visualisation',resource.relevance_notes['demo:visualization'])
+        source=next(s for s in plan.sources if s.source_id in resource.source_ids)
+        self.assertIn('related_learning_topic',source.supported_claims)
+        self.assertNotIn('skill_mapping',source.supported_claims)
+        self.assertEqual(plan.discovery_metrics['alternative_web_resources'],1)
+        self.local.resources=[]
+        uncovered=self.build()
+        self.assertEqual(uncovered.uncovered_skill_ids,['demo:visualization'])
+        self.assertEqual(uncovered.total_known_hours,0)
+
+    def test_unknown_price_reaches_pathway_alternatives_and_preserves_local_plan(self):
+        self.text=TEXT.replace('free course','course')
+        plan=self.build()
+        self.assertEqual(len(plan.alternative_resources),1)
+        resource=plan.alternative_resources[0]
+        self.assertEqual(resource.cost_status,'unknown');self.assertIsNone(resource.cost)
+        self.assertIn('Price not verified',resource.alternative_reason)
+        self.assertEqual(plan.total_known_hours,12)
+        self.assertEqual(plan.discovery_metrics['pricing_exclusions'],1)
+        self.assertEqual(plan.discovery_metrics['displayed_resources'],1)
+        self.assertEqual(plan.discovery_metrics['displayed_alternatives'],1)
+        self.assertEqual(plan.discovery_metrics['search_results'],1)
+        self.assertEqual(plan.discovery_metrics['verified'],1)
+        self.assertIn(resource.source_ids[0],{s.source_id for s in plan.sources})
+        # No key material or extracted full provider page is exposed by diagnostics.
+        self.assertNotIn('mock-only',json.dumps(plan.discovery_metrics))
+
+    def test_strict_paid_budget_shows_honest_alternative_not_affordable_resource(self):
+        self.text=TEXT.replace('free course','course')+'\nPrice: USD 99'
+        self.profile.learning_preferences.budget.currency='USD'
+        self.profile.learning_preferences.budget.amount=10
+        plan=self.build()
+        resource=plan.alternative_resources[0]
+        self.assertEqual(resource.cost_status,'paid');self.assertEqual(resource.cost.amount,99)
+        self.assertIn('budget/currency',resource.alternative_reason)
+        self.assertTrue(all(r.url != URL for p in plan.phases for r in p.resources))
+        self.assertTrue(any(r.resource_id == 'test:course' for p in plan.phases for r in p.resources))
+
+    def test_free_curriculum_remains_free_and_duplicate_alternatives_are_deduplicated(self):
+        plan=self.build()
+        online=[r for p in plan.phases for r in p.resources if r.resource_origin=='web_discovered']
+        self.assertEqual(online[0].cost_status,'free')
+        self.assertIn('free_access',next(s for s in plan.sources if s.source_id in online[0].source_ids).supported_claims)
+        discovery._cache.clear();discovery._pages.clear()
+        self.text=TEXT.replace('free course','course')
+        self.search.side_effect=lambda *a,**k:{'results':[self.hit,{**self.hit,'url':URL+'?utm_source=duplicate'}]}
+        self.extract.side_effect=lambda *a,**k:{'results':[{'url':URL,'raw_content':self.text}]*2}
+        plan=self.build()
+        self.assertEqual(len(plan.alternative_resources),1)
+        self.assertEqual(plan.discovery_metrics['candidate_urls'],1)
+
+    def test_unrelated_and_inaccessible_pages_have_distinct_failure_counters(self):
+        for content,field in [('# Visualization tutorial\n'+'This course teaches cooking recipes and practical kitchen lessons. '*3,'skill_relevance_failures'),
+                              ('# Visualization tutorial\n'+'Access denied. '*10,'content_verification_failures')]:
+            discovery._cache.clear();discovery._pages.clear();self.text=content
+            plan=self.build()
+            self.assertEqual(plan.alternative_resources,[])
+            self.assertEqual(plan.discovery_metrics[field],1)
+
+    def test_related_topics_do_not_override_negation_or_search_snippet_only(self):
+        for curriculum in ('This course does not cover charts or plots.', 'This course teaches cooking only.'):
+            self.hit['content']='Learn charts and plots for visualization'
+            self.text='# Visualization tutorial\n'+curriculum*5
+            with self.assertRaises(ValueError):
+                verify(self.hit,{'url':URL,'raw_content':self.text},{'demo:visualization':self.index.skills['demo:visualization']},'mock')
+
+    def test_topic_reordering_uses_provider_evidence_not_invented_equivalence(self):
+        from types import SimpleNamespace
+        text='# Visualization tutorial\n'+'Learn to analyse datasets in practical exercises and turn findings into useful summaries. '*2
+        resource, source, _=verify(self.hit,{'url':URL,'raw_content':text},
+            {'fixture:data-analysis':SimpleNamespace(name='perform data analysis',aliases=[])},'mock')
+        self.assertEqual(resource.related_skill_ids,['fixture:data-analysis'])
+        self.assertEqual(resource.covers_skill_ids,[])
+        self.assertTrue(all(value in text for value in resource.mapping_evidence.values()))
+
     def test_unknown_duration_remains_unknown(self):
         self.text = TEXT.replace("Duration: 2 hours", "Duration not published")
         self.local.resources = []

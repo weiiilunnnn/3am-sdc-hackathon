@@ -11,7 +11,7 @@ import time
 from urllib.parse import urlsplit
 from src.services.sources import tavily_api
 from . import pathway_llm
-from .resource_verification import provider_url, verify, PROVIDERS
+from .resource_verification import provider_url, verify, PROVIDERS, SkillRelevanceError
 
 log = logging.getLogger(__name__)
 _lock = threading.Lock()
@@ -35,7 +35,8 @@ class Discovery:
     checked_at: datetime | None = None
     metrics: dict = field(default_factory=lambda: {"searches": 0, "extracts": 0, "runpod_calls": 0,
         "verified": 0, "rejected": 0, "cached": 0, "tavily_credits": 0,
-        "candidate_urls": 0, "extracted_pages": 0, "evaluations": 0, "evaluation_valid": 0})
+        "candidate_urls": 0, "extracted_pages": 0, "evaluations": 0, "evaluation_valid": 0,
+        "search_results": 0, "content_verification_failures": 0, "skill_relevance_failures": 0})
     reasons: list[str] = field(default_factory=list)
 
 
@@ -43,6 +44,8 @@ def cached_copy(data):
     return Discovery(resources=[r.model_copy(deep=True, update={"retrieval_mode": "cached_verified"}) for r in data.resources],
         sources={k: s.model_copy(deep=True) for k, s in data.sources.items()}, used_cache=True, checked_at=data.checked_at,
         metrics={**data.metrics, "searches": 0, "extracts": 0, "runpod_calls": 0, "tavily_credits": 0, "evaluations": 0,
+                 "search_results": 0, "candidate_urls": 0, "extracted_pages": 0,
+                 "content_verification_failures": 0, "skill_relevance_failures": 0, "rejected": 0,
                  "cached": len(data.resources)}, reasons=list(data.reasons))
 
 
@@ -63,7 +66,7 @@ def discover_resources(profile, match, index):
         "recognised_skills": [{"skill_id": s.skill_id, "proficiency": s.proficiency} for s in profile.skills],
         "constraints": profile.learning_preferences.model_dump(mode="json")}
     # Public concepts/non-identifying constraints only; no profile IDs/CVs/names.
-    key = hashlib.sha256(json.dumps([payload, query_cap, url_cap, os.getenv("RUNPOD_LLM_ENDPOINT_ID"),
+    key = hashlib.sha256(json.dumps(["curriculum-topics-v2", payload, query_cap, url_cap, os.getenv("RUNPOD_LLM_ENDPOINT_ID"),
         bool(os.getenv("RUNPOD_API_KEY"))], sort_keys=True).encode()).hexdigest()
     with _lock:
         item = _cache.get(key)
@@ -135,6 +138,7 @@ def _retrieve(payload, gaps, query_cap, url_cap, deadline, ttl):
                 data.metrics["searches"] += 1
                 result = tavily_api.search(topic.query, timeout=call_timeout, include_domains=PROVIDERS)
                 usage(result)
+                data.metrics["search_results"] += len(result.get("results", []))
                 for hit in result.get("results", [])[:4]:
                     try:
                         url = provider_url(hit["url"])
@@ -161,10 +165,12 @@ def _retrieve(payload, gaps, query_cap, url_cap, deadline, ttl):
         for url, (hit, query) in hits.items():
             with _lock:
                 old = _pages.get(url)
-            if old and old[0] > time.monotonic() and set(old[1].covers_skill_ids) & gaps.keys():
+            if old and old[0] > time.monotonic() and set(old[1].covers_skill_ids + old[1].related_skill_ids) & gaps.keys():
                 resource = old[1].model_copy(deep=True, update={"retrieval_mode": "cached_verified"})
                 resource.covers_skill_ids = sorted(set(resource.covers_skill_ids) & gaps.keys())
+                resource.related_skill_ids = sorted(set(resource.related_skill_ids) & gaps.keys())
                 resource.mapping_evidence = {k: v for k, v in resource.mapping_evidence.items() if k in gaps}
+                resource.relevance_notes = {k: v for k, v in resource.relevance_notes.items() if k in gaps}
                 candidates.append((resource, old[2].model_copy(deep=True), old[3]))
                 data.used_cache = True
                 data.metrics["cached"] += 1
@@ -191,7 +197,8 @@ def _retrieve(payload, gaps, query_cap, url_cap, deadline, ttl):
                                 _pages.popitem(last=False)
                     except (ValueError, KeyError, TypeError) as exc:
                         data.metrics["rejected"] += 1
-                        safe_reasons = {"Extraction identity mismatch", "Provider title/content unavailable", "Search/provider title contradiction", "No specific learning content", "Content inaccessible", "No literal curriculum support for allowed ESCO concepts", "Provider prerequisites need reviewed canonical mapping", "Unknown extraction URL"}
+                        data.metrics["skill_relevance_failures" if isinstance(exc, SkillRelevanceError) else "content_verification_failures"] += 1
+                        safe_reasons = {"Extraction identity mismatch", "Provider title/content unavailable", "Search/provider title contradiction", "No specific learning content", "Content inaccessible", "No supported curriculum topic for allowed ESCO concepts", "Provider prerequisites need reviewed canonical mapping", "Unknown extraction URL"}
                         log.info("course_verification reason=%s", str(exc) if str(exc) in safe_reasons else "invalid_source_or_schema")
             except Exception:
                 data.reasons.append("extraction_unavailable")
@@ -205,7 +212,7 @@ def _retrieve(payload, gaps, query_cap, url_cap, deadline, ttl):
                 data.metrics["runpod_calls"] += 1
                 data.metrics["evaluations"] += 1
                 ranking = pathway_llm.evaluate([{"resource_id": r.resource_id, "title": r.title,
-                    "provider": r.provider, "target_skill_ids": r.covers_skill_ids, "evidence": evidence,
+                    "provider": r.provider, "target_skill_ids": sorted(set(r.covers_skill_ids + r.related_skill_ids)), "evidence": evidence,
                     "cost_status": r.cost_status, "duration_hours": r.duration_hours,
                     "prerequisite_status": r.prerequisite_status} for r, _, evidence in candidates], call_timeout)
                 data.metrics["evaluation_valid"] = 1
@@ -218,6 +225,8 @@ def _retrieve(payload, gaps, query_cap, url_cap, deadline, ttl):
             data.resources.append(resource)
             data.sources[source.source_id] = source
         data.metrics["verified"] = len(data.resources)
+        data.metrics["confirmed_mapping_resources"] = sum(bool(r.covers_skill_ids) for r in data.resources)
+        data.metrics["suggested_related_resources"] = sum(bool(r.related_skill_ids) for r in data.resources)
         data.checked_at = max((r.content_verified_at for r in data.resources), default=None)
     except Exception:
         data.reasons.append("discovery_unavailable")
@@ -240,6 +249,11 @@ def build_discovered_pathway(profile, match, catalogue, sources, index):
     evidence = {**sources, **discovery.sources}
     result = build_pathway(profile, match, pool, evidence)
     used = [r for phase in result.phases for r in phase.resources]
+    alternatives = result.alternative_resources
+    discovery.metrics.update(result.discovery_metrics)
+    discovery.metrics.update(selected_web_resources=sum(r.resource_origin == "web_discovered" for r in used),
+        alternative_web_resources=sum(r.resource_origin == "web_discovered" for r in alternatives))
+    log.info("feature4_selection counters=%s", discovery.metrics)
     web = any(r.resource_origin == "web_discovered" for r in used)
     local = any(r.resource_origin == "local_catalogue" for r in used)
     status = "mixed" if web and local else "live_verified" if web else "catalogue_fallback" if local else "no_verified_resources" if discovery.metrics["searches"] else "discovery_unavailable"
@@ -254,7 +268,9 @@ def build_discovered_pathway(profile, match, catalogue, sources, index):
         message = "Previously discovered provider evidence reused. " + message
     if not result.target_skill_ids:
         message = "No documented essential gaps require learning resources. Proficiency remains unassessed."
-    ids = set(result.source_ids) | {sid for p in result.phases for sid in p.source_ids}
+    if alternatives:
+        message += f" {len(alternatives)} additional resources require relevance or affordability review; see alternatives."
+    ids = set(result.source_ids) | {sid for p in result.phases for sid in p.source_ids} | {sid for r in alternatives for sid in r.source_ids}
     from .credentials import recommend_credentials
     credentials, credential_metrics, credential_cached = recommend_credentials(profile, match, index, deadline=request_deadline)
     return result.model_copy(update={"discovery_status": status, "discovery_message": message,

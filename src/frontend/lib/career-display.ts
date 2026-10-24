@@ -17,3 +17,11 @@ export function displaySkillLabel(value: string): string {
     return word[0].toUpperCase() + word.slice(1);
   });
 }
+
+/** Simulator skill headings use capitalized words, including short connectors. */
+export function displayTimelineSkill(value: string): string {
+  return displayOccupationTitle(value).replace(/[\p{L}\p{N}]+/gu, word => {
+    if (/[a-z][A-Z]/.test(word) || /^[A-Z\d]{2,}$/.test(word) || /^iOS$/i.test(word)) return word;
+    return word[0].toUpperCase() + word.slice(1);
+  });
+}

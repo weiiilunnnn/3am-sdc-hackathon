@@ -14,7 +14,15 @@ class RelevanceConfig:
     threshold_pct: float = 30
     optional_strength: float = .4
     informative_max_share: float = .25
-    method_version: str = 'profile-relevance-idf-v1'
+    method_version: str = 'profile-relevance-idf-penalty-v2'
+    unmatched_penalty: float = .75
+
+
+def relevance_percentage(matched, total, penalty=.75):
+    """Display alignment; eligibility continues using the original M/T ratio."""
+    if not 0 < penalty <= 1:
+        raise ValueError('Invalid unmatched skill penalty')
+    return 100 * matched / (matched + penalty * max(0, total - matched)) if total else None
 
 
 def development_areas(role, have, index, *, limit=5, include_optional=False):
@@ -45,7 +53,7 @@ def development_areas(role, have, index, *, limit=5, include_optional=False):
 def discover(profile, index: OccupationIndex, *, resources=None, config=None, page_size=5, offset=0,
              role_query='', scenario=None, sdg_mappings=None, response_sources=None):
     config = config or RelevanceConfig()
-    if not 0 <= config.threshold_pct <= 100 or not 0 <= config.optional_strength <= 1 or not 0 <= config.informative_max_share <= 1:
+    if not 0 <= config.threshold_pct <= 100 or not 0 <= config.optional_strength <= 1 or not 0 <= config.informative_max_share <= 1 or not 0 < config.unmatched_penalty <= 1:
         raise ValueError('Invalid relevance configuration')
     if not 1 <= page_size <= 25 or offset < 0:
         raise ValueError('Invalid discovery page')
@@ -94,7 +102,7 @@ def discover(profile, index: OccupationIndex, *, resources=None, config=None, pa
         areas, warning = development_areas(role, have, index)
         missing = {x.skill_id for x in essential if x.skill_id not in have}
         n = len(essential) - len(missing)
-        score = RelevanceScore(profile_relevance_pct=round(raw, 2), essential_coverage_pct=round(100*n/len(essential), 2),
+        score = RelevanceScore(profile_relevance_pct=round(relevance_percentage(numerator, denominator, config.unmatched_penalty), 2), essential_coverage_pct=round(100*n/len(essential), 2),
             personal_fit_score_pct=round(100*n/len(essential), 2), method_version=config.method_version,
             matched_recognised_skill_count=count, matched_essential_skill_count=n, recognised_user_skill_count=len(have),
             qualifying_threshold_pct=config.threshold_pct, informative_skill_ids=informative, weighted_matched_sum=numerator,
@@ -102,7 +110,7 @@ def discover(profile, index: OccupationIndex, *, resources=None, config=None, pa
         maps = sdg_mappings.role_sdg_mappings.get(rid, []) if sdg_mappings else []
         skill_maps = {s: sdg_mappings.skill_sdg_mappings[s] for s in edges if sdg_mappings and s in sdg_mappings.skill_sdg_mappings}
         result = DiscoveryRole(role_id=rid, role_title=role.title, description=role.description, rank=ranks[rid], score=score,
-            qualification_reason=[f'{count} distinct listed concepts match, including {n} essential.', f'At least one non-transversal match appears in no more than {config.informative_max_share*100:g}% of the full indexed occupations.', f'Relevance meets the application-defined {config.threshold_pct:g}% threshold.'],
+            qualification_reason=[f'{count} distinct listed concepts match, including {n} essential.', f'At least one non-transversal match appears in no more than {config.informative_max_share*100:g}% of the full indexed occupations.', f'Original weighted-overlap score meets the application-defined {config.threshold_pct:g}% threshold; displayed relevance uses the unmatched-skill adjustment.'],
             strengths=matched[:3], additional_strength_count=max(0, len(matched)-3), development_areas=areas,
             not_evidenced_essential_count=len(missing), unshown_not_evidenced_count=len(missing)-sum(a.not_yet_evidenced_count for a in areas), grouping_warning=warning,
             occupation_source_ids=role.source_ids, data_source_status=index.coverage, esco_release=index.catalog.dataset_version,
@@ -130,9 +138,11 @@ def discover(profile, index: OccupationIndex, *, resources=None, config=None, pa
         dataset_id=index.catalog.dataset_id, esco_release=index.catalog.dataset_version, data_source_status=index.coverage,
         index_fingerprint=index.fingerprint, indexed_occupation_count=index.n, recognised_user_skill_count=len(have), unknown_user_skills=profile.unresolved_skills,
         insufficient_evidence=insufficient, status='qualified' if qualified else 'insufficient_evidence' if insufficient else 'no_qualifying_roles',
-        qualification_threshold_pct=config.threshold_pct, scoring_method=config.method_version if full else 'profile-relevance-unweighted-fallback-v1',
+        qualification_threshold_pct=config.threshold_pct, scoring_method=config.method_version if full else 'profile-relevance-unweighted-penalty-fallback-v2',
         scoring_configuration={'idf': '1 + ln((N+1)/(df+1))' if full else 'unavailable; uniform diagnostic weights', 'optional_strength': config.optional_strength,
-            'informative_max_share': config.informative_max_share, 'transversal_matches_informative': False, 'frequency_universe_count': index.n if full else None},
+            'informative_max_share': config.informative_max_share, 'transversal_matches_informative': False, 'frequency_universe_count': index.n if full else None,
+            'display_formula': '100 * M / (M + lambda * (T - M))', 'unmatched_penalty': config.unmatched_penalty,
+            'qualification_formula': '100 * M / T', 'qualification_method': 'profile-relevance-idf-v1'},
         discovered_candidate_count=len(candidates), total_qualifying_roles=len(qualified), filtered_qualifying_roles=len(filtered), offset=offset, role_query=role_query,
         next_offset=offset+page_size if offset+page_size < len(filtered) else None, page_size=page_size, diagnostic_counts=dict(counts),
         results=results, sources=[(response_sources or index.sources)[s] for s in sorted(source_ids) if s in (response_sources or index.sources)], warnings=warnings, scenario_context=scenario)

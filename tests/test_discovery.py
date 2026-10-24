@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import patch
 from src.models.future_roles import OccupationCatalog, UserProfile, ProfileSkill, Source
 from src.services.future_roles.occupation_index import OccupationIndex
-from src.services.future_roles.profile_relevance import discover, RelevanceConfig
+from src.services.future_roles.profile_relevance import discover, RelevanceConfig, relevance_percentage
 
 
 def fixture():
@@ -32,7 +32,7 @@ class DiscoveryTests(unittest.TestCase):
         p,i=fixture(); r=discover(p,i)
         self.assertEqual(r.total_qualifying_roles,1)
         s=r.results[0].score
-        self.assertEqual(s.profile_relevance_pct,70)
+        self.assertEqual(s.profile_relevance_pct,75.68)
         self.assertEqual(s.essential_coverage_pct,50)
         self.assertEqual(s.personal_fit_score_pct,50)
         self.assertAlmostEqual(s.weighted_profile_sum,2*(1+math.log(13/2)))
@@ -44,6 +44,22 @@ class DiscoveryTests(unittest.TestCase):
         r=discover(p,i,config=RelevanceConfig(threshold_pct=70.001))
         self.assertEqual(r.total_qualifying_roles,0)
         self.assertEqual(r.diagnostic_counts['below_threshold'],1)
+
+    def test_penalty_changes_display_only_and_preserves_boundaries(self):
+        self.assertIsNone(relevance_percentage(0,0))
+        self.assertEqual(relevance_percentage(0,10),0)
+        self.assertEqual(relevance_percentage(10,10),100)
+        self.assertAlmostEqual(relevance_percentage(4,10),47.0588235294)
+        for invalid in (0,-1,1.1,float('nan')):
+            with self.assertRaises(ValueError):relevance_percentage(4,10,invalid)
+        p,i=fixture()
+        original=discover(p,i,config=RelevanceConfig(unmatched_penalty=1))
+        adjusted=discover(p,i)
+        self.assertEqual(original.total_qualifying_roles,adjusted.total_qualifying_roles)
+        self.assertEqual(original.diagnostic_counts,adjusted.diagnostic_counts)
+        self.assertEqual([r.role_id for r in original.results],[r.role_id for r in adjusted.results])
+        self.assertEqual(original.results[0].score.essential_coverage_pct,adjusted.results[0].score.essential_coverage_pct)
+        self.assertGreater(adjusted.results[0].score.profile_relevance_pct,original.results[0].score.profile_relevance_pct)
 
     def test_empty_single_specific_and_aliases_are_not_qualified(self):
         p,i=fixture()

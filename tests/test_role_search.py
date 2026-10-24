@@ -36,7 +36,8 @@ class RoleSearchTests(unittest.TestCase):
         first = next(r for r in result['results'] if r['role_id'] == self.role.role_id)
         self.assertEqual(first['qualification_status'], 'search_result')
         weights = {s: 1 + log((self.index.n + 1)/(self.index.df.get(s, 0) + 1)) for s in sorted(ids)}
-        expected = round(100 * fsum([weights[matched] * .4]) / fsum(weights.values()), 2)
+        m,t = weights[matched] * .4, fsum(weights.values())
+        expected = round(100 * m / (m + .75 * (t-m)), 2)
         self.assertEqual(first['score']['profile_relevance_pct'], expected)
         self.assertGreater(expected, 0)
         self.assertLess(expected, 30)
@@ -128,7 +129,7 @@ class RoleSearchTests(unittest.TestCase):
                 and len(essential) == role.expected_essential_count
                 and all(supported(edge.source_ids, self.index.sources, 'role_skill_relationships',
                                   native_id=rid) for edge in edges.values()))
-            expected[rid] = 100 * numerator / denominator if assessable else None
+            expected[rid] = 100 * numerator / (numerator + .75 * (denominator-numerator)) if assessable else None
         self.assertGreater(len(expected), 25)
         actual, offset = [], 0
         while True:

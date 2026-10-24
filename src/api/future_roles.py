@@ -16,8 +16,30 @@ from src.services.future_roles.role_search import search_roles
 from src.services.sources.esco import client as esco_client, EscoError
 from src.models.career_analysis import AnalysisRequest, CareerAnalysis
 from src.services.future_roles.career_analysis import analyse_career
+from src.models.career_analysis import AnalysisJobStart, AnalysisJobStatus, AnalysisJob
+from src.services.future_roles import career_jobs
 
 router = APIRouter()
+
+
+@router.post('/api/v2/roles/analysis/jobs', response_model=AnalysisJob)
+def start_career_analysis_job(request: AnalysisJobStart):
+    try:
+        return career_jobs.start(request, get_occupation_index())
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Occupation not present in the pinned index") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="Invalid recognised skills or analysis request") from exc
+
+
+@router.post('/api/v2/roles/analysis/jobs/status', response_model=AnalysisJob)
+def career_analysis_job_status(request: AnalysisJobStatus):
+    try:
+        return career_jobs.poll(request, get_occupation_index())
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Analysis job not found for this evidence") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="Invalid recognised skills or analysis request") from exc
 
 
 @router.post('/api/v2/roles/analysis', response_model=CareerAnalysis)

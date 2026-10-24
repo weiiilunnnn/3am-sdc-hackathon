@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import time
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -31,6 +32,17 @@ def run_sync(endpoint_id: str, payload: dict[str, Any], *, timeout: float = 60) 
 def health(endpoint_id: str, *, timeout: float = 5) -> dict[str, Any]:
     """Read worker/job counts without submitting an inference job. No retries."""
     return _request(endpoint_id, "health", None, timeout=timeout)
+
+
+def submit(endpoint_id: str, payload: dict[str, Any], *, timeout: float = 5) -> dict[str, Any]:
+    """Submit once; a lost response must not be retried automatically."""
+    return _request(endpoint_id, "run", payload, timeout=timeout)
+
+
+def job_status(endpoint_id: str, job_id: str, *, timeout: float = 5) -> dict[str, Any]:
+    if not isinstance(job_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,200}", job_id):
+        raise RunPodRequestError("Invalid provider job identity.", category="response_schema")
+    return _request(endpoint_id, f"status/{job_id}", None, timeout=timeout)
 
 
 def _request(endpoint_id: str, operation: str, payload: dict[str, Any] | None, *, timeout: float) -> dict[str, Any]:
@@ -91,5 +103,5 @@ def unwrap_llm_output(result: dict[str, Any]) -> dict[str, Any]:
     elif isinstance(output, dict) and isinstance(output.get("result"), dict):
         output = output["result"]
     if not isinstance(output, dict):
-        raise RunPodRequestError("RunPod returned no language model output.")
+        raise RunPodRequestError("RunPod returned no language model output.", category="unsupported_output")
     return output

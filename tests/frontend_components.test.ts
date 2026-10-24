@@ -267,6 +267,29 @@ test("credential section preserves origins and fees without per-card evidence di
   assert.ok(render().includes("No verified credential recommendations"));
 });
 
+test("pathway alternatives show unknown prices and attributed suggested topics separately", () => {
+  const resource={resource_id:"mock-web",title:"Fictional curriculum",provider:"Mock provider",url:"https://example.org/course",
+    resource_type:"course",resource_origin:"web_discovered",evidence_status:"verified",cost_status:"unknown",cost:null,
+    covers_skill_ids:[],related_skill_ids:["gap"],prerequisite_resource_ids:[],source_ids:["source"],
+    duration_hours:null,duration_basis:"unknown",access_verified_at:"2026-10-24",mapping_evidence:{gap:"Learn to create charts."},
+    relevance_notes:{gap:"Provider topic suggests a learning connection; review ESCO coverage."},
+    alternative_reason:"Suggested related resource — ESCO coverage requires review."} as unknown as Resource;
+  const pathway={role_title:"Fixture role",target_skill_ids:["gap"],phases:[],alternative_resources:[resource],
+    planning_estimate:null,hours_per_week:3,uncovered_skill_ids:["gap"],credentials:[],warnings:[],blocked_resource_ids:[],status:"resource_not_found"} as unknown as Pathway;
+  const html=renderToStaticMarkup(createElement(PathwayView,{pathway,data:{skills:[],sources:[]} as unknown as Bootstrap}));
+  for(const text of ["Additional Learning Resources","Price not verified — check provider","not confirmed ESCO coverage",
+    "Learn to create charts.","Provider topic suggests", "Discovered online","not included in the affordable plan"]) assert.ok(html.includes(text),text);
+  assert.doesNotMatch(html,/FREE CONTENT|Beginner|Prerequisites:/);
+  assert.match(html,/href="https:\/\/example.org\/course"/);
+  assert.match(html,/<strong>0<\/strong><span>learning resources/);
+  resource.cost_status="paid";resource.cost={amount:99,currency:"USD"};
+  resource.alternative_reason="Exceeds your budget";
+  const paid=renderToStaticMarkup(createElement(PathwayResourceCard,{resource,earlierTitles:[]}));
+  assert.match(paid,/99 USD/);assert.match(paid,/Exceeds your budget/);
+  resource.cost_status="free";resource.cost=null;
+  assert.match(renderToStaticMarkup(createElement(PathwayResourceCard,{resource,earlierTitles:[]})),/FREE CONTENT/);
+});
+
 
 test("career analysis renders one occupation source and noninteractive matrix tiles", () => {
   const analysis = {role_id: "mock", evidence_key: "test", status: "unavailable", message: "AI analysis unavailable.", matched: [], not_evidenced_count: 1, grouping_warning: null, interpretations: [], bridges: [], evidence: [], used_cache: false,
@@ -287,6 +310,22 @@ test("missing career analysis still renders evidence and bridge fallback without
   assert.equal((html.match(/role="tab"/g) ?? []).length, 2);
   assert.ok(html.includes("AI analysis unavailable."));
   assert.ok(html.includes("Skill Evidence Needed"));
+});
+
+test("career retry appears only with eligible evidence and disables during explicit retry", () => {
+  const analysis = { role_id:"mock", evidence_key:"fixture", status:"unavailable", message:"Unavailable",
+    groups:[{group_id:"g",concept_uri:"mock",title:"Mock",count:1,concepts:[],explanation:"",mapping_method:"source_concept_fallback"}],
+    matched:[{skill_id:"s",name:"Mock",source_ids:[]}], not_evidenced_count:1, interpretations:[],bridges:[],evidence:[],used_cache:false,grouping_warning:null } as unknown as CareerAnalysis;
+  const renderRetry = (props: Record<string, unknown> = {}) => renderToStaticMarkup(createElement(CareerAnalysisPanels,
+    {analysis,retryable:true,onRetry:()=>{},...props}));
+  assert.match(renderRetry(), />Retry AI Analysis<\/button>/);
+  for(const props of [{retryable:false},{busy:true},{hasProfile:false},{analysis:null},
+    {analysis:{...analysis,groups:[]}},{analysis:{...analysis,matched:[]}},
+    {analysis:{...analysis,status:"ready",bridges:[{matched_skill_ids:["s"],target_group_id:"g",explanation:"Could help",evidence_ids:[]}]}}]) {
+    assert.doesNotMatch(renderRetry(props), />Retry AI Analysis<\/button>/);
+  }
+  assert.match(renderRetry({busy:true,retrying:true}), /disabled="">Preparing AI analysis\.\.\.<\/button>/);
+  assert.match(renderRetry(), /Skill Evidence Matrix/);
 });
 
 
