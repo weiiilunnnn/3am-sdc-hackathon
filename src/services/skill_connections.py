@@ -15,7 +15,7 @@ from src.data.skills_taxonomy import SKILLS
 from src.services.signal_employment_service import get_signal_employment_dashboard
 from src.services.storage import connection, initialize_database
 
-EXTRACTION_VERSION = "task-evidence-v8"
+EXTRACTION_VERSION = "task-evidence-v9"
 CONNECTION_VERSION = "dynamic-connections-v6"
 TASK_VERBS = re.compile(r"\b(?:build(?:ing|s)?|develop(?:ing|s)?|design(?:ing|s)?|evaluat(?:e|ing|es)|test(?:ing|s)?|creat(?:e|ing|es)|implement(?:ing|s)?|integrat(?:e|ing|es)|use|using|apply|manag(?:e|ing|es)|analy[sz](?:e|ing|es)|automat(?:e|ing|es)|improv(?:e|ing|es)|deploy(?:ing|s)?|work(?:ing)? with)\b", re.I)
 ACTION_VERBS = re.compile(r"\b(?:build\w*|develop\w*|design\w*|evaluat\w*|test\w*|creat\w*|implement\w*|integrat\w*|apply|manag\w*|analy[sz]\w*|automat\w*|improv\w*|deploy\w*)\b", re.I)

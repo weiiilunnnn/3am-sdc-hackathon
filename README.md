@@ -180,3 +180,53 @@ additional profile contents are persisted in the browser. Without a saved profil
 the UI requests one; stale references and retrieval failures show retryable errors.
 Development/tests may explicitly use `/role-matching?demo=demo-graduate-a`;
 production never chooses a fixture implicitly.
+
+## AI Trend Signal deployment
+
+The backend now populates missing O*NET/Anthropic references and refreshes job
+postings, extracted connections and OpenAlex research in a background worker.
+Fresh deployments do not require copying a developer's private SQLite database.
+The first import can take several minutes; reload `/signals` after it completes.
+A bundled, dated OpenAlex snapshot seeds an empty research cache so shared-IP
+rate limits do not leave the chart blank; its original query URLs and collection
+timestamps remain visible. Live refreshes replace it on success.
+Existing valid references are reused, postings are refreshed at most daily, and
+research follows its existing hourly cooldown. A database lease prevents workers
+sharing the same SQLite file from repeating a refresh. Provider failures remain
+independent and retain last-good data. Check backend logs for `AI Trend Signal`.
+
+Configure these **deployment** secrets/settings (not frontend environment variables):
+
+- `OPENALEX_API_KEY`: a free key from https://openalex.org/settings/api. Anonymous
+  queries share the hosting IP's budget and can return HTTP 429. Short throttles
+  are retried; exhausted daily budgets require a reset or a dedicated key.
+- `RUNPOD_API_KEY` and `EVIDENCE_LLM_ENABLED=1`: required for generated disruption
+  assessments and evidence explanations. `RUNPOD_LLM_ENDPOINT_ID` can override
+  the existing team endpoint. Public evidence collection itself never calls the LLM.
+- `AI_TREND_AUTO_REFRESH=0`: disable network maintenance for offline runs/tests.
+- `APP_DB_PATH`: use durable storage when available. Replit's deployment-local
+  filesystem is not a durable database; rebuilt instances can need rehydration.
+  This refresh mechanism rebuilds public evidence only, not user profiles.
+
+For Replit: sync/pull GitHub `main` into the Replit project, check Publishing's
+commands and secrets, then **Republish**. A GitHub push alone does not replace
+Replit's published snapshot unless separate automation was configured. Retain
+this app's existing build/run configuration. After publishing, verify
+`/api/trends/disruption-occupations` has `source_status.ready=true` and nonempty
+occupations, `/api/trends` contains observations, and `/signals` shows a nonempty
+posting sample. A skill can still legitimately have no supported connection.
+
+Manual maintenance against the backend's `APP_DB_PATH`:
+
+```sh
+python -m src.services.signal_maintenance
+# Or refresh the individual source groups:
+python -m scripts.refresh_disruption_references
+python -m scripts.refresh_ai_trend_evidence
+```
+
+Run isolated backend verification without external background calls:
+
+```sh
+AI_TREND_AUTO_REFRESH=0 python -m unittest discover -s tests
+```

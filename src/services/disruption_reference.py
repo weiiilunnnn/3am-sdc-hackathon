@@ -27,6 +27,11 @@ MATCH_VERSION = "onet-anthropic-exact-task-join-v1"
 # Editorial keyword links only. They select occupation tasks for closer
 # assessment; they are not O*NET classifications or AI-exposure scores.
 SKILL_TASK_TERMS = {
+    "local:javascript": ("program", "code", "software", "application", "web", "debug", "testing"),
+    "local:typescript": ("program", "code", "software", "application", "web", "debug", "testing"),
+    "local:sql": ("database", "query", "data", "report"),
+    "local:html": ("web", "interface", "page", "layout"),
+    "local:css": ("web", "interface", "page", "layout"),
     "local:python-programming": ("program", "code", "software", "application", "script", "debug", "testing"),
     "local:machine-learning": ("model", "machine learning", "algorithm", "statistical", "data", "predict"),
     "local:data-analysis": ("analy", "data", "report", "statistics", "statistical", "visualiz"),

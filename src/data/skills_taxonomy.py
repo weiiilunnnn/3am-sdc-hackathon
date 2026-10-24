@@ -29,6 +29,11 @@ def _local_skill(slug: str, name: str, aliases: list[str]) -> dict[str, Any]:
 
 
 SKILLS: list[dict[str, Any]] = [
+    _local_skill("javascript", "JavaScript", ["javascript programming"]),
+    _local_skill("typescript", "TypeScript", ["typescript programming"]),
+    _local_skill("sql", "SQL", ["structured query language"]),
+    _local_skill("html", "HTML", ["hypertext markup language"]),
+    _local_skill("css", "CSS", ["cascading style sheets"]),
     _local_skill(
         "search-databases",
         "Search databases",

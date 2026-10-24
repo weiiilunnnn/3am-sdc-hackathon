@@ -8,6 +8,8 @@ from src.services.sources.himalayas import HimalayasSource
 from src.services.skill_connections import process_skill_connections
 
 if __name__ == "__main__":
+    from src.environment import load_backend_environment
+    load_backend_environment()
     result = refresh_employment(HimalayasSource())
     print(f"Himalayas snapshot: {result.posting_count} retained postings; status: {result.refresh_status}")
     if result.posting_count:

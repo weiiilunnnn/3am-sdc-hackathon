@@ -1,0 +1,231 @@
+{
+  "source": "OpenAlex Works API",
+  "retrieved_at": "2026-10-24T21:19:10Z",
+  "topics": [
+    {
+      "topic_id": "llms",
+      "observations": [
+        {
+          "period_year": 2021,
+          "value": 280310,
+          "period_label": "2021",
+          "source_url": "https://api.openalex.org/works?search=large+language+model&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:11Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2022,
+          "value": 310420,
+          "period_label": "2022",
+          "source_url": "https://api.openalex.org/works?search=large+language+model&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:11Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2023,
+          "value": 400105,
+          "period_label": "2023",
+          "source_url": "https://api.openalex.org/works?search=large+language+model&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:11Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2024,
+          "value": 437112,
+          "period_label": "2024",
+          "source_url": "https://api.openalex.org/works?search=large+language+model&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:11Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2025,
+          "value": 548785,
+          "period_label": "2025",
+          "source_url": "https://api.openalex.org/works?search=large+language+model&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:11Z",
+          "data_mode": "real"
+        }
+      ]
+    },
+    {
+      "topic_id": "ai_agents",
+      "observations": [
+        {
+          "period_year": 2021,
+          "value": 57434,
+          "period_label": "2021",
+          "source_url": "https://api.openalex.org/works?search=AI+agent&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:12Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2022,
+          "value": 67627,
+          "period_label": "2022",
+          "source_url": "https://api.openalex.org/works?search=AI+agent&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:12Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2023,
+          "value": 95727,
+          "period_label": "2023",
+          "source_url": "https://api.openalex.org/works?search=AI+agent&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:12Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2024,
+          "value": 118990,
+          "period_label": "2024",
+          "source_url": "https://api.openalex.org/works?search=AI+agent&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:12Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2025,
+          "value": 191995,
+          "period_label": "2025",
+          "source_url": "https://api.openalex.org/works?search=AI+agent&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:12Z",
+          "data_mode": "real"
+        }
+      ]
+    },
+    {
+      "topic_id": "rag",
+      "observations": [
+        {
+          "period_year": 2021,
+          "value": 6899,
+          "period_label": "2021",
+          "source_url": "https://api.openalex.org/works?search=retrieval+augmented+generation&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:13Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2022,
+          "value": 8396,
+          "period_label": "2022",
+          "source_url": "https://api.openalex.org/works?search=retrieval+augmented+generation&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:13Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2023,
+          "value": 14223,
+          "period_label": "2023",
+          "source_url": "https://api.openalex.org/works?search=retrieval+augmented+generation&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:13Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2024,
+          "value": 24213,
+          "period_label": "2024",
+          "source_url": "https://api.openalex.org/works?search=retrieval+augmented+generation&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:13Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2025,
+          "value": 36416,
+          "period_label": "2025",
+          "source_url": "https://api.openalex.org/works?search=retrieval+augmented+generation&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:13Z",
+          "data_mode": "real"
+        }
+      ]
+    },
+    {
+      "topic_id": "computer_vision",
+      "observations": [
+        {
+          "period_year": 2021,
+          "value": 137217,
+          "period_label": "2021",
+          "source_url": "https://api.openalex.org/works?search=computer+vision&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:15Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2022,
+          "value": 159711,
+          "period_label": "2022",
+          "source_url": "https://api.openalex.org/works?search=computer+vision&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:15Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2023,
+          "value": 207103,
+          "period_label": "2023",
+          "source_url": "https://api.openalex.org/works?search=computer+vision&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:15Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2024,
+          "value": 214698,
+          "period_label": "2024",
+          "source_url": "https://api.openalex.org/works?search=computer+vision&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:15Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2025,
+          "value": 222927,
+          "period_label": "2025",
+          "source_url": "https://api.openalex.org/works?search=computer+vision&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:15Z",
+          "data_mode": "real"
+        }
+      ]
+    },
+    {
+      "topic_id": "responsible_ai",
+      "observations": [
+        {
+          "period_year": 2021,
+          "value": 48757,
+          "period_label": "2021",
+          "source_url": "https://api.openalex.org/works?search=responsible+AI&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:16Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2022,
+          "value": 59925,
+          "period_label": "2022",
+          "source_url": "https://api.openalex.org/works?search=responsible+AI&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:16Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2023,
+          "value": 93552,
+          "period_label": "2023",
+          "source_url": "https://api.openalex.org/works?search=responsible+AI&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:16Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2024,
+          "value": 126612,
+          "period_label": "2024",
+          "source_url": "https://api.openalex.org/works?search=responsible+AI&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:16Z",
+          "data_mode": "real"
+        },
+        {
+          "period_year": 2025,
+          "value": 199320,
+          "period_label": "2025",
+          "source_url": "https://api.openalex.org/works?search=responsible+AI&filter=from_publication_date%3A2021-01-01%2Cto_publication_date%3A2025-12-31&group_by=publication_year&per_page=100",
+          "retrieved_at": "2026-10-24T21:19:16Z",
+          "data_mode": "real"
+        }
+      ]
+    }
+  ]
+}

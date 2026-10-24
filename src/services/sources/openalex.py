@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from datetime import datetime, timezone
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
@@ -66,15 +67,33 @@ class OpenAlexSource:
             headers["Authorization"] = f"Bearer {api_key}"
 
         request = Request(query_url, headers=headers, method="GET")
-        try:
-            with urlopen(request, timeout=self.timeout_seconds) as response:
-                payload = json.loads(response.read().decode("utf-8"))
-        except HTTPError as exc:
-            raise SourceAdapterError(f"OpenAlex returned HTTP {exc.code}.") from exc
-        except (URLError, TimeoutError) as exc:
-            raise SourceAdapterError("OpenAlex is unavailable or the request timed out.") from exc
-        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-            raise SourceAdapterError("OpenAlex returned invalid JSON.") from exc
+        for attempt in range(3):
+            try:
+                with urlopen(request, timeout=self.timeout_seconds) as response:
+                    payload = json.loads(response.read().decode("utf-8"))
+                break
+            except HTTPError as exc:
+                if exc.code == 429:
+                    # Retry short throttles only. Daily-budget limits need a key
+                    # or a later refresh, not a tight retry loop.
+                    try:
+                        delay = float(exc.headers.get("Retry-After", 2 ** attempt))
+                        remaining = float(exc.headers.get("X-RateLimit-Remaining", "1"))
+                    except (TypeError, ValueError):
+                        delay, remaining = 60, 0
+                    if attempt < 2 and remaining > 0 and 0 <= delay <= 5:
+                        time.sleep(delay)
+                        continue
+                    raise SourceAdapterError(
+                        "OpenAlex rate limit reached (HTTP 429). Saved research is retained. "
+                        "Configure OPENALEX_API_KEY in the backend deployment secrets for a dedicated budget, "
+                        "or wait for the provider's limit to reset."
+                    ) from exc
+                raise SourceAdapterError(f"OpenAlex returned HTTP {exc.code}.") from exc
+            except (URLError, TimeoutError) as exc:
+                raise SourceAdapterError("OpenAlex is unavailable or the request timed out.") from exc
+            except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+                raise SourceAdapterError("OpenAlex returned invalid JSON.") from exc
 
         retrieved_at = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
         observations = self.parse_groups(payload, start_year, end_year)

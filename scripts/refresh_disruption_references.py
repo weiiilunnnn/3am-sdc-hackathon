@@ -12,7 +12,8 @@ from urllib.request import Request, urlopen
 
 from src.services.disruption_reference import import_references, reference_status
 
-ONET_ZIP = 'https://www.onetcenter.org/dl_files/database/db_31_0_csv.zip'
+# Download only the required table, not the entire 16 MB O*NET database.
+ONET_TASKS = 'https://www.onetcenter.org/dl_files/database/db_31_0_csv/task_statements.csv'
 ANTHROPIC_TASKS = 'https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/labor_market_impacts/task_penetration.csv'
 ANTHROPIC_JOBS = 'https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/labor_market_impacts/job_exposure.csv'
 
@@ -21,6 +22,9 @@ def download(url: str, cap: int = 65_000_000) -> bytes:
     request=Request(url,headers={'User-Agent':'PathwaayHackathon-ResearchPrototype/0.2','Accept':'application/octet-stream'})
     with urlopen(request,timeout=60) as response:
         data=response.read(cap+1)
+        expected=response.headers.get("Content-Length")
+        if expected is not None and len(data) < int(expected):
+            raise ValueError("Source download was truncated; refusing an incomplete dataset")
         if len(data)>cap:
             raise ValueError('Source exceeds reasonable download size; refused')
         if len(data)<100:
@@ -29,6 +33,8 @@ def download(url: str, cap: int = 65_000_000) -> bytes:
 
 
 def main():
+    from src.environment import load_backend_environment
+    load_backend_environment()
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--onet-file',type=Path,help='Official O*NET 31.0 CSV ZIP or Task Statements.csv')
     p.add_argument('--anthropic-task-file',type=Path,help='Anthropic task_penetration.csv')
@@ -37,7 +43,7 @@ def main():
     args=p.parse_args()
     if args.status:
         print(reference_status());return 0
-    sources=[('O*NET 31.0 Task Statements',args.onet_file,ONET_ZIP),
+    sources=[('O*NET 31.0 Task Statements',args.onet_file,ONET_TASKS),
              ('Anthropic task penetration',args.anthropic_task_file,ANTHROPIC_TASKS),
              ('Anthropic occupation exposure',args.anthropic_job_file,ANTHROPIC_JOBS)]
     blobs=[]

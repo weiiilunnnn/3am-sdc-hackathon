@@ -29,6 +29,7 @@ from src.api.future_roles import router as future_role_router
 from src.api.career_simulator import router as career_simulator_router
 from src.api.employer import router as employer_router
 from src.services.storage import initialize_database
+from src.services.signal_maintenance import start_signal_maintenance
 from src.services.future_roles.occupation_index import get_occupation_index
 from src.utils import format_greeting, summarize
 
@@ -41,7 +42,11 @@ async def lifespan(_: FastAPI):
     index = get_occupation_index()
     if index.coverage != "local_full":
         logger.error("Full ESCO skill and occupation index is unavailable: %s", index.warning)
-    yield
+    maintenance_stop = start_signal_maintenance()
+    try:
+        yield
+    finally:
+        maintenance_stop.set()
 
 
 app = FastAPI(title=os.getenv("PROJECT_NAME", "Hackathon API"), lifespan=lifespan)
