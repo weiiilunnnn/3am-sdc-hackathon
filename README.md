@@ -56,11 +56,11 @@ Pathwaay is a **hackathon research and demonstration prototype** that helps peop
 | Resource | Link / status |
 | --- | --- |
 | Public GitHub repository | https://github.com/weiiilunnnn/3am-sdc-hackathon |
-| Live demo | **[TEAM TO ADD — verified publicly accessible deployment URL]** |
-| Replit project | **[TEAM TO ADD — accessible project URL, if shared]** |
-| RunPod endpoint | Configured privately by the backend via `RUNPOD_LLM_ENDPOINT_ID`; **[TEAM TO ADD authorised endpoint link if required by organisers]**. Never publish API keys. |
-| Slide deck | **[TEAM TO ADD — shareable presentation link]** |
-| Demo video | **[TEAM TO ADD — shareable recording link]** |
+| Live demo | https://3-am-sdc-hackathon.replit.app/ |
+| Replit project | |
+| RunPod endpoint | Configured privately by the backend via `RUNPOD_LLM_ENDPOINT_ID`;  |
+| Slide deck |  |
+| Demo video |  |
 
 > Endpoints and API keys are not the same: a RunPod endpoint address is not itself a secret credential, but whether its URL should be public depends on team/provider access policy. Do not embed a key in any link. The links above are not claimed to be live until verified by the team.
 
