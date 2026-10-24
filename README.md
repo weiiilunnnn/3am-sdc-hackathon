@@ -59,7 +59,7 @@ Pathwaay is a **hackathon research and demonstration prototype** that helps peop
 | Live demo | https://3-am-sdc-hackathon.replit.app/ |
 | Replit project | |
 | RunPod endpoint | Configured privately by the backend via `RUNPOD_LLM_ENDPOINT_ID`;  |
-| Slide deck |  |
+| Slide deck | https://docs.google.com/presentation/d/1GileF1fp6PmVt7NZArXZUwczDBqGtlS4/edit?usp=drive_link&ouid=116200505331971992441&rtpof=true&sd=true |
 | Demo video |  |
 
 > Endpoints and API keys are not the same: a RunPod endpoint address is not itself a secret credential, but whether its URL should be public depends on team/provider access policy. Do not embed a key in any link. The links above are not claimed to be live until verified by the team.
