@@ -2,6 +2,7 @@
 
 import os
 import sys
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -24,13 +25,20 @@ from src.api.career import router as career_router
 from src.api.sdg import router as sdg_router
 from src.api.future_roles import router as future_role_router
 from src.api.career_simulator import router as career_simulator_router
+from src.api.employer import router as employer_router
 from src.services.storage import initialize_database
+from src.services.future_roles.occupation_index import get_occupation_index
 from src.utils import format_greeting, summarize
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     initialize_database()
+    index = get_occupation_index()
+    if index.coverage != "local_full":
+        logger.error("Full ESCO skill and occupation index is unavailable: %s", index.warning)
     yield
 
 
@@ -43,6 +51,7 @@ app.include_router(career_router)
 app.include_router(sdg_router)
 app.include_router(future_role_router)
 app.include_router(career_simulator_router)
+app.include_router(employer_router)
 
 
 class SummarizeRequest(BaseModel):

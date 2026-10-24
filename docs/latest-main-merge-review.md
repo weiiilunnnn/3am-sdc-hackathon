@@ -44,12 +44,14 @@ Existing API compatibility and genuine/unknown profile handling remain intact.
 Registration explicitly collects work descriptions, education/coursework,
 volunteering, projects, training, achievements, activities, strengths and summary.
 It excludes email, interests and aspirations as proof. User consent triggers
-POST /api/profiles/extract-profile-skills. The model returns local taxonomy IDs,
+POST /api/profiles/extract-profile-skills. The model returns canonical ESCO IDs,
 exact evidence quotes, reasons and source references; backend rejects unknown
 IDs/nonliteral quotes. UI suggestions start unselected and require review, check
-for stale evidence, append to manual skills and deduplicate by local ID.
-At final completion names and display links enter the hybrid adapter, existing
-SQLite profile API and existing ESCO recognition. They are not ESCO IDs already.
+for stale evidence, append to the registration skills and deduplicate by ESCO
+ID. Candidate IDs come from the pinned full ESCO v1.2.1 snapshot, are validated
+again by the SQLite profile API, and are passed directly to the KW adapter.
+The request sends only a bounded, locally retrieved set of relevant taxonomy
+entries; it does not call the ESCO API or send the full catalogue.
 Ambiguous SQL remains unresolved. No second recognizer/database was introduced.
 The evidence quote is shown for review; Main's saved skillLinks do not persist
 those quotes as a separate evidence store. Existing backend evidence is retained.
@@ -81,11 +83,11 @@ renders registration/saved content; it does not fabricate new CV content.
 
 ## Remaining limits
 
-The previously observed Runpod health HTTP401, inference timeouts and teammate
-endpoint/key confirmation remain unresolved. Main's new extractor uses 90s
-while Next proxy defaults about30s; slow inference can still time out. No timeout
-increase or async redesign is included. Main's async extraction route also calls
-its synchronous provider helper; concurrency limitations remain inherited.
+RunPod health HTTP401 and teammate endpoint/key confirmation were previously
+reported and remain configuration-dependent. Extraction runs as a transient,
+bounded background job with a 90-second provider deadline; the frontend polls
+for completion and receives explicit provider failures. No live RunPod request
+was used to verify the configured endpoint or credentials.
 Logout is a demo session action, not authenticated ownership; persisted profile
 and local continuity reference remain. Re-entering Profile can restore them.
 Backend limits still reject over40 selected skills; no silent truncation added.

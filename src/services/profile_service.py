@@ -11,6 +11,7 @@ from src.data.sample_profiles import get_sample_profiles
 from src.data.skills_taxonomy import find_skill_by_id, find_skill_by_label, taxonomy_metadata
 from src.models.profiles import NormalizedSkill, ProfileInput, ProfileRecord
 from src.services.storage import connection, initialize_database
+from src.services.future_roles.occupation_index import get_occupation_index
 
 _PROFICIENCY_RANK = {"unknown": -1, "beginner": 0, "intermediate": 1, "advanced": 2}
 
@@ -39,6 +40,19 @@ def normalize_skills(skills: list[Any]) -> list[NormalizedSkill]:
         raw_name = skill.name.strip()
         if skill.skill_id:
             taxonomy_entry = find_skill_by_id(skill.skill_id)
+            if taxonomy_entry is None and skill.skill_id.startswith("http://data.europa.eu/esco/skill/"):
+                index = get_occupation_index()
+                esco_skill = (
+                    index.skills.get(skill.skill_id)
+                    if index.coverage == "local_full" and index.catalog.dataset_version == "v1.2.1"
+                    else None
+                )
+                if esco_skill is not None:
+                    taxonomy_entry = {
+                        "id": esco_skill.skill_id,
+                        "name": esco_skill.name,
+                        "taxonomy_source": f"ESCO {index.catalog.dataset_version}",
+                    }
             if taxonomy_entry is None:
                 raise UnknownSkillIdError(f"Unsupported skill identifier: {skill.skill_id}")
         elif skill.force_custom:

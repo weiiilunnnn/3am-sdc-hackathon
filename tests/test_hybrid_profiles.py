@@ -1,6 +1,7 @@
 """Hybrid storage uses the existing database and ESCO adapter, with providers off."""
 import os
 import tempfile
+import time
 import unittest
 from copy import deepcopy
 from unittest.mock import patch
@@ -31,6 +32,15 @@ class HybridProfileTests(unittest.TestCase):
         response = self.client.post('/api/profiles', json=self.draft, headers={"Idempotency-Key": key} if key else {})
         self.assertEqual(response.status_code, 201, response.text)
         return response.json()
+
+    def wait_for_skill_job(self, job_id):
+        deadline = time.monotonic() + 30
+        while time.monotonic() < deadline:
+            response = self.client.get(f'/api/profiles/extract-profile-skills/{job_id}')
+            if response.status_code != 200 or response.json()['status'] == 'completed':
+                return response
+            time.sleep(0.01)
+        self.fail('Skill extraction job did not finish within the test deadline.')
 
     def test_real_unknown_snapshot_and_esco_ambiguity_roundtrip(self):
         saved = self.create()
@@ -73,24 +83,89 @@ class HybridProfileTests(unittest.TestCase):
     def test_reviewed_ai_skill_uses_same_profile_and_esco_adapter(self):
         import json
         response = {'output':{'choices':[{'message':{'content':json.dumps({'skills':[{
-            'skill_id':'local:python-programming','evidence_id':'e0',
+            'skill_id':'http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d','evidence_id':'e0',
             'evidence':'using Python','reason':'Explicit activity in the fictional project.'}]})}}]}}
         with patch('src.services.skill_extractor.run_sync',return_value=response):
-            extracted = self.client.post('/api/profiles/extract-profile-skills',
+            started = self.client.post('/api/profiles/extract-profile-skills',
                 headers={'X-Synthetic-Demo-Confirmed':'true'},json={'evidence':[{
                     'source_id':'project-1','source_label':'Projects','text':'Built a chart using Python.'}]})
+            self.assertEqual(started.status_code,202,started.text)
+            extracted = self.wait_for_skill_job(started.json()['job_id'])
         self.assertEqual(extracted.status_code,200,extracted.text)
-        candidate = extracted.json()[0]
+        candidate = extracted.json()['skills'][0]
         self.draft['projects'] = [{'id':'project-1','title':'Fictional chart','description':'Built a chart using Python.','skill_ids':[]}]
         # Explicitly reviewed candidate replaces only the matching draft entry.
         self.draft['skills'][0].update(name=candidate['canonical_name'],skill_id=candidate['skill_id'],evidence_record_ids=candidate['evidence_record_ids'])
         saved = self.create('reviewed-ai-hybrid-profile')
         self.assertEqual(len(saved['skills']),3)  # Manual SQL/Data Analysis retained.
         python = next(s for s in saved['skills'] if s['skill_id']==candidate['skill_id'])
+        self.assertEqual(python['taxonomy_source'], 'ESCO v1.2.1')
         self.assertEqual(python['evidence_record_ids'],['project-1'])
         esco = self.client.get('/api/v2/profiles/'+saved['id']).json()
         self.assertIn('Python (computer programming)',[s['name'] for s in esco['skills']])
         self.assertEqual(esco['unresolved_skills'],['SQL'])
+
+    def test_esco_skill_search_returns_only_canonical_skill_concepts(self):
+        response = self.client.get('/api/v2/skills?q=statistics')
+        self.assertEqual(response.status_code, 200, response.text)
+        body = response.json()
+        self.assertEqual(body['data_source_status'], 'local_full')
+        self.assertTrue(body['skills'])
+        self.assertTrue(all(skill['skill_id'].startswith('http://data.europa.eu/esco/skill/') for skill in body['skills']))
+
+    def test_esco_skill_search_supports_multiple_terms_in_one_request(self):
+        response = self.client.get('/api/v2/skills', params={
+            'q': 'Python (computer programming)|perform data analysis|machine learning|communication|solve problems|think critically',
+        })
+        self.assertEqual(response.status_code, 200, response.text)
+        names = {skill['name'] for skill in response.json()['skills']}
+        self.assertTrue({
+            'Python (computer programming)',
+            'perform data analysis',
+            'machine learning',
+            'communication',
+            'solve problems',
+            'think critically',
+        } <= names)
+
+    def test_skill_extraction_returns_503_when_full_esco_snapshot_is_unavailable(self):
+        from types import SimpleNamespace
+
+        fallback = SimpleNamespace(
+            coverage='local_subset_fallback',
+            catalog=SimpleNamespace(dataset_version='v1.2.1'),
+            warning='Full index checksum mismatch',
+            skills={},
+        )
+        with patch('src.services.skill_extractor.get_occupation_index', return_value=fallback), \
+             patch('src.services.skill_extractor.run_sync') as run_sync:
+            started = self.client.post(
+                '/api/profiles/extract-profile-skills',
+                headers={'X-Synthetic-Demo-Confirmed': 'true'},
+                json={'evidence': [{'source_id': 'p1', 'source_label': 'Project', 'text': 'Used Python.'}]},
+            )
+            self.assertEqual(started.status_code, 202, started.text)
+            response = self.wait_for_skill_job(started.json()['job_id'])
+        self.assertEqual(response.status_code, 503, response.text)
+        self.assertIn('Verified full ESCO v1.2.1', response.json()['detail'])
+        run_sync.assert_not_called()
+
+    def test_runpod_timeout_is_returned_as_actionable_502(self):
+        from src.services.sources.runpod_api import RunPodRequestError
+
+        with patch(
+            'src.services.skill_extractor.run_sync',
+            side_effect=RunPodRequestError('provider timed out', category='timeout', timeout_seconds=90),
+        ):
+            started = self.client.post(
+                '/api/profiles/extract-profile-skills',
+                headers={'X-Synthetic-Demo-Confirmed': 'true'},
+                json={'evidence': [{'source_id': 'p1', 'source_label': 'Project', 'text': 'Used Python.'}]},
+            )
+            self.assertEqual(started.status_code, 202, started.text)
+            response = self.wait_for_skill_job(started.json()['job_id'])
+        self.assertEqual(response.status_code, 502, response.text)
+        self.assertIn('timed out while waiting for RunPod', response.json()['detail'])
 
     def test_retried_creation_never_overwrites_or_duplicates(self):
         key = 'hybrid-test-retry-identity'

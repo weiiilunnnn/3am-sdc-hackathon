@@ -28,15 +28,23 @@ export function registrationToDraft(main: PathwaayRegistrationProfile, saved?: S
     education: [], experience: [], projects: [], certifications: [], achievements: [],
     learning_preferences: {weekly_hours: null, budget_myr: null, mode: null}, synthetic_demo: false,
   };
-  // Only local vocabulary identity is reused here; ESCO recognition stays on the server.
-  const identity = (name: string) => vocabulary.find(s => [s.name, ...s.aliases].some(n => key(n) === key(name)))?.id ?? `name:${key(name)}`;
-  const owns = new Set((previous?.skills ?? []).map(identity));
-  const requested = new Set(main.skills.map(identity));
+  const identity = (name: string, links = main.skillLinks) => {
+    const link = links?.find(item => key(item.name) === key(name));
+    if (link?.taxonomy_source === "ESCO v1.2.1" && link.skill_id) return link.skill_id;
+    return vocabulary.find(s => [s.name, ...s.aliases].some(n => key(n) === key(name)))?.id ?? `name:${key(name)}`;
+  };
+  const owns = new Set((previous?.skills ?? []).map(name => identity(name, previous?.skillLinks)));
+  const requested = new Set(main.skills.map(name => identity(name, main.skillLinks)));
   const skills = base.skills.filter(s => !owns.has(s.skill_id ?? identity(s.name)) || requested.has(s.skill_id ?? identity(s.name)));
   for (const name of main.skills) {
-    const id = identity(name);
+    const id = identity(name, main.skillLinks);
     const existing = skills.find(s => (s.skill_id ?? identity(s.name)) === id);
-    if (!existing) skills.push({name, skill_id: id.startsWith("local:") ? id : null, proficiency: "unknown", evidence_record_ids: []});
+    if (!existing) skills.push({
+      name,
+      skill_id: id.startsWith("local:") || id.startsWith("http://data.europa.eu/esco/skill/") ? id : null,
+      proficiency: "unknown",
+      evidence_record_ids: [],
+    });
   }
   // Include retained backend skills in Main's view rather than hiding them.
   const snapshot = {...main, skills: [...main.skills]};

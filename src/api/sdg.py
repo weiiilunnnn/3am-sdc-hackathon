@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api/sdg")
 @router.post("/recommendations")
 def sdg_recommendations(request: SDGRecommendationRequest) -> dict:
     try:
-        return recommend_sdgs(request.role)
+        return recommend_sdgs(request.role, request.skills)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except RuntimeError as exc:

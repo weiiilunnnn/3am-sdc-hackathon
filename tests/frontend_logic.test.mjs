@@ -3,6 +3,7 @@ import test from "node:test";
 
 import { buildTrendChartGeometry } from "../src/frontend/lib/chart-utils.ts";
 import { splitCommaList, validateProfileDraft } from "../src/frontend/lib/profile-validation.ts";
+import { extractProfileSkills } from "../src/frontend/lib/api.ts";
 
 const validProfile = () => ({
   status: "student",
@@ -37,6 +38,36 @@ const observation = (period_year, value) => ({
 
 test("comma-separated entries are trimmed and de-duplicated", () => {
   assert.deepEqual(splitCommaList(" Python, data,Python, , data "), ["Python", "data"]);
+});
+
+test("skill extraction never displays more suggestions than the requested limit", async () => {
+  const previousFetch = globalThis.fetch;
+  const previousWindow = globalThis.window;
+  const requested = [];
+  globalThis.window = {
+    setTimeout(callback) {
+      callback();
+      return 1;
+    },
+    clearTimeout() {},
+  };
+  globalThis.fetch = async (path, init) => {
+    requested.push({ path, init });
+    const body = path === "/api/profiles/extract-profile-skills"
+      ? { job_id: "test-job" }
+      : { status: "completed", skills: Array.from({ length: 20 }, (_, index) => ({ skill_id: `skill-${index}` })) };
+    return new Response(JSON.stringify(body), { status: path.endsWith("extract-profile-skills") ? 202 : 200 });
+  };
+
+  try {
+    const candidates = await extractProfileSkills([], 10);
+    assert.equal(candidates.length, 10);
+    assert.equal(JSON.parse(requested[0].init.body).limit, 10);
+  } finally {
+    globalThis.fetch = previousFetch;
+    if (previousWindow === undefined) delete globalThis.window;
+    else globalThis.window = previousWindow;
+  }
 });
 
 test("profile validation accepts a complete synthetic profile", () => {

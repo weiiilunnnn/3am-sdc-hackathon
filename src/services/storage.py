@@ -57,6 +57,23 @@ def initialize_database() -> None:
                 result_json TEXT
             );
 
+            CREATE TABLE IF NOT EXISTS employer_departments (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL UNIQUE COLLATE NOCASE,
+                created_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS employer_member_departments (
+                member_id TEXT PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
+                department_id TEXT NOT NULL REFERENCES employer_departments(id) ON DELETE CASCADE
+            );
+
+            CREATE TABLE IF NOT EXISTS employer_department_skill_targets (
+                department_id TEXT NOT NULL REFERENCES employer_departments(id) ON DELETE CASCADE,
+                skill_id TEXT NOT NULL,
+                PRIMARY KEY (department_id, skill_id)
+            );
+
             CREATE TABLE IF NOT EXISTS trend_refresh_state (
                 id INTEGER PRIMARY KEY CHECK (id = 1),
                 last_attempt_at TEXT,

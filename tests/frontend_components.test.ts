@@ -3,6 +3,7 @@ import { createRequire } from "node:module";
 import test from "node:test";
 import { EmploymentSnapshotView, formatCooldown, type EmploymentSnapshotViewProps } from "../src/frontend/app/(workspace)/radar/EmploymentSnapshot";
 import Home from "../src/frontend/app/(workspace)/profile/page";
+import EmployerProfile from "../src/frontend/app/(workspace)/employer/profile/page";
 import type { EmploymentDashboard } from "../src/frontend/lib/api";
 import RadialProfileRelevance from "../src/frontend/components/RadialProfileRelevance";
 import CareerOverview from "../src/frontend/components/CareerOverview";
@@ -54,6 +55,39 @@ test("hybrid conversion keeps genuine unknowns and exact Main snapshot without i
   assert.equal(registrationToDraft(main).learning_preferences.weekly_hours, 0);
   main.learningBudget = "not a number";
   assert.throws(() => registrationToDraft(main), /non-negative/);
+});
+
+test("hybrid registration handoff preserves selected ESCO IDs and removes unselected ESCO skills", () => {
+  const main = registrationFixture();
+  main.skills = ["Python (computer programming)"];
+  main.skillLinks = [{
+    name: "Python (computer programming)",
+    skill_id: "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d",
+    taxonomy_source: "ESCO v1.2.1",
+  }];
+  const draft = registrationToDraft(main);
+  assert.equal(draft.skills[0].skill_id, main.skillLinks[0].skill_id);
+  assert.equal(draft.registration_profile?.skillLinks?.[0].taxonomy_source, "ESCO v1.2.1");
+
+  const saved = {
+    ...draft,
+    id: "saved-esco",
+    created_at: "2026-10-23",
+    updated_at: "2026-10-23",
+    skills: [{
+      skill_id: main.skillLinks[0].skill_id,
+      display_name: "Python (computer programming)",
+      input_names: ["Python (computer programming)"],
+      proficiency: "unknown",
+      taxonomy_source: "ESCO v1.2.1",
+      is_custom: false,
+      evidence_record_ids: [],
+    }],
+  } as StoredProfile;
+  const changed = registrationFixture();
+  changed.skills = ["SQL"];
+  changed.skillLinks = [];
+  assert.equal(registrationToDraft(changed, saved).skills.some(skill => skill.skill_id === main.skillLinks?.[0].skill_id), false);
 });
 
 test("hybrid updates retain existing evidence, proficiency and unrelated records", () => {
@@ -203,6 +237,14 @@ test("profile component exposes the safe handoff loading state before reading br
   assert.match(html, /Opening your completed profile/);
   assert.match(html, /role="status"/);
   assert.doesNotMatch(html, /data-testid="button-save-profile"/);
+});
+
+test("employer own profile is clearly identified as a fictional Company X IT demo", () => {
+  const html = renderToStaticMarkup(createElement(EmployerProfile));
+  assert.match(html, /Company X/);
+  assert.match(html, /Information Technology \(IT\)/);
+  assert.match(html, /fictional IT company/i);
+  assert.match(html, /not an authenticated or registered organization/i);
 });
 
 test("employment component renders attributed records, denominator and escaped text", () => {
@@ -366,6 +408,7 @@ for (const value of [0, 47.1234, 100, null]) {
     assert.ok(html.includes("Matched Profile Concepts"));
     assert.ok(html.includes("Essential Concepts Not Evidenced"));
     assert.ok(html.includes("Relevance does not indicate career readiness or hiring probability."));
+    assert.ok(html.includes('href="/role-matching/sdg?role_id=http%3A%2F%2Fdata.europa.eu%2Fesco%2Foccupation%2Ftest-role"'));
     assert.doesNotMatch(html, /Very high match|High digital intensity|Research &amp; Development|scoring-footer/);
     if (value === null) assert.match(html, /role="link" aria-disabled="true"/);
     else assert.match(html, /class="overview-pathway-link" href="\/role-matching\/roles\/test-role\/pathway"/);

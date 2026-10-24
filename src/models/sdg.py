@@ -1,5 +1,7 @@
 """Request and response contracts for the synthetic SDG dashboard."""
 
+from typing import Annotated
+
 from pydantic import BaseModel, Field
 
 
@@ -33,3 +35,4 @@ class SDGOverviewRequest(BaseModel):
 
 class SDGRecommendationRequest(BaseModel):
     role: str = Field(min_length=1, max_length=120)
+    skills: list[Annotated[str, Field(min_length=1, max_length=100)]] = Field(default_factory=list, max_length=50)

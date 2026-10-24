@@ -1,5 +1,7 @@
 """Transient, synthetic-only CV extraction response."""
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -14,7 +16,22 @@ class ExtractedSkill(BaseModel):
     evidence: str | None = Field(default=None, max_length=400)
     rationale: str | None = Field(default=None, max_length=500)
     evidence_source: str | None = Field(default=None, max_length=80)
+    taxonomy_source: str | None = Field(default=None, max_length=80)
     evidence_record_ids: list[str] = Field(default_factory=list, max_length=20)
+
+
+class SkillExtractionJobStarted(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    job_id: str
+    status: Literal["pending"] = "pending"
+
+
+class SkillExtractionJobStatus(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    status: Literal["pending", "completed"]
+    skills: list[ExtractedSkill] | None = None
 
 
 class CVExtraction(BaseModel):

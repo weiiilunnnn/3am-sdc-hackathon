@@ -139,7 +139,7 @@ class NormalizedSkill(BaseModel):
     display_name: str
     input_names: list[str]
     proficiency: Proficiency
-    taxonomy_source: Literal["Local prototype vocabulary", "Custom"]
+    taxonomy_source: Literal["Local prototype vocabulary", "ESCO v1.2.1", "Custom"]
     is_custom: bool
     evidence_record_ids: list[str] = Field(default_factory=list)
 

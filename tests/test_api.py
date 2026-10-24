@@ -4,6 +4,8 @@ import asyncio
 import json
 import os
 import tempfile
+import threading
+import time
 import unittest
 from copy import deepcopy
 from unittest.mock import patch
@@ -42,7 +44,7 @@ def request(
         await app(scope, receive, send)
         status = next(message["status"] for message in messages if message["type"] == "http.response.start")
         data = b"".join(message.get("body", b"") for message in messages if message["type"] == "http.response.body")
-        return status, json.loads(data)
+        return status, json.loads(data) if data else None
     return asyncio.run(run())
 
 
@@ -64,6 +66,15 @@ class ApiIntegrationTests(unittest.TestCase):
         for key in ("label", "sample_id", "taxonomy"):
             draft.pop(key, None)
         return draft
+
+    def wait_for_skill_job(self, job_id: str) -> tuple[int, object]:
+        deadline = time.monotonic() + 30
+        while time.monotonic() < deadline:
+            status, result = request("GET", f"/api/profiles/extract-profile-skills/{job_id}")
+            if status != 200 or result["status"] == "completed":
+                return status, result
+            time.sleep(0.01)
+        self.fail("Skill extraction job did not finish within the test deadline.")
 
     def test_health_and_legacy_summary_remain_available(self):
         for path in ("/api/health", "/api/healthz"):
@@ -211,22 +222,15 @@ class ApiIntegrationTests(unittest.TestCase):
             "source_label": "Projects",
             "text": "Built a fictional dashboard using Python.",
         }]
-        payload = {
-            "input": {
-                "model": "glm-5.3",
-                "messages": [{
-                    "role": "assistant",
-                    "content": json.dumps({
-                        "skills": [{
-                            "skill_id": "local:python-programming",
-                            "evidence_id": "e0",
-                            "evidence": "using Python",
-                            "reason": "The description explicitly mentions Python.",
-                        }]
-                    }),
-                }],
-            }
-        }
+        esco_python_id = "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d"
+        model_content = json.dumps({
+            "skills": [{
+                "skill_id": esco_python_id,
+                "evidence_id": "e0",
+                "evidence": "using Python",
+                "reason": "The description explicitly mentions Python.",
+            }]
+        })
         from src.services.sources.runpod_api import RunPodConfigurationError
 
         path = "/api/profiles/extract-profile-skills"
@@ -236,25 +240,196 @@ class ApiIntegrationTests(unittest.TestCase):
         headers = [(b"x-synthetic-demo-confirmed", b"true")]
         with patch(
             "src.services.skill_extractor.run_sync",
-            return_value={"output": {"choices": [{"message": {"content": payload["input"]["messages"][0]["content"]}}]}},
-        ):
-            status, result = request("POST", path, body, extra_headers=headers)
+            return_value={"output": {"choices": [{"message": {"content": model_content}}]}},
+        ) as run_sync:
+            status, started = request("POST", path, body, extra_headers=headers)
+            self.assertEqual(status, 202)
+            self.assertEqual(started["status"], "pending")
+            status, result = self.wait_for_skill_job(started["job_id"])
         self.assertEqual(status, 200)
-        self.assertEqual(result[0]["skill_id"], "local:python-programming")
-        self.assertEqual(result[0]["canonical_name"], "Python programming")
-        self.assertEqual(result[0]["evidence_record_ids"], ["project-1"])
+        self.assertEqual(result["status"], "completed")
+        self.assertEqual(result["skills"][0]["skill_id"], esco_python_id)
+        self.assertEqual(result["skills"][0]["canonical_name"], "Python (computer programming)")
+        self.assertEqual(result["skills"][0]["evidence_record_ids"], ["project-1"])
+        sent_taxonomy = json.loads(run_sync.call_args.args[1]["input"]["messages"][1]["content"])["taxonomy"]
+        self.assertIn(esco_python_id, {skill["skill_id"] for skill in sent_taxonomy})
 
         with patch("src.services.skill_extractor.run_sync", side_effect=RunPodConfigurationError("RunPod is not configured.")):
-            status, error = request("POST", path, body, extra_headers=headers)
+            status, started = request("POST", path, body, extra_headers=headers)
+            self.assertEqual(status, 202)
+            status, error = self.wait_for_skill_job(started["job_id"])
         self.assertEqual(status, 503)
         self.assertIn("RunPod", error["detail"])
 
         from src.services.sources.runpod_api import RunPodRequestError
 
         with patch("src.services.skill_extractor.run_sync", side_effect=RunPodRequestError("RunPod rejected the API key (HTTP 401). Check RUNPOD_API_KEY.")):
-            status, error = request("POST", path, body, extra_headers=headers)
+            status, started = request("POST", path, body, extra_headers=headers)
+            self.assertEqual(status, 202)
+            status, error = self.wait_for_skill_job(started["job_id"])
         self.assertEqual(status, 502)
         self.assertEqual(error["detail"], "RunPod rejected the API key (HTTP 401). Check RUNPOD_API_KEY.")
+
+    def test_skill_extraction_job_status_and_unknown_job(self):
+        with patch(
+            "src.services.skill_extraction_jobs.extract_profile_skill_candidates",
+            return_value=[],
+        ):
+            status, started = request(
+                "POST",
+                "/api/profiles/extract-profile-skills",
+                {"evidence": [{"source_label": "Project", "text": "Used Python."}]},
+                extra_headers=[(b"x-synthetic-demo-confirmed", b"true")],
+            )
+            self.assertEqual(status, 202)
+            status, completed = self.wait_for_skill_job(started["job_id"])
+        self.assertEqual(status, 200)
+        self.assertEqual(completed, {"status": "completed", "skills": []})
+        self.assertEqual(request("GET", "/api/profiles/extract-profile-skills/not-a-job")[0], 404)
+
+    def test_skill_extraction_jobs_are_bounded_and_report_pending(self):
+        started = threading.Event()
+        release = threading.Event()
+
+        def hold_job(evidence, *, limit):
+            started.set()
+            release.wait(5)
+            return []
+
+        headers = [(b"x-synthetic-demo-confirmed", b"true")]
+        payload = {"evidence": [{"source_label": "Project", "text": "Used Python."}]}
+        with patch("src.services.skill_extraction_jobs.extract_profile_skill_candidates", side_effect=hold_job):
+            try:
+                first_status, first = request("POST", "/api/profiles/extract-profile-skills", payload, extra_headers=headers)
+                self.assertEqual(first_status, 202)
+                self.assertTrue(started.wait(2))
+                pending_status, pending = request("GET", f"/api/profiles/extract-profile-skills/{first['job_id']}")
+                self.assertEqual((pending_status, pending["status"]), (200, "pending"))
+
+                second_status, second = request("POST", "/api/profiles/extract-profile-skills", payload, extra_headers=headers)
+                self.assertEqual(second_status, 202)
+                busy_status, busy = request("POST", "/api/profiles/extract-profile-skills", payload, extra_headers=headers)
+                self.assertEqual(busy_status, 429)
+                self.assertIn("busy", busy["detail"])
+            finally:
+                release.set()
+
+            for job in (first, second):
+                status, result = self.wait_for_skill_job(job["job_id"])
+                self.assertEqual(status, 200)
+                self.assertEqual(result["status"], "completed")
+
+    def test_employer_dashboard_departments_targets_and_minimized_member_records(self):
+        first = self.draft()
+        first["skills"] = [{
+            "name": "Python programming",
+            "skill_id": "local:python-programming",
+            "proficiency": "intermediate",
+            "force_custom": False,
+            "evidence_record_ids": [],
+        }]
+        first["professional_summary"] = "Fictional private summary should not be included in the employer list."
+        first_status, first_profile = request("POST", "/api/profiles", first)
+        second = self.draft()
+        second["skills"] = [{
+            "name": "Data analysis",
+            "skill_id": "local:data-analysis",
+            "proficiency": "beginner",
+            "force_custom": False,
+            "evidence_record_ids": [],
+        }]
+        second_status, second_profile = request("POST", "/api/profiles", second)
+        self.assertEqual((first_status, second_status), (201, 201))
+
+        status, department = request("POST", "/api/employer/departments", {"name": "Data & Insights"})
+        self.assertEqual(status, 201)
+        self.assertEqual(request("POST", "/api/employer/departments", {"name": "data & insights"})[0], 409)
+        for profile in (first_profile, second_profile):
+            self.assertEqual(
+                request("PUT", f"/api/employer/members/{profile['id']}/department", {"department_id": department["id"]})[0],
+                204,
+            )
+        self.assertEqual(
+            request("PUT", f"/api/employer/departments/{department['id']}/targets", {
+                "skill_ids": ["local:python-programming", "local:data-analysis"],
+            })[0],
+            204,
+        )
+        status, dashboard = request("GET", "/api/employer/dashboard")
+        self.assertEqual(status, 200)
+        self.assertEqual(dashboard["member_count"], 2)
+        self.assertEqual(dashboard["unassigned_count"], 0)
+        data_team = next(item for item in dashboard["departments"] if item["id"] == department["id"])
+        self.assertEqual(data_team["member_count"], 2)
+        self.assertEqual([item["coverage_percent"] for item in data_team["skill_coverage"]], [50.0, 50.0])
+        self.assertNotIn("private summary", json.dumps(dashboard).lower())
+        self.assertIn("No HR authentication", dashboard["data_notice"])
+        self.assertEqual(request("PUT", "/api/employer/members/missing/department", {"department_id": department["id"]})[0], 404)
+        self.assertEqual(request("PUT", f"/api/employer/departments/{department['id']}/targets", {"skill_ids": ["fake:skill"]})[0], 422)
+
+    def test_employer_learning_plan_sends_only_minimum_skill_context_and_validates_output(self):
+        draft = self.draft()
+        draft["professional_summary"] = "Do not send this fictional summary to the model."
+        draft["current_occupation"] = "Do not send this occupation to the model."
+        draft["skills"] = [{
+            "name": "Python programming",
+            "skill_id": "local:python-programming",
+            "proficiency": "intermediate",
+            "force_custom": False,
+            "evidence_record_ids": [],
+        }]
+        _, profile = request("POST", "/api/profiles", draft)
+        _, department = request("POST", "/api/employer/departments", {"name": "Data Team"})
+        request("PUT", f"/api/employer/members/{profile['id']}/department", {"department_id": department["id"]})
+        request("PUT", f"/api/employer/departments/{department['id']}/targets", {"skill_ids": ["local:data-analysis"]})
+        plan_content = json.dumps({
+            "summary": "Build practical data analysis experience.",
+            "steps": [{
+                "skill_name": "Data analysis",
+                "title": "Explore a small dataset",
+                "activity": "Use a fictional dataset to identify patterns and explain one result.",
+                "resource_type": "guided practice",
+                "duration_hours": 2,
+            }],
+        })
+        with patch(
+            "src.services.employer_service.run_sync",
+            return_value={"output": {"choices": [{"message": {"content": plan_content}}]}},
+        ) as run_model:
+            status, result = request("POST", f"/api/employer/members/{profile['id']}/learning-plan")
+        self.assertEqual(status, 200)
+        self.assertEqual(result["steps"][0]["skill_name"], "Data analysis")
+        self.assertIn("not verified courses or links", result["notice"])
+        model_payload = run_model.call_args.args[1]
+        model_text = json.dumps(model_payload)
+        self.assertNotIn(profile["id"], model_text)
+        self.assertNotIn("Do not send this", model_text)
+        self.assertNotIn("occupation", model_text.lower())
+
+        wrong_skill = json.dumps({
+            "summary": "Unsupported plan.",
+            "steps": [{
+                "skill_name": "Machine learning",
+                "title": "Take a course",
+                "activity": "Complete activities.",
+                "resource_type": "project",
+                "duration_hours": 3,
+            }],
+        })
+        with patch(
+            "src.services.employer_service.run_sync",
+            return_value={"output": {"choices": [{"message": {"content": wrong_skill}}]}},
+        ):
+            status, error = request("POST", f"/api/employer/members/{profile['id']}/learning-plan")
+        self.assertEqual(status, 502)
+        self.assertIn("invalid employer learning plan", error["detail"])
+
+        from src.services.sources.runpod_api import RunPodConfigurationError
+
+        with patch("src.services.employer_service.run_sync", side_effect=RunPodConfigurationError("RunPod is not configured.")):
+            status, error = request("POST", f"/api/employer/members/{profile['id']}/learning-plan")
+        self.assertEqual(status, 502)
+        self.assertIn("RunPod is not configured", error["detail"])
 
 
 if __name__ == "__main__":
