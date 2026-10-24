@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { useRegistrationProfile } from "../profile-workspace";
 import type { PathwaayRegistrationProfile } from "@/lib/pathwaay-profile";
 import "./ai-trend-v5.css";
+import DisruptionOutlook from "./DisruptionOutlook";
 
 type ProfileRequest = { occupation: string; field_of_study: string; skills: {name:string;skill_id:string|null}[]; work_tasks:string[]; aspiration:string };
 type Skill = { id:string|null; key:string; name:string; connection_count:number; potential_count?:number };
@@ -61,7 +62,7 @@ export default function SignalsPage(){
   const {profile,loading:profileLoading}=useRegistrationProfile();
   const request=useMemo(()=>profile?pack(profile):null,[profile]);
   const fingerprint=JSON.stringify(request);
-  const [view,setView]=useState<"personal"|"explore">("personal");
+  const [view,setView]=useState<"personal"|"explore"|"disruption">("personal");
   const [personal,setPersonal]=useState<Experience|null>(null),[selected,setSelected]=useState<string|null>(null);
   const [personalBusy,setPersonalBusy]=useState(false),[personalError,setPersonalError]=useState("");
   const [allSkills,setAllSkills]=useState(false),[opened,setOpened]=useState<Connection|null>(null);
@@ -159,8 +160,8 @@ export default function SignalsPage(){
   return <main className="v5-page">
     <div className="v5-glow" aria-hidden="true"/>
     <div className="v5-wrap">
-      <header className="v5-heading"><p className="v5-eyebrow"><span className="v5-signal-dot"/> AI TREND SIGNAL</p><h1>{view==="personal"?"Your skills. New possibilities.":"Where AI is moving."}</h1><p className="v5-intro">{view==="personal"?"Discover AI-related work that connects with what you already know.":"Follow AI research activity and examine the capabilities appearing in real job descriptions."}</p></header>
-      <nav className="v5-tabs" aria-label="AI Trend Signal views"><button type="button" className={view==="personal"?"active":""} aria-current={view==="personal"?"page":undefined} onClick={()=>{setView("personal");setJobSelected(null);}}>For your skills</button><button type="button" className={view==="explore"?"active":""} aria-current={view==="explore"?"page":undefined} onClick={()=>{closeEvidence();setView("explore");}}>Explore AI skills</button></nav>
+      <header className="v5-heading"><p className="v5-eyebrow"><span className="v5-signal-dot"/> AI TREND SIGNAL</p><h1>{view==="personal"?"Your skills. New possibilities.":view==="explore"?"Where AI is moving.":"How might AI change your work?"}</h1><p className="v5-intro">{view==="personal"?"Discover AI-related work that connects with what you already know.":view==="explore"?"Follow AI research activity and examine the capabilities appearing in real job descriptions.":"Explore one evidence-limited transformation assessment, job-posting signals and a practical adaptation step."}</p></header>
+      <nav className="v5-tabs" aria-label="AI Trend Signal views"><button type="button" className={view==="personal"?"active":""} aria-current={view==="personal"?"page":undefined} onClick={()=>{setView("personal");setJobSelected(null);}}>For your skills</button><button type="button" className={view==="explore"?"active":""} aria-current={view==="explore"?"page":undefined} onClick={()=>{closeEvidence();setView("explore");}}>Explore AI skills</button><button type="button" className={view==="disruption"?"active":""} aria-current={view==="disruption"?"page":undefined} onClick={()=>{closeEvidence();setView("disruption");}}>Disruption outlook</button></nav>
       {view==="personal"&&<div className="v5-personal">
         {profileLoading&&<p className="v5-status">Reading your profile…</p>}
         {!profileLoading&&!profile&&<section className="v5-empty"><h2>Build your skill profile first.</h2><p>These pathways are based on the skills you enter during registration.</p><Link href="/register">Start registration <Icon name="arrow"/></Link></section>}
@@ -183,6 +184,7 @@ export default function SignalsPage(){
           </section></div>}
         {personal&&<footer className="v5-footnote"><Icon name="database" size={16}/>{personal.source_state.name} · {personal.source_state.posting_sample_size} saved postings · {fullDate(personal.source_state.collected_at)}<details><summary>How matches are found</summary><p>{personal.method} Candidate matches are not proof that a transition is possible.</p></details></footer>}
       </div>}
+      {view==="disruption"&&<DisruptionOutlook profile={request}/>}
       {view==="explore"&&<div className="v5-explore">
         <section className="v5-research-section"><div className="v5-section-title"><div><p className="v5-eyebrow"><Icon name="trend" size={17}/> OPENALEX · RESEARCH ACTIVITY</p><h2>AI research momentum</h2><p>Compare completed years of publications for selected AI research topics.</p></div><span className="v5-source-pill">Research ≠ hiring</span></div>
           {researchBusy&&<p className="v5-status">Loading research observations from OpenAlex…</p>}

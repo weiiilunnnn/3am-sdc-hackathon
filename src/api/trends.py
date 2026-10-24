@@ -22,6 +22,9 @@ from src.services.session_signal_runpod import (
 
 from src.services.session_signal_review import (SessionReviewRequest, SessionReviewError, review_connection)
 
+from src.services.disruption_outlook import DisruptionRequest, evidence_for, assess
+from src.services.disruption_reference import occupation_options, reference_status
+
 router = APIRouter(prefix="/api/trends")
 
 
@@ -90,3 +93,24 @@ def profile_relevance(profile_id: str = Query(min_length=1, max_length=80)) -> P
     if relevance is None:
         raise HTTPException(status_code=404, detail="Profile not found.")
     return relevance
+
+
+@router.get("/disruption-occupations")
+def disruption_occupations() -> dict:
+    return {"source_status": reference_status(), "occupations": occupation_options()}
+
+
+@router.post("/disruption-evidence")
+def disruption_evidence(request: DisruptionRequest) -> dict:
+    try:
+        return evidence_for(request)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/disruption-assess")
+def disruption_assess(request: DisruptionRequest) -> dict:
+    try:
+        return assess(request)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc

@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { PathwaayExperience, PathwaayRegistrationProfile } from "@/lib/pathwaay-profile";
+import CvProfileEditor from "./CvProfileEditor";
+import { normalizeCvDetails, validateCvDetails } from "@/lib/cv-profile";
 
 type EditableSection = "identity" | "intro" | "education" | "skills" | "experience" | "milestones" | "direction" | "learning";
 type ExperienceField = keyof PathwaayExperience;
@@ -91,6 +93,12 @@ export default function CompletedProfile({ profile, onProfileChange, editPage = 
   }, [activeEditor]);
 
   function saveEdit() {
+    const cvErrors = Object.values(validateCvDetails(normalizeCvDetails(draft.cvDetails)));
+    if (cvErrors.length) {
+      setSaveError(`Correct ${cvErrors.length} CV field${cvErrors.length === 1 ? "" : "s"} before saving. Check dates and public links below.`);
+      document.getElementById("cv-profile-details")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
     try {
       onProfileChange(draft);
       setSaveError("");
@@ -319,6 +327,7 @@ export default function CompletedProfile({ profile, onProfileChange, editPage = 
         </section>
       </aside>
     </div>
+    <CvProfileEditor details={displayProfile.cvDetails} editPage={editPage} onChange={(cvDetails) => setDraft((current) => ({ ...current, cvDetails }))} onSave={saveEdit} />
     <dialog
       ref={editorDialogRef}
       className="completed-editor-dialog"
