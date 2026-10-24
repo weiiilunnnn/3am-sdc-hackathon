@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import CVFastTrack from "@/components/CVFastTrack";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { extractProfileSkills, getEscoSkills, type SkillEvidenceInput, type SkillExtractionCandidate, type SkillOption } from "@/lib/api";
@@ -371,7 +372,7 @@ export default function RegisterPage() {
 
   function startJourney() {
     setJourneyTransition(true);
-    setActiveStep(0);
+    setActiveStep(-1);
     window.scrollTo({ top: 0, behavior: "smooth" });
     window.setTimeout(() => setJourneyTransition(false), 900);
   }
@@ -510,7 +511,7 @@ export default function RegisterPage() {
         : true;
 
   return (
-    <main className={`login-page register-page ${activeStep === null ? "is-welcome" : "is-onboarding"}${activeStep === 7 ? " is-skill-review" : ""}`}>
+    <main className={`login-page register-page ${activeStep === null ? "is-welcome" : "is-onboarding"}${activeStep === 7 ? " is-skill-review" : ""}${activeStep === -1 ? " is-cv-fast-track" : ""}`}>
       <div className="ambient-layer" aria-hidden="true" />
       <header className={`login-topbar ${hasScrolled ? "is-scrolled" : ""}`}>
         <Link className="brand" href="/" aria-label="Pathwaay home"><span className="brand-mark">P</span> Pathwaay <span className="brand-note">CAREER EXPLORER</span></Link>
@@ -536,7 +537,7 @@ export default function RegisterPage() {
         </div>
         <ParticleWave />
         <div className="welcome-scroll-cue"><span className="scroll-cue-line" /><span>A NEW PATHWAY IS TAKING SHAPE</span><span className="scroll-cue-arrow">→</span></div>
-      </section> : activeStep <= lastStep ? <section className="onboarding-stage" aria-live="polite">
+      </section> : activeStep === -1 ? <CVFastTrack onBack={() => setActiveStep(null)} onManual={() => setActiveStep(0)} /> : activeStep <= lastStep ? <section className="onboarding-stage" aria-live="polite">
         <div className="onboarding-orbit" aria-hidden="true"><span /><i /><i /><i /></div>
         <ParticleWave />
         <div className="onboarding-scene">

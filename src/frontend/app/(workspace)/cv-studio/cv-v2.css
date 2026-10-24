@@ -1,0 +1,131 @@
+/* Scoped CV Studio V2 and optional CV profile editor. Registration styles are untouched. */
+.cv2-page { max-width: 1460px; }
+.cv2-studio { margin-top: 24px; }
+.cv2-toolbar { display:flex;justify-content:space-between;align-items:center;gap:30px;margin:20px 0 27px;padding:22px 0;border-bottom:1px solid var(--line); }
+.cv2-toolbar h2 { margin:4px 0;font:800 clamp(25px,3vw,33px)/1.15 Manrope, sans-serif;letter-spacing:-.05em; }
+.cv2-toolbar p {margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.65;}
+.cv2-eyebrow {font:700 10px "DM Mono",monospace;letter-spacing:.14em;color:var(--green);}
+.cv2-workspace {display:grid;grid-template-columns:minmax(300px,370px) minmax(0,1fr);gap:25px;align-items:start;}
+.cv2-sidebar {display:grid;gap:16px;min-width:0;}
+.cv2-panel {padding:20px 20px 22px;border:1px solid var(--line);border-radius:14px;background:var(--surface,#fffef8);color:var(--ink);}
+.cv2-panel h3 {margin:0 0 12px;font:800 12px/1.5 Manrope,sans-serif;letter-spacing:.01em;}
+.cv2-panel-top {display:flex;justify-content:space-between;gap:10px;align-items:start;}
+.cv2-panel a,.cv2-inline-button,.cv2-text-button,.cv-text-button {color:var(--green);font:700 11px Manrope,sans-serif;text-decoration:none;}
+.cv2-subtle {color:var(--muted);font-size:11px;line-height:1.55;margin:0 0 15px;}
+.cv2-templates {display:grid;gap:9px;}
+.cv2-template-option {display:flex;align-items:center;gap:13px;text-align:left;padding:12px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--ink);cursor:pointer;}
+.cv2-template-option.active {border-color:#289e76;background:rgba(59,194,145,.09);box-shadow:inset 0 0 0 1px #289e76;}
+.cv2-template-option strong,.cv2-template-option small {display:block;line-height:1.5;}
+.cv2-template-option strong {font:750 11px Manrope,sans-serif;}
+.cv2-template-option small {color:var(--muted);font-size:10px;}
+.cv2-template-symbol {width:33px;height:43px;flex:0 0 33px;display:flex;flex-direction:column;justify-content:center;gap:5px;padding:7px;background:#fff;border:1px solid #d8dbd8;border-radius:3px;}
+.cv2-template-symbol i {display:block;height:2px;background:#b9c5bb;}
+.cv2-template-symbol i:first-child {width:65%;height:4px;background:#3a5c50;}
+.cv2-symbol-modern {border-top:5px solid #1a8872;}
+.cv2-symbol-graduate i:first-child {background:#444;}
+.cv2-section-control {display:flex;justify-content:space-between;align-items:center;gap:10px;margin:3px 0;padding:9px 0;border-bottom:1px solid var(--line);font-size:11px;}
+.cv2-section-control label {display:flex;align-items:center;gap:9px;min-width:0;cursor:pointer;}
+.cv2-section-control label span {overflow-wrap:anywhere;}
+.cv2-section-control input,.cv2-record-control input {accent-color:#209977;}
+.cv2-section-control>div {display:flex;gap:4px;}
+.cv2-section-control button {padding:4px 7px;background:transparent;border:1px solid var(--line);border-radius:5px;color:inherit;cursor:pointer;}
+.cv2-show-missing {margin-top:12px;border:0;padding:4px 0;background:none;color:var(--green);font-size:11px;cursor:pointer;}
+.cv2-missing {display:flex;justify-content:space-between;gap:6px;margin-top:9px;font-size:10px;color:var(--muted);}
+.cv2-missing a {font-size:10px;}
+.cv2-edit-label {display:grid;gap:7px;font-size:11px;font-weight:700;}
+.cv2-edit-label textarea,.cv2-edit-record textarea {width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);background:#fff;color:#26332c;font:12px/1.6 sans-serif;resize:vertical;}
+.cv2-inline-button,.cv-text-button {border:0;background:none;padding:4px 0;cursor:pointer;text-align:left;}
+.cv2-record-options {margin-top:12px;border-top:1px solid var(--line);padding-top:11px;}
+.cv2-record-options summary {font-weight:700;font-size:11px;cursor:pointer;}
+.cv2-record-control {padding:12px 0 8px;border-bottom:1px solid var(--line);display:grid;gap:5px;}
+.cv2-record-control label {display:flex;gap:8px;align-items:start;font-size:11px;overflow-wrap:anywhere;}
+.cv2-edit-record {display:grid;gap:4px;}
+.cv2-quality {background:rgba(225,185,91,.08);}
+.cv2-quality p {font-size:11px;line-height:1.5;}
+.cv2-sidebar-note {font:10px/1.6 "DM Mono",monospace;color:var(--muted);}
+.cv2-preview {min-width:0;}
+.cv2-preview-label {display:flex;justify-content:space-between;gap:12px;margin-bottom:13px;color:var(--muted);font:10px "DM Mono",monospace;letter-spacing:.06em;}
+.cv2-print-tip {text-align:center;font-size:11px;color:var(--muted);padding:18px 0;}
+.cv2-paper {box-sizing:border-box;width:100%;max-width:800px;min-height:1030px;margin:0 auto;padding:54px clamp(30px,5vw,62px);background:#fff;border:1px solid #d9e1d6;box-shadow:0 19px 56px rgba(0,0,0,.14);color:#202a25;font:11px/1.5 Arial,Helvetica,sans-serif;}
+.cv2-paper * {box-sizing:border-box;}
+.cv2-paper-header {padding-bottom:16px;border-bottom:1.4px solid #2c4137;text-align:left;}
+.cv2-paper-header h2 {margin:0;font:700 26px/1.18 Arial,Helvetica,sans-serif;letter-spacing:-.025em;color:#19261e;}
+.cv2-paper-role {margin:6px 0 4px;font-size:12px;color:#394b42;}
+.cv2-contacts {display:flex;flex-wrap:wrap;gap:2px 11px;margin-top:7px;color:#35463c;font-size:9.5px;line-height:1.6;}
+.cv2-contacts span:not(:last-child)::after {content:"·";margin-left:10px;color:#888;}
+.cv2-paper a {color:inherit;text-decoration:none;overflow-wrap:anywhere;}
+.cv2-section {margin-top:16px;}
+.cv2-section h3 {margin:0 0 8px;padding-bottom:5px;border-bottom:1px solid #b9c4bc;font:700 10.5px/1.4 Arial,Helvetica,sans-serif;color:#263d30;text-transform:uppercase;letter-spacing:.08em;break-after:avoid;}
+.cv2-summary,.cv2-skills {margin:0;white-space:pre-line;overflow-wrap:anywhere;}
+.cv2-record {margin:0 0 11px;break-inside:avoid;page-break-inside:avoid;}
+.cv2-record-top {display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.cv2-record-top strong {display:block;font-weight:700;font-size:11px;}
+.cv2-record-top p {margin:2px 0 0;color:#425047;font-size:10px;}
+.cv2-record-top span {font-size:10px;text-align:right;white-space:normal;flex:0 0 auto;max-width:36%;}
+.cv2-record-description {margin:5px 0 0;white-space:pre-line;overflow-wrap:anywhere;}
+.cv2-bullets {margin:6px 0 0;padding-left:18px;line-height:1.5;}
+.cv2-bullets li {margin-bottom:3px;overflow-wrap:anywhere;}
+.cv2-record-url {display:block;margin-top:4px;color:#266756!important;font-size:9px;}
+.cv2-placeholder {padding:20px 0;color:#666;}
+.cv2-template-modern .cv2-paper-header {border-color:#258875;}
+.cv2-template-modern .cv2-paper-header h2 {color:#165f52;}
+.cv2-template-modern .cv2-section h3 {color:#176f5b;border-bottom-color:#93bdb1;}
+.cv2-template-graduate .cv2-paper-header {text-align:center;}
+.cv2-template-graduate .cv2-contacts {justify-content:center;}
+.cv2-template-graduate .cv2-section h3 {border-bottom:1.5px solid #404040;}
+/* My Profile optional editor */
+.cv-profile-extras {margin-top:24px;}
+.cv-profile-header {display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px;}
+.cv-profile-header h2 {font:750 20px/1.3 Manrope,sans-serif;letter-spacing:-.04em;margin:7px 0;}
+.cv-profile-header p,.cv-extra-help,.cv-extra-save p {font-size:11px;color:var(--muted);line-height:1.6;}
+.cv-extra-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;}
+.cv-extra-field {display:grid;gap:6px;color:var(--ink);font-size:11px;font-weight:700;}
+.cv-extra-field input,.cv-extra-field textarea {box-sizing:border-box;width:100%;min-width:0;padding:11px;border:1px solid var(--line);border-radius:8px;background:var(--surface,#fff);color:var(--ink);font:12px/1.5 sans-serif;}
+.cv-extra-field textarea {resize:vertical;}
+.cv-extra-wide {grid-column:1/-1;}
+.cv-extra-group {margin-top:13px;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+.cv-extra-group>summary {display:flex;justify-content:space-between;align-items:center;gap:15px;padding:14px;cursor:pointer;font-weight:750;font-size:12px;}
+.cv-extra-group>summary span {font-weight:400;color:var(--muted);font-size:10px;}
+.cv-extra-records {display:grid;gap:12px;padding:14px;border-top:1px solid var(--line);}
+.cv-extra-record {padding:13px;border:1px solid var(--line);border-radius:8px;}
+.cv-extra-record-top {display:flex;justify-content:space-between;margin-bottom:12px;gap:10px;}
+.cv-extra-save {display:flex;gap:14px;align-items:center;justify-content:space-between;margin-top:22px;}
+.cv-extra-readonly {display:grid;gap:8px;}
+.cv-extra-readonly p {margin:0;font-size:12px;overflow-wrap:anywhere;}
+@media (max-width:950px){.cv2-workspace{grid-template-columns:1fr;}.cv2-sidebar{grid-template-columns:repeat(2,minmax(0,1fr));}.cv2-sidebar-note{grid-column:1/-1;}}
+@media (max-width:650px){.cv2-sidebar{grid-template-columns:1fr;}.cv2-toolbar,.cv-profile-header,.cv-extra-save{flex-direction:column;align-items:stretch;}.cv-extra-grid{grid-template-columns:1fr;}.cv2-paper{min-height:auto;padding:29px 22px;}.cv2-preview-label{flex-direction:column;}}
+@media print {
+  @page {size:A4;margin:14mm 15mm;}
+  html,body {background:white!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  body:has(.cv2-paper) * {visibility:hidden!important;}
+  /* Stronger than the broad hide rule above: otherwise the PDF is blank. */
+  body:has(.cv2-paper) .cv2-paper,
+  body:has(.cv2-paper) .cv2-paper * {visibility:visible!important;}
+  .cv2-paper {position:absolute!important;left:0!important;top:0!important;width:100%!important;max-width:none!important;min-height:0!important;margin:0!important;padding:0!important;box-shadow:none!important;border:0!important;background:#fff!important;color:#111!important;}
+  .cv2-page,.cv2-studio,.cv2-workspace,.cv2-preview {display:block!important;max-width:none!important;margin:0!important;padding:0!important;background:#fff!important;border:0!important;}
+  .cv2-sidebar,.cv2-toolbar,.cv2-preview-label,.cv2-print-tip,.no-print {display:none!important;}
+  .cv2-section,.cv2-record {break-inside:auto;page-break-inside:auto;}
+  .cv2-record,.cv2-paper-header,.cv2-section h3 {break-inside:avoid;page-break-inside:avoid;}
+}
+
+/* Keep the identity edit action visually separate from the status label. */
+.completed-profile-editing .completed-identity .completed-status + .completed-edit-icon {
+  margin-inline-start: 18px;
+  vertical-align: middle;
+}
+/* CV data quality feedback: guide users without policing free-text achievements. */
+.cv-extra-invalid {color:#f5a68f!important;border-color:#ce7a65!important;}
+.cv-extra-field input[aria-invalid="true"],
+.cv-extra-field textarea[aria-invalid="true"] {border-color:#cf806c!important;outline-offset:2px;}
+.cv-extra-field-error {color:#f3a48e;font-size:11px;font-weight:500;line-height:1.4;}
+.cv-extra-example {font-size:10px;color:var(--muted);font-weight:500;line-height:1.4;}
+.cv-extra-validation-summary {padding:12px 14px;border:1px solid #bf6d57;border-radius:8px;background:rgba(200,79,54,.1);color:#f9b7a3;font-size:12px;line-height:1.5;}
+.cv-extra-language-tools {display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.cv-extra-language-tools select {flex:1 1 200px;min-width:0;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--surface,#fff);color:var(--ink);font-size:12px;}
+.cv-extra-language-tags {display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0;}
+.cv-extra-language-tags button {padding:5px 9px;background:rgba(42,148,112,.16);border:1px solid var(--line);border-radius:999px;color:var(--ink);cursor:pointer;font-size:11px;}
+@media print {
+  .cv2-paper {color:#111!important;}
+  .cv2-section {break-inside:auto!important;page-break-inside:auto!important;}
+  .cv2-record,.cv2-paper-header,.cv2-section h3 {break-inside:avoid!important;page-break-inside:avoid!important;}
+}

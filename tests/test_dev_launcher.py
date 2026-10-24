@@ -43,9 +43,10 @@ class DevLauncherTests(unittest.TestCase):
     def test_windows_cleanup_gracefully_stops_process_group(self):
         process = Mock(pid=123)
         process.poll.return_value = None
-        with patch.object(dev.os, "name", "nt"):
+        # CTRL_BREAK_EVENT is a Windows-only signal; supply it for cross-platform testing.
+        with patch.object(dev.os, "name", "nt"), patch.object(dev.signal, "CTRL_BREAK_EVENT", 1, create=True):
             dev.stop_process(process)
-            process.send_signal.assert_called_once_with(signal.CTRL_BREAK_EVENT)
+            process.send_signal.assert_called_once_with(1)
             process.wait.assert_called_once_with(timeout=5)
 
 

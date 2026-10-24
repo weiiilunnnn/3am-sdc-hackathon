@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./cv-studio/cv-v2.css";
 import "../pathwaay-ribbon.css";
 import AppShell from "./AppShell";
 import PathwaayRibbon from "../PathwaayRibbon";

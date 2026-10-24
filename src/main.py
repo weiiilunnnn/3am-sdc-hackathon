@@ -21,6 +21,8 @@ from src.api.profiles import router as profile_router
 from src.api.trends import router as trend_router
 from src.api.employment import router as employment_router
 from src.api.cv import router as cv_router
+from src.api.registration_cv import router as registration_cv_router
+from src.api.registration_cv_async import router as registration_cv_async_router
 from src.api.career import router as career_router
 from src.api.sdg import router as sdg_router
 from src.api.future_roles import router as future_role_router
@@ -43,6 +45,8 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title=os.getenv("PROJECT_NAME", "Hackathon API"), lifespan=lifespan)
+app.include_router(registration_cv_router)
+app.include_router(registration_cv_async_router)
 app.include_router(profile_router)
 app.include_router(trend_router)
 app.include_router(employment_router)

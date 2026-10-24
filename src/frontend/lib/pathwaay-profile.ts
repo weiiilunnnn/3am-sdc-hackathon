@@ -1,3 +1,4 @@
+import { normalizeCvDetails, type CvDetails } from "./cv-profile";
 export const PATHWAAY_PROFILE_HANDOFF_KEY = "pathwaay.registration-profile";
 export const PATHWAAY_PROFILE_UPDATED_EVENT = "pathwaay-profile-updated";
 
@@ -13,6 +14,10 @@ export type PathwaaySkillLink = {
   name: string;
   skill_id: string | null;
   taxonomy_source: string;
+  esco_uri?: string | null;
+  esco_label?: string | null;
+  source_version?: string | null;
+  original_text?: string;
 };
 
 export type PathwaayRegistrationProfile = {
@@ -42,6 +47,7 @@ export type PathwaayRegistrationProfile = {
   learningBudget: string;
   learningMode: string;
   photoDataUrl?: string;
+  cvDetails?: CvDetails;
 };
 
 export function readPathwaayRegistrationProfile(): PathwaayRegistrationProfile | null {
@@ -60,7 +66,11 @@ export function readPathwaayRegistrationProfile(): PathwaayRegistrationProfile |
         const link = entry as Partial<PathwaaySkillLink>;
         if (typeof link.name !== "string" || typeof link.taxonomy_source !== "string") return [];
         if (link.skill_id !== null && typeof link.skill_id !== "string") return [];
-        return [{ name: link.name, skill_id: link.skill_id ?? null, taxonomy_source: link.taxonomy_source }];
+        return [{ name: link.name, skill_id: link.skill_id ?? null, taxonomy_source: link.taxonomy_source,
+          esco_uri: typeof link.esco_uri === "string" ? link.esco_uri : null,
+          esco_label: typeof link.esco_label === "string" ? link.esco_label : null,
+          source_version: typeof link.source_version === "string" ? link.source_version : null,
+          original_text: typeof link.original_text === "string" ? link.original_text : link.name }];
       })
       : [];
     return {
@@ -74,6 +84,7 @@ export function readPathwaayRegistrationProfile(): PathwaayRegistrationProfile |
       workActivities: text(profile.workActivities), strengths: text(profile.strengths), skillsToDevelop: text(profile.skillsToDevelop),
       aspiration: text(profile.aspiration), profileSummary: text(profile.profileSummary), weeklyHours: text(profile.weeklyHours),
       learningBudget: text(profile.learningBudget), learningMode: text(profile.learningMode),
+      cvDetails: normalizeCvDetails(profile.cvDetails),
       photoDataUrl: typeof profile.photoDataUrl === "string" && profile.photoDataUrl.startsWith("data:image/jpeg;base64,") && profile.photoDataUrl.length <= 600_000 ? profile.photoDataUrl : undefined,
     };
   } catch {

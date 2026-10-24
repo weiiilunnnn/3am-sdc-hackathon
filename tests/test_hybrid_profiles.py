@@ -71,7 +71,7 @@ class HybridProfileTests(unittest.TestCase):
         snapshot['skillLinks'] = [{'name':'Python','skill_id':'untrusted-display-id','taxonomy_source':'Local prototype vocabulary'}]
         first = self.create('main-extraction-metadata-test')
         self.assertEqual(first['registration_profile']['email'], snapshot['email'])
-        self.assertEqual(first['registration_profile']['skillLinks'], snapshot['skillLinks'])
+        self.assertEqual([{k: v for k, v in link.items() if v is not None} for link in first['registration_profile']['skillLinks']], snapshot['skillLinks'])
         profile = self.client.get('/api/v2/profiles/'+first['id']).json()
         self.assertNotIn('untrusted-display-id', [s['skill_id'] for s in profile['skills']])
         self.assertEqual(profile['unresolved_skills'], ['SQL'])
