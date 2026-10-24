@@ -27,9 +27,38 @@ class SessionSignalProfile(BaseModel):
     aspiration: str = Field(default="", max_length=240)
 
 
+# A small, reviewed bridge between exact official ESCO English labels and the
+# app's legacy evidence vocabulary. This is NOT an automatic ESCO-to-local
+# crosswalk: do not infer equivalence from a shared keyword or arbitrary URI.
+# The original ESCO URI remains attached to the user's saved profile.
+ESCO_EVIDENCE_LABELS = {
+    'python (computer programming)': 'Python programming',
+    'perform data analysis': 'Data analysis',
+    'analyse data': 'Data analysis',
+    'analyze data': 'Data analysis',
+    'use machine learning': 'Machine learning',
+    'apply machine learning': 'Machine learning',
+    'perform machine learning': 'Machine learning',
+    'use spreadsheets': 'Spreadsheet analysis',
+    'use spreadsheet software': 'Spreadsheet analysis',
+    'manage projects': 'Project planning',
+    'plan projects': 'Project planning',
+    'communicate with others': 'Communication',
+    'communicate with customers': 'Customer service',
+    'provide customer support': 'Customer service',
+    'solve problems': 'Problem solving',
+    'think critically': 'Critical thinking',
+    'work in teams': 'Teamwork',
+    'collaborate in teams': 'Teamwork',
+}
+
+
 def _resolved_skill(skill: SessionSkill) -> dict:
-    # Never blindly trust an arbitrary session skill ID.
-    known = find_skill_by_label(skill.name)
+    # Never blindly trust an arbitrary session skill ID. Evidence has legacy
+    # local IDs, whereas CV registration uses official ESCO skill identities.
+    # Use only exact, reviewed label bridges when looking up evidence.
+    label = " ".join(skill.name.casefold().split())
+    known = find_skill_by_label(skill.name) or find_skill_by_label(ESCO_EVIDENCE_LABELS.get(label, ""))
     hinted = find_skill_by_id(skill.skill_id) if skill.skill_id else None
     def same_label(taxonomy: dict | None) -> bool:
         return bool(taxonomy and skill.name.casefold() in

@@ -37,8 +37,19 @@ class DisruptionRequest(BaseModel):
 
 
 def _selected(request: DisruptionRequest) -> dict:
-    known = list({_resolved_skill(item)["key"]: _resolved_skill(item) for item in request.profile.skills}.values())
-    selected = next((item for item in known if item["key"] == request.skill_id), None)
+    # The profile may contain a verified ESCO URI from CV registration, while
+    # the legacy Trend Signal resolver maps only its small local vocabulary.
+    # Match the resolver's canonical key first, but also accept the *exact*
+    # skill ID attached to a named skill in THIS request's profile. Use the
+    # backend-resolved identity downstream; never use an unverified URI to
+    # fabricate evidence or to look up unrelated users' data.
+    known = {_resolved_skill(item)["key"]: _resolved_skill(item) for item in request.profile.skills}
+    selected = known.get(request.skill_id)
+    if selected is None:
+        for original in request.profile.skills:
+            if original.skill_id and original.skill_id == request.skill_id:
+                selected = _resolved_skill(original)
+                break
     if selected is None:
         raise ValueError("Selected skill is not in this session's profile.")
     return selected
