@@ -63,6 +63,38 @@ class RegistrationSkillLink(BaseModel):
     name: str = Field(min_length=1, max_length=100)
     skill_id: str | None = Field(default=None, max_length=100)
     taxonomy_source: str = Field(max_length=200)
+    esco_uri: str | None = Field(default=None, max_length=180)
+    esco_label: str | None = Field(default=None, max_length=200)
+    source_version: str | None = Field(default=None, max_length=40)
+    original_text: str | None = Field(default=None, max_length=100)
+
+
+class CvEntry(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    id: str = Field(min_length=1, max_length=150)
+    title: str = Field(default="", max_length=120)
+    organization: str = Field(default="", max_length=120)
+    period: str = Field(default="", max_length=80)
+    description: str = Field(default="", max_length=2200)
+    url: str = Field(default="", max_length=260)
+
+
+class CvDetails(BaseModel):
+    """Optional CV presentation data retained in the existing profile snapshot."""
+    model_config = ConfigDict(extra="forbid")
+    phone: str = Field(default="", max_length=30)
+    location: str = Field(default="", max_length=90)
+    linkedin: str = Field(default="", max_length=260)
+    github: str = Field(default="", max_length=260)
+    portfolio: str = Field(default="", max_length=260)
+    graduationDate: str = Field(default="", max_length=35)
+    languages: str = Field(default="", max_length=350)
+    additionalEducation: list[CvEntry] = Field(default_factory=list, max_length=30)
+    projects: list[CvEntry] = Field(default_factory=list, max_length=30)
+    certifications: list[CvEntry] = Field(default_factory=list, max_length=30)
+    awards: list[CvEntry] = Field(default_factory=list, max_length=30)
+    volunteering: list[CvEntry] = Field(default_factory=list, max_length=30)
+    publications: list[CvEntry] = Field(default_factory=list, max_length=30)
 
 
 class RegistrationProfile(BaseModel):
@@ -94,6 +126,7 @@ class RegistrationProfile(BaseModel):
     learningBudget: str = Field(default="", max_length=40)
     learningMode: str = Field(default="", max_length=120)
     photoDataUrl: str | None = Field(default=None, max_length=600000, pattern=r"^data:image/jpeg;base64,[A-Za-z0-9+/=]+$")
+    cvDetails: CvDetails | None = None
 
 
 class ProfileInput(BaseModel):

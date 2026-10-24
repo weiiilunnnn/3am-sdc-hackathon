@@ -46,8 +46,10 @@ test("main redirect and every existing page remain available alongside KW", asyn
     const response = await request.get(route);
     expect(response.status(), route).toBe(200);
   }
+  // The original Main home brand points to /, which redirects to /register.
   await page.getByRole("link", { name: "Pathwaay home", exact: true }).click();
-  await expect(page).toHaveURL(/\/home$/);
+  await expect(page).toHaveURL(/\/register$/);
+  await page.goto("/home");
   await page.getByTestId("link-profile").click();
   await expect(page).toHaveURL(/\/profile$/);
   await expect(page.getByTestId("form-profile")).toBeVisible();

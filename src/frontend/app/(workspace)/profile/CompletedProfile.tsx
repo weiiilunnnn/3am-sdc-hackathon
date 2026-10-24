@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { PathwaayExperience, PathwaayRegistrationProfile } from "@/lib/pathwaay-profile";
+import CvProfileEditor from "./CvProfileEditor";
+import { normalizeCvDetails, validateCvDetails } from "@/lib/cv-profile";
 
 type EditableSection = "identity" | "intro" | "education" | "skills" | "experience" | "milestones" | "direction" | "learning";
 type ExperienceField = keyof PathwaayExperience;
@@ -93,6 +95,12 @@ export default function CompletedProfile({ profile, onProfileChange, editPage = 
 
   async function saveEdit() {
     if (saving) return;
+    const cvErrors = Object.values(validateCvDetails(normalizeCvDetails(draft.cvDetails)));
+    if (cvErrors.length) {
+      setSaveError(`Correct ${cvErrors.length} CV field${cvErrors.length === 1 ? "" : "s"} before saving. Check dates and public links below.`);
+      document.getElementById("cv-profile-details")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
     setSaving(true);
     try {
       await onProfileChange(draft);
@@ -233,7 +241,7 @@ export default function CompletedProfile({ profile, onProfileChange, editPage = 
           ? <img className="completed-avatar completed-avatar-photo" src={shownPhoto} alt={`${fullName} profile`} />
           : <div className="completed-avatar" aria-hidden="true">{initials}</div>}
         <div>
-          <span className="completed-status"><i /> {editPage ? "EDIT YOUR PROFILE" : "PROFILE READY · SESSION PREVIEW"}</span>
+          <span className="completed-status"><i /> {editPage ? "EDIT YOUR PROFILE" : "PROFILE READY · PROFILE OVERVIEW"}</span>
           {editPage && <EditIconButton label="personal details" onClick={() => editSection("identity")} />}
           <h1>{fullName}</h1><p>{displayProfile.major || "Your field of study"}{displayProfile.university ? ` · ${displayProfile.university}` : ""}</p>{displayProfile.email && <p>{displayProfile.email}</p>}
           {editPage && <div className="completed-photo-actions">
@@ -309,7 +317,7 @@ export default function CompletedProfile({ profile, onProfileChange, editPage = 
           <Detail label="Roles" value={String(experience.length)} />
           <Detail label="Skills" value={String(displayProfile.skills.length)} />
           <Detail label="Profile details" value={`${details} direction${details === 1 ? "" : "s"}`} />
-          <div className="completed-session-note">This profile is a session preview kept in this browser tab; it is not saved to the profile database.</div>
+          <div className="completed-session-note">Your reviewed profile can be recovered from the Pathwaay backend on this device. Save changes to update your stored profile.</div>
         </section>
 
         <section className="completed-panel completed-direction" aria-labelledby="completed-direction-heading">
@@ -323,6 +331,7 @@ export default function CompletedProfile({ profile, onProfileChange, editPage = 
         </section>
       </aside>
     </div>
+    <CvProfileEditor details={displayProfile.cvDetails} editPage={editPage} onChange={(cvDetails) => setDraft((current) => ({ ...current, cvDetails }))} onSave={saveEdit} />
     <dialog
       ref={editorDialogRef}
       className="completed-editor-dialog"

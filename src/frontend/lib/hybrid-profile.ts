@@ -31,6 +31,8 @@ export function registrationToDraft(main: PathwaayRegistrationProfile, saved?: S
   const identity = (name: string, links = main.skillLinks) => {
     const link = links?.find(item => key(item.name) === key(name));
     if (link?.taxonomy_source === "ESCO v1.2.1" && link.skill_id) return link.skill_id;
+    // Read SH session drafts created before the shared persistence integration.
+    if (link?.taxonomy_source === "ESCO" && link.esco_uri) return link.esco_uri;
     return vocabulary.find(s => [s.name, ...s.aliases].some(n => key(n) === key(name)))?.id ?? `name:${key(name)}`;
   };
   const owns = new Set((previous?.skills ?? []).map(name => identity(name, previous?.skillLinks)));

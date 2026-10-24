@@ -7,6 +7,8 @@ test("Main registration saves once, recovers after browser closure, and reaches 
   test.setTimeout(150_000);
   await page.goto('/register');
   await page.getByRole('button',{name:/Begin your journey/}).click();
+  // SH adds a CV fast-track choice; keep coverage of Main's manual onboarding.
+  await page.getByRole('button',{name:'Continue with manual registration'}).click();
   await page.getByLabel('First name',{exact:true}).fill('Fixture');
   await page.getByLabel('Last name',{exact:true}).fill('Learner');
   await page.getByRole('button',{name:/Continue/}).click();
@@ -33,7 +35,7 @@ test("Main registration saves once, recovers after browser closure, and reaches 
   await expect(page).toHaveURL(/\/profile$/, {timeout:20_000});
   await expect(page.getByRole('heading',{name:'Fixture Learner',exact:true})).toBeVisible();
   await page.goto('/home'); await expect(page.getByRole('heading',{name:'Computing',exact:true})).toBeVisible();
-  await page.goto('/cv-studio'); await expect(page.locator('.cv-document')).toContainText('Python programming');
+  await page.goto('/cv-studio'); await expect(page.getByRole('article',{name:'CV document preview'})).toContainText('Python programming');
   await page.getByTestId('link-role-matching').click();
   const card = page.getByTestId('career-card').first(); await expect(card).toBeVisible();
   await card.getByRole('link',{name:/Explore More/}).click();
@@ -58,6 +60,8 @@ test("Main edit updates the existing row and preserves evidence, proficiency and
   const created = await (await request.post('/api/profiles',{data:{...draft,synthetic_demo:false,registration_profile:mainFixture(),projects:[record],skills:[{name:'Python',skill_id:'local:python-programming',proficiency:'advanced',evidence_record_ids:[record.id]}]}})).json();
   await page.addInitScript(({key,id})=>localStorage.setItem(key,id),{key:PROFILE_KEY,id:created.id});
   await page.goto('/profile/edit');
+  // Main's retained editor only shows inputs after opening their section.
+  await page.getByRole('button',{name:'Edit profile summary'}).click();
   await page.getByRole('textbox',{name:'Profile summary',exact:true}).fill('Edited through Main.');
   const update = page.waitForResponse(r=>r.url().endsWith('/api/profiles/'+created.id)&&r.request().method()==='PUT');
   await page.getByRole('button',{name:/Save changes/}).click();

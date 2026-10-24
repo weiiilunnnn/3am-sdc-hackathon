@@ -22,10 +22,13 @@ class DevelopmentLauncherTests(unittest.TestCase):
 
     def test_process_groups_use_platform_specific_options(self):
         self.assertEqual(dev._process_options(windows=False), {"start_new_session": True})
-        self.assertEqual(
-            dev._process_options(windows=True),
-            {"creationflags": dev.subprocess.CREATE_NEW_PROCESS_GROUP},
-        )
+        # Emulate the Windows-only constant when this test runs on macOS/Linux.
+        # The production code remains unchanged and receives the real constant on Windows.
+        with patch.object(dev.subprocess, "CREATE_NEW_PROCESS_GROUP", 0x200, create=True):
+            self.assertEqual(
+                dev._process_options(windows=True),
+                {"creationflags": 0x200},
+            )
 
 
 if __name__ == "__main__":
